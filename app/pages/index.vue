@@ -3,6 +3,6 @@
 
 <template>
 
-<h1>AnonyMate</h1>
+<h1>Main Page</h1>
 
 </template>
