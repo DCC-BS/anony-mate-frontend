@@ -73,10 +73,11 @@ run = "bunx biome check --fix"
 
 # ── Testing ───────────────────────────────────────────────────────────────────
 
-[tasks."test:unit"]
-env = { APP_MODE= "ci" }
-description = "run unit tests"
-run = "bunx vitest"
+# disabled because there are no test yet
+# [tasks."test:unit"]
+# env = { APP_MODE= "ci" }
+# description = "run unit tests"
+# run = "bunx vitest"
 
 [tasks."test:watch"]
 env = { APP_MODE= "ci" }
@@ -87,10 +88,11 @@ run = "bunx vitest --watch"
 description = "run unit tests with coverage report"
 run = "bunx vitest run --coverage"
 
-[tasks."test:e2e"]
-env = { APP_MODE= "ci" }
-description = "run Playwright E2E tests"
-run = "bunx playwright test"
+# disabled because there are not e2e test yet
+# [tasks."test:e2e"]
+# env = { APP_MODE= "ci" }
+# description = "run Playwright E2E tests"
+# run = "bunx playwright test"
 
 [tasks."test:e2e:ui"]
 env = { APP_MODE= "ci" }
