@@ -1,2 +1,2 @@
 // Initialize and export the API handler
-export const apiHandler = backendHandlerBuilder;
+export const apiHandler = backendHandlerBuilder();

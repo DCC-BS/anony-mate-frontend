@@ -27,7 +27,8 @@ export function useRedact() {
 
         const response = await apiFetch("/api/redact", {
             schema: RedactResultSchema,
-            body: body
+            body: body,
+            method: "POST"
         });
 
         if (isApiError(response)) {
