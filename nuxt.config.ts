@@ -84,7 +84,7 @@ export default defineNuxtConfig({
             repo: "Feedback",
         },
         public: {
-            useFeedback: process.env.USE_FEEDBACK ?? true,
+            useFeedback: process.env.USE_FEEDBACK !== "false",
             useDummyData: process.env.DUMMY,
             logger: {
                 loglevel: process.env.LOG_LEVEL || "debug",

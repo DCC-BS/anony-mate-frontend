@@ -1,5 +1,76 @@
 {
     "navigation": {
         "app": "AnonyMate"
+    },
+    "redact": {
+        "button": "Schwärzen",
+        "page": {
+            "title": "Sensible Informationen schwärzen",
+            "description": "Wähle aus, was erkannt wird, führe die Schwärzung aus und prüfe das Ergebnis."
+        },
+        "input": {
+            "title": "Dein Text",
+            "placeholder": "Text zum Schwärzen eingeben oder einfügen …",
+            "clear": "Leeren",
+            "stats": "{words} Wörter · {chars} Zeichen"
+        },
+        "toast": {
+            "loadErrorTitle": "Entitätstypen konnten nicht geladen werden",
+            "loadErrorDescription": "Bitte versuche es später erneut.",
+            "errorTitle": "Schwärzung fehlgeschlagen",
+            "errorDescription": "Die Schwärzung konnte nicht ausgeführt werden. Bitte versuche es erneut."
+        },
+        "options": {
+            "presetSection": "Preset",
+            "entities": "Entitätstypen",
+            "activeCount": "{enabled} von {total} aktiv",
+            "custom": "Benutzerdefiniert",
+            "remove": "Typ entfernen",
+            "descriptionLabel": "Beschreibung",
+            "typeName": "Typname (z. B. versicherungsnummer)",
+            "typeDescription": "Beschreibung (z. B. Eine Person mit Vor- und Nachnamen)",
+            "cancel": "Abbrechen",
+            "add": "Hinzufügen",
+            "addType": "Typ hinzufügen",
+            "threshold": "Konfidenzschwelle",
+            "thresholdStrict": "Streng — nur sehr sichere Erkennungen werden geschwärzt.",
+            "thresholdBalanced": "Ausgewogen — für die meisten Fälle empfohlen.",
+            "thresholdLoose": "Locker — mehr Erkennungen, aber auch mehr Fehltreffer.",
+            "blacklist": "Nie schwärzen",
+            "blacklistHint": "Begriffe, die sichtbar bleiben, auch wenn erkannt.",
+            "blacklistPlaceholder": "z. B. Müller, Berlin"
+        },
+        "preset": {
+            "default": "Standard",
+            "legal": "Rechtlich"
+        },
+        "confirm": {
+            "title": "Preset wechseln?",
+            "description": "Deine Auswahl, Bearbeitungen und benutzerdefinierten Typen werden zurückgesetzt.",
+            "confirm": "Wechseln"
+        },
+        "errors": {
+            "nameRequired": "Ein Typname ist erforderlich.",
+            "nameDuplicate": "Dieser Typ existiert bereits."
+        },
+        "editor": {
+            "title": "Ergebnis prüfen",
+            "entityCount": "{count} gefunden",
+            "legend": "Gefundene Typen",
+            "original": "Original",
+            "confidence": "Konfidenz",
+            "changeType": "Entitätstyp ändern",
+            "remove": "Schwärzung entfernen",
+            "undo": "Rückgängig",
+            "redo": "Wiederholen",
+            "copy": "Ergebnis kopieren",
+            "copied": "Kopiert",
+            "emptyTitle": "Noch kein Ergebnis",
+            "empty": "Führe eine Schwärzung aus, um das Ergebnis hier zu sehen.",
+            "rerunTitle": "Schwärzung erneut ausführen?",
+            "rerunDescription": "Deine Review-Bearbeitungen (Entfernungen, Typänderungen) gehen verloren.",
+            "rerun": "Erneut ausführen",
+            "cancel": "Abbrechen"
+        }
     }
 }

@@ -8,19 +8,22 @@ export const EntitySchema = z.object({
     label: z.string(),
     start: z.int(),
     end: z.int(),
-    confidence: z.float32().gte(0).lte(1)
+    confidence: z.float32().gte(0).lte(1),
 });
 
 export const RedactResultSchema = z.object({
     text: z.string(),
-    entities: z.record(z.string(), z.array(EntitySchema))
+    entities: z.record(z.string(), z.array(EntitySchema)),
 });
 
 export const RedactOptionsSchema = z.object({
     text: z.string(),
-    entity_types: z.union([z.array(z.string()), z.record(z.string(), z.string())]),
+    entity_types: z.union([
+        z.array(z.string()),
+        z.record(z.string(), z.string()),
+    ]),
     threshold: z.float32().gte(0).lte(1).optional(),
-    blacklist: z.array(z.string()).optional()
+    blacklist: z.array(z.string()).optional(),
 });
 
 export type Entity = z.infer<typeof EntitySchema>;

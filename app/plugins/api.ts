@@ -1,6 +1,6 @@
 import {
-    createFetcherBuilder,
     createApiClient,
+    createFetcherBuilder,
 } from "@dcc-bs/communication.bs.js";
 
 export default defineNuxtPlugin(() => {
