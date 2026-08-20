@@ -3,6 +3,7 @@ import { type JSONContent, Node } from "@tiptap/core";
 import { StarterKit } from "@tiptap/starter-kit";
 import { EditorContent, useEditor, VueNodeViewRenderer } from "@tiptap/vue-3";
 import RedactPill from "~~/app/components/RedactPill.vue";
+import type { EntityColor } from "~~/app/utils/entityColors";
 
 interface RedactEditorProps {
     originalText: string;
@@ -102,7 +103,7 @@ const foundTypes = computed(() =>
     )]
 );
 
-const DOT_CLASSES: Record<string, string> = {
+const DOT_CLASSES: Record<EntityColor, string> = {
     primary: "bg-(--ui-primary)",
     secondary: "bg-(--ui-secondary)",
     success: "bg-(--ui-success)",
@@ -112,7 +113,7 @@ const DOT_CLASSES: Record<string, string> = {
 };
 
 function dotClass(name: string): string {
-    return DOT_CLASSES[entityColor(name)] ?? "bg-(--ui-primary)";
+    return DOT_CLASSES[entityColor(name)];
 }
 
 const flatEntities = computed(() =>
@@ -121,12 +122,12 @@ const flatEntities = computed(() =>
         .sort((a, b) => a.start - b.start)
 );
 
-function buildContent() {
+function buildContent(): JSONContent {
     if (!props.originalText || !flatEntities.value.length) {
         return { type: "doc", content: [{ type: "paragraph", content: [] }] };
     }
 
-    const nodes = [];
+    const nodes: JSONContent[] = [];
     let cursor = 0;
 
     for (const entity of flatEntities.value) {
@@ -183,11 +184,11 @@ function copyResult() {
         .content?.flatMap((block) => block.content ?? [])
         .map((node: JSONContent) => {
             if (node.type === "text") {
-                return node.text as string;
+                return node.text ?? "";
             }
             if (node.type === "redaction") {
-                const attrs = node.attrs ?? {};
-                return `[${attrs.label}:${attrs.id}]`;
+                const { label = "", id = "" } = node.attrs ?? {};
+                return `[${label}:${id}]`;
             }
             return "";
         })
