@@ -1,5 +1,76 @@
 {
     "navigation": {
         "app": "AnonyMate"
+    },
+    "redact": {
+        "button": "Redact",
+        "page": {
+            "title": "Redact sensitive information",
+            "description": "Choose what to detect, run the redaction, and review the result."
+        },
+        "input": {
+            "title": "Your text",
+            "placeholder": "Paste or type the text to redact…",
+            "clear": "Clear",
+            "stats": "{words} words · {chars} characters"
+        },
+        "toast": {
+            "loadErrorTitle": "Could not load entity types",
+            "loadErrorDescription": "Please try again later.",
+            "errorTitle": "Redaction failed",
+            "errorDescription": "The redaction could not be run. Please try again."
+        },
+        "options": {
+            "presetSection": "Preset",
+            "entities": "Entity types",
+            "activeCount": "{enabled} of {total} active",
+            "custom": "Custom",
+            "remove": "Remove type",
+            "descriptionLabel": "Description",
+            "typeName": "Type name (e.g. insurance_number)",
+            "typeDescription": "Description (e.g. A person with first and last name)",
+            "cancel": "Cancel",
+            "add": "Add",
+            "addType": "Add type",
+            "threshold": "Confidence threshold",
+            "thresholdStrict": "Strict — only very confident detections are redacted.",
+            "thresholdBalanced": "Balanced — recommended for most cases.",
+            "thresholdLoose": "Loose — more detections, but more false positives.",
+            "blacklist": "Never redact",
+            "blacklistHint": "Terms that stay visible, even when detected.",
+            "blacklistPlaceholder": "e.g. Müller, Berlin"
+        },
+        "preset": {
+            "default": "Default",
+            "legal": "Legal"
+        },
+        "confirm": {
+            "title": "Switch preset?",
+            "description": "Your selected types, edits and custom types will be reset.",
+            "confirm": "Switch"
+        },
+        "errors": {
+            "nameRequired": "A type name is required.",
+            "nameDuplicate": "This type already exists."
+        },
+        "editor": {
+            "title": "Review result",
+            "entityCount": "{count} found",
+            "legend": "Types found",
+            "original": "Original",
+            "confidence": "Confidence",
+            "changeType": "Change entity type",
+            "remove": "Remove redaction",
+            "undo": "Undo",
+            "redo": "Redo",
+            "copy": "Copy result",
+            "copied": "Copied",
+            "emptyTitle": "No result yet",
+            "empty": "Run a redaction to see the result here.",
+            "rerunTitle": "Re-run redaction?",
+            "rerunDescription": "Your review edits (removals, type changes) will be discarded.",
+            "rerun": "Re-run",
+            "cancel": "Cancel"
+        }
     }
 }

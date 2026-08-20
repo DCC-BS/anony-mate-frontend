@@ -17,9 +17,9 @@
         "test": "vitest",
         "test:watch": "vitest --watch",
         "test:coverage": "vitest run --coverage",
-        "test:e2e": "playwright test",
-        "test:e2e:ui": "playwright test --ui",
-        "e2e:codegen": "playwright codegen http://localhost:3000",
+        "test:e2e": "mise run test:e2e",
+        "test:e2e:ui": "mise run test:e2e:ui",
+        "e2e:codegen": "mise run e2e:codegen",
         "env:check": "pass-cli login && bunx varlock load"
     },
     "dependencies": {
@@ -32,6 +32,10 @@
         "@nuxt/ui": "^4.4.0",
         "@nuxtjs/i18n": "^10.2.1",
         "@pinia/nuxt": "^0.11.3",
+        "@tiptap/core": "^3.30.0",
+        "@tiptap/pm": "^3.30.0",
+        "@tiptap/starter-kit": "^3.30.0",
+        "@tiptap/vue-3": "^3.30.0",
         "@varlock/proton-pass-plugin": "^0.0.3",
         "@varlock/vite-integration": "^0.2.7",
         "giget": "^3.0.0",
@@ -44,7 +48,7 @@
         "varlock": "^0.7.0",
         "vue": "^3.5.30",
         "vue-router": "^5.2.0",
-        "zod": "^4.3.5"
+        "zod": "^4.4.3"
     },
     "devDependencies": {
         "@biomejs/biome": "2.5.7",
