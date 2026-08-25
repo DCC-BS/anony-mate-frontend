@@ -17,8 +17,8 @@
         "@tiptap/pm": "^3.30.0",
         "@tiptap/starter-kit": "^3.30.0",
         "@tiptap/vue-3": "^3.30.0",
-        "@varlock/proton-pass-plugin": "^0.0.3",
-        "@varlock/vite-integration": "^0.2.7",
+        "@varlock/proton-pass-plugin": "^2.0.1",
+        "@varlock/vite-integration": "^1.5.0",
         "giget": "^3.0.0",
         "nuxt": "^4.2.2",
         "openid-client": "^6.8.1",
@@ -26,7 +26,7 @@
         "pino": "^10.2.0",
         "tailwindcss": "^4.1.18",
         "ts-pattern": "^5.9.0",
-        "varlock": "^0.7.0",
+        "varlock": "^1.17.1",
         "vue": "^3.5.30",
         "vue-router": "^5.2.0",
         "zod": "^4.4.3",
@@ -714,9 +714,9 @@
 
     "@unhead/vue": ["@unhead/vue@2.1.17", "", { "dependencies": { "hookable": "^6.0.1", "unhead": "2.1.17" }, "peerDependencies": { "vue": ">=3.5.18" } }, "sha512-pnC8x9HLV3qQXdvWfylUEU25uhfCAy3ly9nmpQz84j9py818DRfU8jOsQ5wjdWtxyU1vX/fW2udfm4jtxUK8Bg=="],
 
-    "@varlock/proton-pass-plugin": ["@varlock/proton-pass-plugin@0.0.3", "", { "peerDependencies": { "varlock": "^0.7.0" } }, "sha512-jzqe9DQjgVSG8RG+WkBFq1bZxgty8l5vP9cZnaM6TKyU34ZYXnkzDPgWElpFlA3jxh7wlszlemXPHSOjP2V+WQ=="],
+    "@varlock/proton-pass-plugin": ["@varlock/proton-pass-plugin@2.0.1", "", { "peerDependencies": { "varlock": "^1.17.1" } }, "sha512-SMu6eWK9s4Dxec9PHuvYmPGpurbE2Heo6phoD6lXeX0YoCK9pmd07mZuKkMmUxpA/o2yoXu27UOAtbLV5klZiQ=="],
 
-    "@varlock/vite-integration": ["@varlock/vite-integration@0.2.10", "", { "peerDependencies": { "varlock": "^0.7.2", "vite": ">=5" } }, "sha512-awd2fSWA/p/kR6eqX4+qCiVqVHhnMt01sjHCIBcuNq7qyTmyaet+9MSdPHd8TykeiectJhGPodzMj4Zw6cy8gA=="],
+    "@varlock/vite-integration": ["@varlock/vite-integration@1.5.0", "", { "peerDependencies": { "varlock": "^1.17.1", "vite": ">=5" } }, "sha512-+X/zrYIVL4ueTNVTF9zr+Qi9OfA6W/lTeme1nRvbtU5Xcd0oSeuCeqjV2lvFr9SlR8px/ZftgGwp0BAL2EmbUw=="],
 
     "@vercel/nft": ["@vercel/nft@1.10.2", "", { "dependencies": { "@mapbox/node-pre-gyp": "^2.0.0", "@rollup/pluginutils": "^5.1.3", "acorn": "^8.6.0", "acorn-import-attributes": "^1.9.5", "async-sema": "^3.1.1", "bindings": "^1.4.0", "estree-walker": "2.0.2", "glob": "^13.0.0", "graceful-fs": "^4.2.9", "node-gyp-build": "^4.2.2", "picomatch": "^4.0.2", "resolve-from": "^5.0.0" }, "bin": { "nft": "out/cli.js" } }, "sha512-w+WyX5Ulmj4dtTZrxaulqrjaLZHSbnPzx75SJsTNYmotKsqn1JlLnDJa+lz5hn90HJofhl/2MAtw0mCrgM3qYw=="],
 
@@ -1908,7 +1908,7 @@
 
     "util-deprecate": ["util-deprecate@1.0.2", "", {}, "sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw=="],
 
-    "varlock": ["varlock@0.7.4", "", { "bin": { "varlock": "bin/cli.js" } }, "sha512-F6L99HHJMHBrLs6/6Mijgu/8q6JbHGHwmpKFnYGQMB1CTFekJXJ3FbK8IHhHwC0mokUnKIx5HGiPApWJMNvBcg=="],
+    "varlock": ["varlock@1.17.1", "", { "optionalDependencies": { "@varlock/native-helper-darwin": "1.17.1", "@varlock/native-helper-linux-arm64": "1.17.1", "@varlock/native-helper-linux-x64": "1.17.1", "@varlock/native-helper-win32-x64": "1.17.1" }, "bin": { "varlock": "bin/cli.js" } }, "sha512-nRxUKuWvvHcCUfLTWu78GYsyR34toOWGG9nhV9ObpVxsZ07mofsAsZrg4zDnWv5sRcujpV8DiQ9I5euDqIQ1WQ=="],
 
     "vaul-vue": ["vaul-vue@0.4.1", "", { "dependencies": { "@vueuse/core": "^10.8.0", "reka-ui": "^2.0.0", "vue": "^3.4.5" } }, "sha512-A6jOWOZX5yvyo1qMn7IveoWN91mJI5L3BUKsIwkg6qrTGgHs1Sb1JF/vyLJgnbN1rH4OOOxFbtqL9A46bOyGUQ=="],
 
