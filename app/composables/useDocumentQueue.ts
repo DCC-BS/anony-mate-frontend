@@ -34,15 +34,16 @@ export const useDocumentQueue = createSharedComposable(() => {
         () => db.detections.where("state").equals("open").toArray(),
         [],
     );
-    const openCounts = computed(() =>
-        openDetections.value.reduce<Record<string, number>>(
-            (counts, detection) => ({
-                ...counts,
-                [detection.documentId]: (counts[detection.documentId] ?? 0) + 1,
-            }),
-            {},
-        ),
-    );
+    const openCounts = computed(() => {
+        const counts: Record<string, number> = {};
+
+        for (const detection of openDetections.value) {
+            counts[detection.documentId] =
+                (counts[detection.documentId] ?? 0) + 1;
+        }
+
+        return counts;
+    });
 
     const isProcessing = ref(false);
 

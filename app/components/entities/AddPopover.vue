@@ -14,16 +14,22 @@ const emit = defineEmits<{ submit: [values: Record<string, string>] }>();
 
 const { t } = useI18n();
 
-const open = ref(false);
+const isOpen = ref(false);
+const firstInput = useTemplateRef<{ inputRef: HTMLInputElement | null }>("firstInput");
 const values = ref<Record<string, string>>({});
 
-/** Resets the form to the field defaults whenever the popover opens. */
-watch(open, (isOpen) => {
-    if (isOpen) {
-        values.value = Object.fromEntries(
-            props.fields.map((field) => [field.key, field.default ?? ""])
-        );
+/** Resets the form and focuses the first field whenever the popover opens. */
+watch(isOpen, async (opened) => {
+    if (!opened) {
+        return;
     }
+
+    values.value = Object.fromEntries(
+        props.fields.map((field) => [field.key, field.default ?? ""])
+    );
+
+    await nextTick();
+    firstInput.value?.inputRef?.focus();
 });
 
 const firstField = computed(() => props.fields[0]?.key ?? "");
@@ -43,12 +49,12 @@ function submit() {
             ])
         )
     );
-    open.value = false;
+    isOpen.value = false;
 }
 </script>
 
 <template>
-    <UPopover v-model:open="open">
+    <UPopover v-model:open="isOpen">
         <UButton icon="i-lucide-plus" size="sm" variant="soft" :title="props.title" />
 
         <template #content>
@@ -67,15 +73,15 @@ function submit() {
                     >
                         <UInput
                             v-model="values[field.key]"
+                            :ref="index === 0 ? 'firstInput' : undefined"
                             class="w-full"
-                            :autofocus="index === 0"
                             :placeholder="field.placeholder"
                         />
                     </UFormField>
                 </div>
 
                 <div class="flex justify-end gap-2 px-4 py-2.5">
-                    <UButton size="sm" variant="ghost" color="neutral" @click="open = false">
+                    <UButton size="sm" variant="ghost" color="neutral" @click="isOpen = false">
                         {{ t("entities.cancel") }}
                     </UButton>
                     <UButton type="submit" size="sm" :disabled="!canSubmit">
