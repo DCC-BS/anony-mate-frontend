@@ -1,0 +1,165 @@
+import { db } from "~/stores/db";
+import type { StoredDetection, StoredDocument } from "~/types/storedDocument";
+
+/** Which rendering of the document the review shows. */
+export type DocumentView = "original" | "anonymised" | "blacked";
+
+/**
+ * Loads one document with its detections and records the review decisions.
+ *
+ * Decisions are written straight to IndexedDB, so a reload picks the review up
+ * exactly where it was left.
+ *
+ * @param documentId - Id of the document under review.
+ * @returns The review state and its operations.
+ */
+export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
+    const { setDetectionState } = getDocumentService();
+
+    const storedDocument = ref<StoredDocument>();
+    /** True until the first lookup finishes, so the page can hold back the
+     *  "not found" message instead of flashing it during hydration. */
+    const isLoading = ref(true);
+    const detections = useLiveQuery<StoredDetection[]>(
+        () =>
+            db.detections
+                .where("documentId")
+                .equals(toValue(documentId))
+                .sortBy("start"),
+        [],
+    );
+
+    const openDetections = computed(() =>
+        detections.value.filter((detection) => detection.state === "open"),
+    );
+    const counts = computed(() => ({
+        total: detections.value.length,
+        open: openDetections.value.length,
+        accepted: detections.value.filter((d) => d.state === "accepted").length,
+        rejected: detections.value.filter((d) => d.state === "rejected").length,
+    }));
+
+    /** Detections grouped by entity type, each group sorted by position. */
+    const groups = computed(() => {
+        const byLabel = new Map<string, StoredDetection[]>();
+
+        for (const detection of [...detections.value].sort(
+            (a, b) => a.start - b.start,
+        )) {
+            byLabel.set(detection.label, [
+                ...(byLabel.get(detection.label) ?? []),
+                detection,
+            ]);
+        }
+
+        return [...byLabel.entries()].map(([label, items]) => ({
+            label,
+            // Open first, decided sink to the bottom: once a detection is
+            // settled it no longer needs looking at.
+            items: [...items].sort(
+                (a, b) =>
+                    Number(a.state !== "open") - Number(b.state !== "open") ||
+                    a.start - b.start,
+            ),
+            openCount: items.filter((item) => item.state === "open").length,
+        }));
+    });
+
+    const { types } = useEntityGroups();
+
+    /** Replacement template per entity type, for the redacted renderings. */
+    const replacements = computed(() =>
+        Object.fromEntries(
+            types.value.map((type) => [type.name, type.replacement]),
+        ),
+    );
+
+    onMounted(async () => {
+        try {
+            storedDocument.value = await db.documents.get(toValue(documentId));
+        } finally {
+            isLoading.value = false;
+        }
+    });
+
+    /**
+     * Records a decision for one detection.
+     */
+    async function decide(
+        id: string,
+        state: StoredDetection["state"],
+    ): Promise<void> {
+        await setDetectionState(id, state);
+    }
+
+    /**
+     * Applies the same decision to every detection of one entity type.
+     */
+    async function decideGroup(
+        label: string,
+        state: StoredDetection["state"],
+    ): Promise<void> {
+        await db.detections
+            .where("documentId")
+            .equals(toValue(documentId))
+            .and((detection) => detection.label === label)
+            .modify({ state });
+    }
+
+    /**
+     * Applies one decision to every open detection in the document.
+     */
+    async function decideAllOpen(
+        state: StoredDetection["state"],
+    ): Promise<void> {
+        await db.detections
+            .where("documentId")
+            .equals(toValue(documentId))
+            .and((detection) => detection.state === "open")
+            .modify({ state });
+    }
+
+    /**
+     * Applies the same decision to every detection with the same text, so a
+     * name occurring dozens of times is decided once.
+     */
+    async function decideAllOccurrences(
+        text: string,
+        state: StoredDetection["state"],
+    ): Promise<void> {
+        await db.detections
+            .where("documentId")
+            .equals(toValue(documentId))
+            .and((detection) => detection.text === text)
+            .modify({ state });
+    }
+
+    /** How many detections share this text. */
+    function occurrenceCount(text: string): number {
+        return detections.value.filter((detection) => detection.text === text)
+            .length;
+    }
+
+    /**
+     * Moves a detection to a different entity type, keeping its decision.
+     */
+    async function relabel(id: string, label: string): Promise<void> {
+        await db.detections.update(id, { label });
+    }
+
+    return {
+        storedDocument,
+        isLoading,
+        detections,
+        openDetections,
+        counts,
+        groups,
+        replacements,
+        decide,
+        decideGroup,
+        decideAllOccurrences,
+        decideAllOpen,
+        occurrenceCount,
+        relabel,
+    };
+}

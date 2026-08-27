@@ -7,14 +7,19 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
     extends: [
         ["github:DCC-BS/nuxt-layers/auth"],
-        ["github:DCC-BS/nuxt-layers/backend_communication"],
-        ["github:DCC-BS/nuxt-layers/health_check"],
+        ["github:DCC-BS/nuxt-layers/backend_communication", { install: true }],
+        ["github:DCC-BS/nuxt-layers/health_check", { install: true }],
         ["github:DCC-BS/nuxt-layers/logger"],
         ["github:DCC-BS/nuxt-layers/dcc-app-config"],
         process.env.USE_FEEDBACK !== "false"
-            ? ["github:DCC-BS/nuxt-layers/feedback-control"]
+            ? ["github:DCC-BS/nuxt-layers/feedback-control", { install: true }]
             : undefined,
     ],
+    nitro: {
+        externals: {
+            inline: [/[\\/]\.c12[\\/]/],
+        },
+    },
     routeRules: {
         "/api/ping": {
             cors: true,
@@ -58,6 +63,7 @@ export default defineNuxtConfig({
     modules: [
         "@nuxt/ui",
         "@nuxtjs/i18n",
+        "@nuxtjs/mdc",
         "@dcc-bs/common-ui.bs.js",
         "@dcc-bs/event-system.bs.js",
         "@dcc-bs/dependency-injection.bs.js",

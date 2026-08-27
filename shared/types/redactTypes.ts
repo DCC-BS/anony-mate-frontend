@@ -26,6 +26,12 @@ export const RedactOptionsSchema = z.object({
     blacklist: z.array(z.string()).optional(),
 });
 
+export const ConversionResultSchema = z.object({
+    text: z.string(),
+    page_offsets: z.array(z.int()).default([]),
+});
+
 export type Entity = z.infer<typeof EntitySchema>;
 export type RedactResult = z.infer<typeof RedactResultSchema>;
 export type RedactOptions = z.infer<typeof RedactOptionsSchema>;
+export type ConversionResult = z.infer<typeof ConversionResultSchema>;

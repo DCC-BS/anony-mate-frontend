@@ -71,6 +71,186 @@
             "rerunDescription": "Your review edits (removals, type changes) will be discarded.",
             "rerun": "Re-run",
             "cancel": "Cancel"
+        },
+        "upload": {
+            "button": "Upload file",
+            "dropHint": "Drop a document to convert it",
+            "converting": "Converting document…",
+            "successTitle": "Document converted",
+            "errorTitle": "Upload failed",
+            "dismiss": "Dismiss",
+            "errors": {
+                "document_conversion_error": "The document could not be converted. Please try again.",
+                "invalid_mime_type": "This file type is not supported.",
+                "document_conversion_timeout": "The document took too long to convert. Please try a smaller file."
+            }
         }
+    },
+    "workspace": {
+        "title": "Workspace",
+        "documents": "Documents",
+        "new": "New anonymisation",
+        "entities": "Entities"
+    },
+    "documents": {
+        "title": "Documents",
+        "new": "New anonymisation",
+        "empty": "No documents yet.",
+        "processing": "{count} documents in progress",
+        "table": {
+            "document": "Document",
+            "status": "Status",
+            "detections": "Detections",
+            "review": "Review",
+            "retry": "Try again",
+            "remove": "Remove"
+        },
+        "status": {
+            "staged": "Queued",
+            "converting": "Reading",
+            "redacting": "Detecting",
+            "ready": "Ready for review",
+            "failed": "Failed",
+            "failedHint": "Processing failed. Please try again.",
+            "reviewed": "Reviewed"
+        },
+        "search": "Search documents…",
+        "noMatches": "No matches."
+    },
+    "new": {
+        "title": "New anonymisation",
+        "tabs": {
+            "files": "Files",
+            "paste": "Paste text"
+        },
+        "dropTitle": "Drop files here",
+        "dropHint": "PDF, DOCX, MD, TXT · scans are read via OCR",
+        "chooseFiles": "Choose files",
+        "staged": "Ready to process ({count})",
+        "pastePlaceholder": "Paste text here – for example a case note or an excerpt from minutes.",
+        "pasteHint": "{chars} characters · never leaves your own infrastructure",
+        "pastedName": "Pasted text {date}",
+        "start": "Start processing",
+        "group": {
+            "title": "Detection group",
+            "entityCount": "{count} entities",
+            "manage": "Manage groups"
+        },
+        "threshold": {
+            "title": "Minimum confidence",
+            "hint": "Lower finds more, at the cost of false positives."
+        }
+    },
+    "review": {
+        "back": "Back to overview",
+        "meta": "{detections} detections · {chars} characters",
+        "notFound": "This document no longer exists.",
+        "detections": "Detections",
+        "found": "{count} found",
+        "openCount": "{count} open",
+        "accept": "Accept",
+        "reject": "Discard",
+        "acceptAll": "Accept all",
+        "rejectAll": "Discard all",
+        "searchPlaceholder": "Search the document…",
+        "stats": {
+            "open": "open",
+            "accepted": "approved",
+            "rejected": "discarded"
+        },
+        "state": {
+            "open": "Open",
+            "accepted": "Approved",
+            "rejected": "Discarded"
+        },
+        "view": {
+            "original": "Original",
+            "anonymised": "Anonymised",
+            "blacked": "Blacked out"
+        },
+        "wizard": {
+            "title": "Review assistant",
+            "open": "Assistant · {count} open",
+            "progress": "{done} of {total} reviewed",
+            "changeCategory": "Change category",
+            "later": "Later",
+            "hint": "Nothing is changed until the export is run.",
+            "done": "No open detections left",
+            "close": "Back to the document"
+        },
+        "copy": "Copy",
+        "copied": "Copied",
+        "pages": "Pages",
+        "page": "Page {page}",
+        "acceptAllOccurrences": "Accept all {count} occurrences",
+        "acceptAllOccurrencesShort": "Accept all occurrences",
+        "rejectAllOccurrencesShort": "Discard all occurrences",
+        "acceptAllOpen": "Accept all {count} open",
+        "rejectAllOpen": "Discard all"
+    },
+    "entities": {
+        "title": "Entities",
+        "typesTitle": "Entities",
+        "groupsTitle": "Detection groups",
+        "builtin": "Built-in",
+        "groupEntities": "{count} entities",
+        "deleteGroup": "Delete group",
+        "deleteType": "Delete entity",
+        "table": {
+            "name": "Entity",
+            "description": "Description",
+            "descriptionPlaceholder": "Description of the content to find"
+        },
+        "newType": {
+            "name": "Name",
+            "description": "Description",
+            "add": "Create",
+            "title": "New entity",
+            "namePlaceholder": "e.g. project_name",
+            "descriptionPlaceholder": "Description of the content to find"
+        },
+        "newGroup": {
+            "name": "New group",
+            "add": "Create",
+            "title": "New group",
+            "placeholder": "e.g. Legal & appeals"
+        },
+        "blacklist": {
+            "title": "Never redact",
+            "placeholder": "e.g. Basel-Stadt",
+            "add": "Add",
+            "remove": "Remove",
+            "empty": "No terms yet."
+        },
+        "count": "{count}",
+        "searchTypes": "Search entities…",
+        "searchGroups": "Search groups…",
+        "selectTypes": "Select entities",
+        "noMatches": "No matches.",
+        "noDescription": "No description",
+        "edit": "Edit",
+        "save": "Save",
+        "cancel": "Cancel",
+        "replacement": {
+            "label": "Replacement in the document",
+            "tokens": {
+                "label": "entity name",
+                "subject": "same match, same number",
+                "occurrence": "every mention numbered"
+            }
+        }
+    },
+    "export": {
+        "export": "Export",
+        "openWarning": "{count} detections are still open and stay visible.",
+        "hint": "Only accepted detections are replaced.",
+        "formats": {
+            "title": "Format",
+            "markdown": "Markdown (.md)",
+            "text": "Text (.txt)",
+            "docx": "Word (.docx)",
+            "clipboard": "Copy to clipboard"
+        },
+        "copied": "Copied"
     }
 }

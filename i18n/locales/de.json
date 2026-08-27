@@ -71,6 +71,186 @@
             "rerunDescription": "Deine Review-Bearbeitungen (Entfernungen, Typänderungen) gehen verloren.",
             "rerun": "Erneut ausführen",
             "cancel": "Abbrechen"
+        },
+        "upload": {
+            "button": "Datei hochladen",
+            "dropHint": "Dokument hier ablegen zum Konvertieren",
+            "converting": "Dokument wird konvertiert…",
+            "successTitle": "Dokument konvertiert",
+            "errorTitle": "Upload fehlgeschlagen",
+            "dismiss": "Schliessen",
+            "errors": {
+                "document_conversion_error": "Das Dokument konnte nicht konvertiert werden. Bitte erneut versuchen.",
+                "invalid_mime_type": "Dieser Dateityp wird nicht unterstützt.",
+                "document_conversion_timeout": "Die Konvertierung hat zu lange gedauert. Bitte eine kleinere Datei verwenden."
+            }
         }
+    },
+    "workspace": {
+        "title": "Arbeitsbereich",
+        "documents": "Dokumente",
+        "new": "Neu anonymisieren",
+        "entities": "Entitäten"
+    },
+    "documents": {
+        "title": "Dokumente",
+        "new": "Neu anonymisieren",
+        "empty": "Noch keine Dokumente vorhanden.",
+        "processing": "{count} Dokumente in Arbeit",
+        "table": {
+            "document": "Dokument",
+            "status": "Status",
+            "detections": "Erkennungen",
+            "review": "Prüfen",
+            "retry": "Erneut versuchen",
+            "remove": "Entfernen"
+        },
+        "status": {
+            "staged": "Wartet",
+            "converting": "Wird gelesen",
+            "redacting": "Wird geprüft",
+            "ready": "Bereit zur Prüfung",
+            "failed": "Fehlgeschlagen",
+            "failedHint": "Verarbeitung fehlgeschlagen. Bitte erneut versuchen.",
+            "reviewed": "Geprüft"
+        },
+        "search": "Dokument suchen…",
+        "noMatches": "Keine Treffer."
+    },
+    "new": {
+        "title": "Neu anonymisieren",
+        "tabs": {
+            "files": "Dateien",
+            "paste": "Text einfügen"
+        },
+        "dropTitle": "Dateien hierher ziehen",
+        "dropHint": "PDF, DOCX, MD, TXT · Scans werden per OCR erschlossen",
+        "chooseFiles": "Dateien auswählen",
+        "staged": "Bereit zur Verarbeitung ({count})",
+        "pastePlaceholder": "Text hier einfügen – z. B. eine Aktennotiz oder ein Protokollausschnitt.",
+        "pasteHint": "{chars} Zeichen · verlässt die eigene Infrastruktur nicht",
+        "pastedName": "Eingefügter Text {date}",
+        "start": "Verarbeitung starten",
+        "group": {
+            "title": "Erkennungsgruppe",
+            "entityCount": "{count} Entitäten",
+            "manage": "Gruppen bearbeiten"
+        },
+        "threshold": {
+            "title": "Mindestkonfidenz",
+            "hint": "Tiefer erkennt mehr, bringt aber mehr Fehltreffer."
+        }
+    },
+    "review": {
+        "back": "Zurück zur Übersicht",
+        "meta": "{detections} Erkennungen · {chars} Zeichen",
+        "notFound": "Dieses Dokument ist nicht mehr vorhanden.",
+        "detections": "Erkennungen",
+        "found": "{count} gefunden",
+        "openCount": "{count} offen",
+        "accept": "Übernehmen",
+        "reject": "Verwerfen",
+        "acceptAll": "Alle übernehmen",
+        "rejectAll": "Alle verwerfen",
+        "searchPlaceholder": "Begriff im Dokument suchen…",
+        "stats": {
+            "open": "offen",
+            "accepted": "freigegeben",
+            "rejected": "verworfen"
+        },
+        "state": {
+            "open": "Offen",
+            "accepted": "Freigegeben",
+            "rejected": "Verworfen"
+        },
+        "view": {
+            "original": "Original",
+            "anonymised": "Anonymisiert",
+            "blacked": "Geschwärzt"
+        },
+        "wizard": {
+            "title": "Prüfassistent",
+            "open": "Assistent · {count} offen",
+            "progress": "{done} von {total} geprüft",
+            "changeCategory": "Kategorie ändern",
+            "later": "Später",
+            "hint": "Nichts wird verändert, solange der Export nicht ausgeführt wird.",
+            "done": "Keine offenen Erkennungen mehr",
+            "close": "Zurück zum Dokument"
+        },
+        "copy": "Kopieren",
+        "copied": "Kopiert",
+        "pages": "Seiten",
+        "page": "Seite {page}",
+        "acceptAllOccurrences": "Alle {count} Vorkommen übernehmen",
+        "acceptAllOccurrencesShort": "Alle Vorkommen übernehmen",
+        "rejectAllOccurrencesShort": "Alle Vorkommen verwerfen",
+        "acceptAllOpen": "Alle {count} offenen übernehmen",
+        "rejectAllOpen": "Alle verwerfen"
+    },
+    "entities": {
+        "title": "Entitäten",
+        "typesTitle": "Entitäten",
+        "groupsTitle": "Erkennungsgruppen",
+        "builtin": "Vorgabe",
+        "groupEntities": "{count} Entitäten",
+        "deleteGroup": "Gruppe löschen",
+        "deleteType": "Entität löschen",
+        "table": {
+            "name": "Entität",
+            "description": "Beschreibung",
+            "descriptionPlaceholder": "Beschreibung des gesuchten Inhalts"
+        },
+        "newType": {
+            "name": "Bezeichnung",
+            "description": "Beschreibung",
+            "add": "Anlegen",
+            "title": "Neue Entität",
+            "namePlaceholder": "z. B. projektname",
+            "descriptionPlaceholder": "Beschreibung des gesuchten Inhalts"
+        },
+        "newGroup": {
+            "name": "Neue Gruppe",
+            "add": "Anlegen",
+            "title": "Neue Gruppe",
+            "placeholder": "z. B. Recht & Einsprachen"
+        },
+        "blacklist": {
+            "title": "Nie schwärzen",
+            "placeholder": "z. B. Basel-Stadt",
+            "add": "Hinzufügen",
+            "remove": "Entfernen",
+            "empty": "Noch keine Begriffe erfasst."
+        },
+        "count": "{count}",
+        "searchTypes": "Entität suchen…",
+        "searchGroups": "Gruppe suchen…",
+        "selectTypes": "Entitäten auswählen",
+        "noMatches": "Keine Treffer.",
+        "noDescription": "Keine Beschreibung",
+        "edit": "Bearbeiten",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "replacement": {
+            "label": "Ersetzung im Dokument",
+            "tokens": {
+                "label": "Entitätsname",
+                "subject": "gleiche Treffer gleich nummeriert",
+                "occurrence": "jedes Vorkommen einzeln nummeriert"
+            }
+        }
+    },
+    "export": {
+        "export": "Exportieren",
+        "openWarning": "{count} Erkennungen sind noch offen und bleiben sichtbar.",
+        "hint": "Nur übernommene Erkennungen werden ersetzt.",
+        "formats": {
+            "title": "Format",
+            "markdown": "Markdown (.md)",
+            "text": "Text (.txt)",
+            "docx": "Word (.docx)",
+            "clipboard": "In die Zwischenablage"
+        },
+        "copied": "Kopiert"
     }
 }
