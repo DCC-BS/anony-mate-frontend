@@ -165,28 +165,32 @@ export const useDocumentQueue = createSharedComposable(() => {
         const formData = new FormData();
         formData.append("file", document.file as Blob, document.name);
 
-        const response = await $fetch("/api/convert", {
-            method: "POST",
-            body: formData,
-        });
-
-        return ConversionResultSchema.parse(response);
+        return await runApiTask(
+            () =>
+                $fetch<unknown>("/api/convert", {
+                    method: "POST",
+                    body: formData,
+                }),
+            ConversionResultSchema,
+        );
     }
 
     async function redact(document: StoredDocument, text: string) {
-        const response = await $fetch("/api/redact", {
-            method: "POST",
-            body: {
-                text,
-                entity_types: document.entityTypes,
-                threshold: document.threshold,
-                // Blacklisting happens client-side, so a term added later
-                // applies without asking the API again.
-                blacklist: [],
-            },
-        });
-
-        return RedactResultSchema.parse(response);
+        return await runApiTask(
+            () =>
+                $fetch<unknown>("/api/redact", {
+                    method: "POST",
+                    body: {
+                        text,
+                        entity_types: document.entityTypes,
+                        threshold: document.threshold,
+                        // Blacklisting happens client-side, so a term added
+                        // later applies without asking the API again.
+                        blacklist: [],
+                    },
+                }),
+            RedactResultSchema,
+        );
     }
 
     /**

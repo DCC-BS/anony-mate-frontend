@@ -35,3 +35,17 @@ export type Entity = z.infer<typeof EntitySchema>;
 export type RedactResult = z.infer<typeof RedactResultSchema>;
 export type RedactOptions = z.infer<typeof RedactOptionsSchema>;
 export type ConversionResult = z.infer<typeof ConversionResultSchema>;
+
+export const TaskAcceptedSchema = z.object({
+    task_id: z.string(),
+});
+
+export const TaskStateSchema = z.object({
+    task_id: z.string(),
+    status: z.enum(["pending", "running", "finished", "failed"]),
+    progress: z.number().nullable().optional(),
+    resource_id: z.string().nullable().optional(),
+    error: z.string().nullable().optional(),
+});
+
+export type TaskState = z.infer<typeof TaskStateSchema>;

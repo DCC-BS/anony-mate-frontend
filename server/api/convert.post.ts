@@ -14,4 +14,4 @@ export default apiHandler
         formData.append("file", file, file.name);
         return formData;
     })
-    .build("/convert/doc");
+    .build("/convert/doc/async");
