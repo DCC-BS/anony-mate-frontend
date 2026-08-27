@@ -38,7 +38,7 @@ export default defineNuxtConfig({
     },
     app: {
         head: {
-            titleTemplate: "AnonyMate (Frontend)",
+            titleTemplate: "AnonyMate",
             htmlAttrs: {
                 lang: "de",
             },
@@ -50,9 +50,9 @@ export default defineNuxtConfig({
                 },
                 {
                     name: "apple-mobile-web-app-title",
-                    content: "AnonyMate (Frontend)",
+                    content: "AnonyMate",
                 },
-                { name: "application-name", content: "AnonyMate (Frontend)" },
+                { name: "application-name", content: "AnonyMate" },
                 { name: "msapplication-config", content: "/browserconfig.xml" },
             ],
         },
