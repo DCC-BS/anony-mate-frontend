@@ -1,8 +1,8 @@
 import type { z } from "zod";
 import { TaskAcceptedSchema, TaskStateSchema } from "#shared/types/redactTypes";
 
-/** How long to wait between polls; the API reports progress per chunk. */
-const POLL_INTERVAL_MS = 1000;
+/** Conversions and scans run for minutes, so polling often only adds noise. */
+const POLL_INTERVAL_MS = 10_000;
 
 /**
  * Runs one long API operation through its task endpoints.
