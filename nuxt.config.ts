@@ -75,6 +75,12 @@ export default defineNuxtConfig({
     css: ["~/assets/css/main.css"],
     vite: {
         plugins: [varlockVitePlugin({ ssrInjectMode: "resolved-env" })],
+        environments: {
+            // Dexie's exports map resolves to its CJS build under plain Node,
+            // so the built server crashes on `import { Dexie } from "dexie"`.
+            // Bundling it into the server chunk sidesteps that resolution.
+            ssr: { resolve: { noExternal: ["dexie"] } },
+        },
         build: {
             sourcemap: process.env.NODE_ENV !== "production",
             cssMinify: "lightningcss",
