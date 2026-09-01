@@ -53,6 +53,16 @@
     },
     "overrides": [
         {
+            "includes": ["**/pages/**"],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "useVueMultiWordComponentNames": "off"
+                    }
+                }
+            }
+        },
+        {
             "includes": ["**/*.vue"],
             "linter": {
                 "rules": {

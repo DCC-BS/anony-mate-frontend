@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 const { t } = useI18n();
-const toast = useToast();
 const localePath = useLocalePath();
 const router = useRouter();
 
@@ -102,7 +101,7 @@ async function start() {
                             files: 'max-h-56 overflow-y-auto'
                         }"
                     />
-                    <p v-if="stagedFiles.length" class="text-xs text-(--ui-text-muted)">
+                    <p v-if="stagedFiles.length" class="text-xs text-muted">
                         {{ t("new.staged", { count: stagedFiles.length }) }}
                     </p>
                 </template>
@@ -115,7 +114,7 @@ async function start() {
                         :placeholder="t('new.pastePlaceholder')"
                         class="w-full"
                     />
-                    <div class="text-xs text-(--ui-text-muted)">
+                    <div class="text-xs text-muted">
                         {{ t("new.pasteHint", { chars: pastedText.length }) }}
                     </div>
                 </template>

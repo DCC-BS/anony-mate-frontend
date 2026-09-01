@@ -30,7 +30,7 @@ function formatDate(date: Date): string {
             :class="rowGrid"
         >
             <div>{{ t("documents.table.document") }}</div>
-            <div class="hidden sm:block">{{ t("documents.table.status") }}</div>
+            <div>{{ t("documents.table.status") }}</div>
             <div class="hidden sm:block">{{ t("documents.table.detections") }}</div>
             <div />
         </div>
