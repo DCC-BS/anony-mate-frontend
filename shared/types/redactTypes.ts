@@ -44,6 +44,7 @@ export const TaskStateSchema = z.object({
     task_id: z.string(),
     status: z.enum(["pending", "running", "finished", "failed"]),
     progress: z.number().nullable().optional(),
+    queue_position: z.number().nullable().optional(),
     resource_id: z.string().nullable().optional(),
     error: z.string().nullable().optional(),
 });

@@ -1,9 +1,6 @@
 import type { z } from "zod";
 import { TaskAcceptedSchema, TaskStateSchema } from "#shared/types/redactTypes";
 
-/** Conversions and scans run for minutes, so polling often only adds noise. */
-const POLL_INTERVAL_MS = 10_000;
-
 /**
  * Runs one long API operation through its task endpoints.
  *
@@ -14,21 +11,30 @@ const POLL_INTERVAL_MS = 10_000;
  *
  * @param submit - Posts the work and resolves with `{ task_id }`.
  * @param schema - Shape of the collected resource.
- * @param onProgress - Called with the fraction done, when the API reports one.
+ * @param onState - Called on every poll with what the API knows so far: the
+ *   fraction done, and the place in the queue while the work is still waiting.
  * @returns The parsed resource.
  */
 export async function runApiTask<T extends z.ZodType>(
     submit: () => Promise<unknown>,
     schema: T,
-    onProgress?: (progress: number | null) => void,
+    onState?: (state: {
+        progress: number | null;
+        queuePosition: number | null;
+    }) => void,
 ): Promise<z.infer<T>> {
+    const pollIntervalMs = useRuntimeConfig().public.pollIntervalMs;
+
     const { task_id } = TaskAcceptedSchema.parse(await submit());
 
     for (;;) {
         const state = TaskStateSchema.parse(
             await $fetch(`/api/task/${task_id}`),
         );
-        onProgress?.(state.progress ?? null);
+        onState?.({
+            progress: state.progress ?? null,
+            queuePosition: state.queue_position ?? null,
+        });
 
         if (state.status === "failed") {
             throw new Error(state.error ?? "Task failed");
@@ -39,6 +45,6 @@ export async function runApiTask<T extends z.ZodType>(
             );
         }
 
-        await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+        await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
     }
 }

@@ -98,6 +98,9 @@ export default defineNuxtConfig({
         public: {
             useFeedback: process.env.USE_FEEDBACK !== "false",
             useDummyData: process.env.DUMMY,
+            pollIntervalMs: Number(process.env.POLL_INTERVAL_MS) || 3000,
+            documentRetentionDays:
+                Number(process.env.DOCUMENT_RETENTION_DAYS) || 7,
             logger: {
                 loglevel: process.env.LOG_LEVEL || "debug",
             },

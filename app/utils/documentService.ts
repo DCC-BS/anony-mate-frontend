@@ -8,9 +8,6 @@ import {
     StoredDocumentSchema,
 } from "~/types/storedDocument";
 
-/** Documents older than this are dropped on startup. */
-export const DOCUMENT_RETENTION_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
-
 /**
  * Persistence layer for documents and detections on top of IndexedDB.
  *
@@ -148,7 +145,10 @@ export function getDocumentService() {
      * @returns How many documents were removed.
      */
     async function cleanupOldDocuments(): Promise<number> {
-        const threshold = new Date(Date.now() - DOCUMENT_RETENTION_PERIOD_MS);
+        const retentionDays = useRuntimeConfig().public.documentRetentionDays;
+        const threshold = new Date(
+            Date.now() - retentionDays * 24 * 60 * 60 * 1000,
+        );
         const stale = await db.documents
             .where("updatedAt")
             .below(threshold)

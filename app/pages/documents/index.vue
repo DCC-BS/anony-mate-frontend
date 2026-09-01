@@ -1,7 +1,15 @@
 <script lang="ts" setup>
 const { t } = useI18n();
 const localePath = useLocalePath();
-const { documents, openCounts, pending, progress, isProcessing, retry } =
+const {
+    documents,
+    openCounts,
+    queuePositions,
+    pending,
+    progress,
+    isProcessing,
+    retry,
+} =
     useDocumentQueue();
 const { deleteDocument } = getDocumentService();
 
@@ -55,6 +63,7 @@ const hasDocuments = computed(() => documents.value.length > 0);
             <DocumentsDocumentTable
                 :documents="visibleDocuments"
                 :open-counts="openCounts"
+                :queue-positions="queuePositions"
                 @retry="retry"
                 @remove="deleteDocument"
             />

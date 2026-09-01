@@ -112,7 +112,8 @@
             "ready": "Bereit zur Prüfung",
             "failed": "Fehlgeschlagen",
             "failedHint": "Verarbeitung fehlgeschlagen. Bitte erneut versuchen.",
-            "reviewed": "Geprüft"
+            "reviewed": "Geprüft",
+            "queued": "Wartet ({position}.)"
         },
         "search": "Dokument suchen…",
         "noMatches": "Keine Treffer."

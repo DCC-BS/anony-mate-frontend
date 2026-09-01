@@ -4,6 +4,7 @@ import type { StoredDocument } from "~/types/storedDocument";
 const props = defineProps<{
     documents: StoredDocument[];
     openCounts: Record<string, number>;
+    queuePositions: Record<string, number | null>;
 }>();
 const emit = defineEmits<{ retry: [id: string]; remove: [id: string] }>();
 
@@ -65,6 +66,7 @@ function formatDate(date: Date): string {
                 <DocumentsDocumentStatusBadge
                     :document="document"
                     :open-count="props.openCounts[document.id] ?? 0"
+                    :queue-position="props.queuePositions[document.id] ?? null"
                 />
             </div>
 

@@ -112,7 +112,8 @@
             "ready": "Ready for review",
             "failed": "Failed",
             "failedHint": "Processing failed. Please try again.",
-            "reviewed": "Reviewed"
+            "reviewed": "Reviewed",
+            "queued": "Queued (#{position})"
         },
         "search": "Search documents…",
         "noMatches": "No matches."

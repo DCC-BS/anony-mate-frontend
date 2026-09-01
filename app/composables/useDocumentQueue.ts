@@ -46,6 +46,12 @@ export const useDocumentQueue = createSharedComposable(() => {
     });
 
     const isProcessing = ref(false);
+    /**
+     * Place in the API's queue per document, while it is waiting on a busy
+     * downstream service. Transient by nature, so it stays in memory rather
+     * than in IndexedDB: a reload re-submits and gets a fresh position.
+     */
+    const queuePositions = ref<Record<string, number | null>>({});
 
     const pending = computed(() =>
         documents.value.filter((document) =>
@@ -158,6 +164,8 @@ export const useDocumentQueue = createSharedComposable(() => {
                 status: "failed",
                 errorMessage: t("documents.status.failedHint"),
             });
+        } finally {
+            delete queuePositions.value[document.id];
         }
     }
 
@@ -170,8 +178,12 @@ export const useDocumentQueue = createSharedComposable(() => {
                 $fetch<unknown>("/api/convert", {
                     method: "POST",
                     body: formData,
+                    headers: { "X-Client-Id": clientId() },
                 }),
             ConversionResultSchema,
+            ({ queuePosition }) => {
+                queuePositions.value[document.id] = queuePosition;
+            },
         );
     }
 
@@ -180,6 +192,7 @@ export const useDocumentQueue = createSharedComposable(() => {
             () =>
                 $fetch<unknown>("/api/redact", {
                     method: "POST",
+                    headers: { "X-Client-Id": clientId() },
                     body: {
                         text,
                         entity_types: document.entityTypes,
@@ -190,6 +203,9 @@ export const useDocumentQueue = createSharedComposable(() => {
                     },
                 }),
             RedactResultSchema,
+            ({ queuePosition }) => {
+                queuePositions.value[document.id] = queuePosition;
+            },
         );
     }
 
@@ -204,6 +220,7 @@ export const useDocumentQueue = createSharedComposable(() => {
     return {
         documents,
         openCounts,
+        queuePositions,
         pending,
         activeDocument,
         isProcessing,

@@ -1,7 +1,12 @@
 <script lang="ts" setup>
 import type { StoredDocument } from "~/types/storedDocument";
 
-const props = defineProps<{ document: StoredDocument; openCount?: number }>();
+const props = defineProps<{
+    document: StoredDocument;
+    openCount?: number;
+    /** Place in the API queue, when the work is waiting on a busy service. */
+    queuePosition?: number | null;
+}>();
 
 const { t } = useI18n();
 
@@ -30,6 +35,16 @@ const presentation = computed(
 const isBusy = computed(
     () => status.value === "converting" || status.value === "redacting"
 );
+
+/**
+ * A queued document says how many are ahead of it, so a long wait reads as a
+ * queue rather than as a stall.
+ */
+const label = computed(() =>
+    isBusy.value && props.queuePosition
+        ? t("documents.status.queued", { position: props.queuePosition })
+        : t(`documents.status.${status.value}`)
+);
 </script>
 
 <template>
@@ -40,6 +55,6 @@ const isBusy = computed(
         :icon="presentation.icon"
         :ui="{ leadingIcon: isBusy ? 'animate-pulse' : undefined }"
     >
-        {{ t(`documents.status.${status}`) }}
+        {{ label }}
     </UBadge>
 </template>
