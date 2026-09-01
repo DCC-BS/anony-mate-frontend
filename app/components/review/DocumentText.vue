@@ -52,52 +52,70 @@ function reportVisiblePage(): void {
  */
 const anchor = ref<{ page: number; fraction: number }>();
 
+/** Where the reader is now, as a page and how far into it. */
+function currentAnchor(): { page: number; fraction: number } | undefined {
+    const root = scroller.value;
+    if (!root) {
+        return undefined;
+    }
+
+    const top = root.getBoundingClientRect().top;
+    for (const sheet of root.querySelectorAll<HTMLElement>("[data-page]")) {
+        const box = sheet.getBoundingClientRect();
+        if (box.bottom > top) {
+            return {
+                page: Number(sheet.dataset.page),
+                fraction: Math.min(1, Math.max(0, (top - box.top) / box.height)),
+            };
+        }
+    }
+
+    return undefined;
+}
+
+/**
+ * Waits for the pane to stop growing, then puts the anchor back under the top
+ * edge.
+ *
+ * The redacted views render their markdown asynchronously. Until it arrives
+ * the pane is shorter than it will be, and the browser clamps the scroll
+ * position to that smaller height — which is how the reader's place is lost
+ * on the way in, but not on the way back to a view that renders at once.
+ */
+async function restoreAnchor(): Promise<void> {
+    const target = anchor.value;
+    const root = scroller.value;
+    if (!root || !target) {
+        return;
+    }
+
+    let previous = -1;
+    for (let frame = 0; frame < 60 && root.scrollHeight !== previous; frame++) {
+        previous = root.scrollHeight;
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+
+    const sheet = root.querySelector<HTMLElement>(
+        `[data-page="${target.page}"]`,
+    );
+    if (!sheet) {
+        return;
+    }
+
+    const box = sheet.getBoundingClientRect();
+    root.scrollTop +=
+        box.top - root.getBoundingClientRect().top + box.height * target.fraction;
+}
+
 watch(
     () => props.view,
     () => {
-        const root = scroller.value;
-        const sheet = root?.querySelector<HTMLElement>("[data-page]");
-        if (!root || !sheet) {
-            return;
-        }
-
-        const top = root.getBoundingClientRect().top;
-        for (const candidate of root.querySelectorAll<HTMLElement>("[data-page]")) {
-            const box = candidate.getBoundingClientRect();
-            if (box.bottom > top) {
-                anchor.value = {
-                    page: Number(candidate.dataset.page),
-                    fraction: Math.min(1, Math.max(0, (top - box.top) / box.height)),
-                };
-                return;
-            }
-        }
+        anchor.value = currentAnchor();
     },
     { flush: "pre" },
 );
 
-watch(
-    () => props.view,
-    async () => {
-        const target = anchor.value;
-        await nextTick();
-        const root = scroller.value;
-        if (!root || !target) {
-            return;
-        }
-
-        const sheet = root.querySelector<HTMLElement>(
-            `[data-page="${target.page}"]`,
-        );
-        if (sheet) {
-            root.scrollTop +=
-                sheet.getBoundingClientRect().top -
-                root.getBoundingClientRect().top +
-                sheet.getBoundingClientRect().height * target.fraction;
-        }
-    },
-    { flush: "post" },
-);
+watch(() => props.view, restoreAnchor, { flush: "post" });
 
 const isInteractive = computed(() => props.view === "original");
 
