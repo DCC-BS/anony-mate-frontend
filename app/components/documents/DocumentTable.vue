@@ -11,8 +11,11 @@ const emit = defineEmits<{ retry: [id: string]; remove: [id: string] }>();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 
+// Status is shown at every width, so the narrow layout needs a column for it
+// too: with only name and actions, the header's status label would sit over
+// the buttons. Detections stay hidden below `sm`.
 const rowGrid =
-    "grid grid-cols-[minmax(0,1fr)_88px] items-center gap-3 sm:grid-cols-[minmax(0,1fr)_150px_130px_92px]";
+    "grid grid-cols-[minmax(0,1fr)_auto_88px] items-center gap-3 sm:grid-cols-[minmax(0,1fr)_150px_130px_92px]";
 
 function formatDate(date: Date): string {
     return date.toLocaleString(locale.value);
@@ -62,7 +65,7 @@ function formatDate(date: Date): string {
                 </span>
             </div>
 
-            <div class="hidden sm:block">
+            <div>
                 <DocumentsDocumentStatusBadge
                     :document="document"
                     :open-count="props.openCounts[document.id] ?? 0"
