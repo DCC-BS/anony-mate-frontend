@@ -134,6 +134,17 @@ function detectionText(detection: StoredDetection, original: string): string {
 const BLOCK_CHARS = 1200;
 
 /**
+ * Characters a single unbroken paragraph may reach before it is split anyway.
+ *
+ * A block boundary is a line break: the browser cannot flow text from one
+ * absolutely positioned box into the next. Splitting only at the document's
+ * own paragraph breaks therefore leaves the text exactly as it reads, so the
+ * limit is set far above any real paragraph and exists only so that a document
+ * written as one enormous line still mounts in pieces rather than whole.
+ */
+const UNBROKEN_CHARS = 12000;
+
+/**
  * Splits one page into plain and detected segments. Detections are sorted and
  * any overlap is skipped, so the segments always tile the page exactly once.
  */
@@ -217,12 +228,12 @@ const blocks = computed<Block[]>(() => {
             parts.push(part);
             size += part.text.length;
 
-            const breaks = part.kind === "text" && part.text.includes("\n");
-            if (size >= BLOCK_CHARS && breaks) {
+            const endsParagraph = part.kind === "text" && part.text.endsWith("\n");
+            if (size >= BLOCK_CHARS && endsParagraph) {
                 flush(false);
-            } else if (size >= BLOCK_CHARS * 3) {
-                // No paragraph break in sight; split anyway rather than let one
-                // block grow back into the whole document.
+            } else if (size >= UNBROKEN_CHARS) {
+                // No paragraph break for a very long way: split regardless, and
+                // accept the one break, rather than mount the whole document.
                 flush(false);
             }
         }
