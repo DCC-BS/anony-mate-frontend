@@ -188,6 +188,9 @@ interface Block {
     first: boolean;
     /** True for the last block of a page, which carries the page footer. */
     endsPage: boolean;
+    /** Edges of the whole document, which carry the outer padding. */
+    firstOfDocument: boolean;
+    lastOfDocument: boolean;
     parts: Segment[];
 }
 
@@ -216,6 +219,8 @@ const blocks = computed<Block[]>(() => {
                     page: page.page,
                     first: blocksOnPage === 0,
                     endsPage,
+                    firstOfDocument: false,
+                    lastOfDocument: false,
                     parts,
                 });
                 blocksOnPage += 1;
@@ -239,6 +244,13 @@ const blocks = computed<Block[]>(() => {
         }
 
         flush(true);
+    }
+
+    const first = result.at(0);
+    const last = result.at(-1);
+    if (first && last) {
+        first.firstOfDocument = true;
+        last.lastOfDocument = true;
     }
 
     return result;
@@ -294,12 +306,22 @@ function estimateBlock(index: number): number {
         @scroll="reportVisiblePage"
     >
         <template #default="{ item }">
-            <div class="mx-auto w-full max-w-[880px] px-6">
+            <!-- The page sheet is drawn per block: only some of a page is
+                 mounted, so its border is carried by the blocks that hold its
+                 edges and continued by the ones in between. -->
+            <div
+                class="mx-auto w-full max-w-[928px] px-6"
+                :class="[item.firstOfDocument && 'pt-6', item.lastOfDocument && 'pb-6']"
+            >
                 <div
                     :id="`page-${item.page}`"
                     :data-page="item.page"
-                    class="bg-default px-12 text-sm leading-relaxed"
-                    :class="[item.first && 'rounded-t-sm pt-12', item.endsPage && 'rounded-b-sm pb-12']"
+                    class="border-x border-default bg-default px-12 text-sm leading-relaxed"
+                    :class="[
+                        item.first && 'rounded-t-sm border-t pt-12',
+                        item.endsPage && 'rounded-b-sm border-b pb-12',
+                        item.endsPage && !item.lastOfDocument && 'mb-6'
+                    ]"
                 >
                     <div class="whitespace-pre-wrap break-words">
                         <template v-for="(part, index) in item.parts" :key="index">
