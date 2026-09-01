@@ -19,7 +19,7 @@ const { t } = useI18n();
 
 const query = ref("");
 
-/** Groups the reader has opened; collapsed by default, as before. */
+/** Groups the reader has opened. */
 const expanded = ref(new Set<string>());
 
 function toggleGroup(label: string): void {

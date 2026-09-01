@@ -22,31 +22,35 @@ const { t } = useI18n();
 const { getEntityColor } = useEntityColor();
 
 const { renderPage } = useDocumentExport();
+const { blocks, estimateBlock } = useDocumentBlocks(() => props.slices);
 
-const scroller = useTemplateRef<{ $el: HTMLElement }>("scroller");
+const scroller = useTemplateRef<{
+    virtualizer?: {
+        scrollOffset: number | null;
+        getVirtualItems: () => { index: number; end: number }[];
+    };
+}>("scroller");
 
 /**
  * Reports which page the reader is on, so the page rail can follow along.
  *
- * Read from the mounted blocks rather than an observer over page sections:
- * only the blocks near the viewport exist, so there is nothing to observe for
- * the rest of the document.
+ * Taken from the virtualiser's own offset rather than the first mounted
+ * block: it mounts a few blocks either side of the viewport, so the topmost
+ * one is usually still above it.
  */
 function reportVisiblePage(): void {
-    const root = scroller.value?.$el;
-    if (!root) {
+    const virtualizer = scroller.value?.virtualizer;
+    if (!virtualizer) {
         return;
     }
 
-    const top = root.getBoundingClientRect().top;
-    for (const element of root.querySelectorAll<HTMLElement>("[data-page]")) {
-        if (element.getBoundingClientRect().bottom > top) {
-            const page = Number(element.dataset.page);
-            if (page) {
-                emit("visiblePage", page);
-            }
-            return;
-        }
+    const offset = virtualizer.scrollOffset ?? 0;
+    const mounted = virtualizer.getVirtualItems();
+    const visible = mounted.find((item) => item.end > offset) ?? mounted[0];
+    const page = blocks.value[visible?.index ?? -1]?.page;
+
+    if (page) {
+        emit("visiblePage", page);
     }
 }
 
@@ -61,7 +65,6 @@ function redactedPage(page: DocumentPage): string {
     );
 }
 
-/** Right-click actions for one detection. */
 function menuItems(detection: StoredDetection) {
     return [
         [
@@ -130,143 +133,6 @@ function detectionText(detection: StoredDetection, original: string): string {
         : original;
 }
 
-/** Characters a block may hold before the next paragraph starts a new one. */
-const BLOCK_CHARS = 1200;
-
-/**
- * Characters a single unbroken paragraph may reach before it is split anyway.
- *
- * A block boundary is a line break: the browser cannot flow text from one
- * absolutely positioned box into the next. Splitting only at the document's
- * own paragraph breaks therefore leaves the text exactly as it reads, so the
- * limit is set far above any real paragraph and exists only so that a document
- * written as one enormous line still mounts in pieces rather than whole.
- */
-const UNBROKEN_CHARS = 12000;
-
-/**
- * Splits one page into plain and detected segments. Detections are sorted and
- * any overlap is skipped, so the segments always tile the page exactly once.
- */
-function segmentsOf(page: DocumentPage) {
-    const parts: (
-        | { kind: "text"; text: string }
-        | { kind: "detection"; text: string; detection: StoredDetection }
-    )[] = [];
-
-    let cursor = 0;
-    for (const detection of [...page.detections].sort((a, b) => a.start - b.start)) {
-        if (detection.start < cursor) {
-            continue; // overlaps the previous detection
-        }
-
-        if (detection.start > cursor) {
-            parts.push({ kind: "text", text: page.text.slice(cursor, detection.start) });
-        }
-
-        parts.push({
-            kind: "detection",
-            text: page.text.slice(detection.start, detection.end),
-            detection
-        });
-        cursor = detection.end;
-    }
-
-    if (cursor < page.text.length) {
-        parts.push({ kind: "text", text: page.text.slice(cursor) });
-    }
-
-    return parts;
-}
-
-type Segment = ReturnType<typeof segmentsOf>[number];
-
-interface Block {
-    id: string;
-    page: number;
-    /** True for the first block of a page, which carries the sheet's top edge. */
-    first: boolean;
-    /** True for the last block of a page, which carries the page footer. */
-    endsPage: boolean;
-    /** Edges of the whole document, which carry the outer padding. */
-    firstOfDocument: boolean;
-    lastOfDocument: boolean;
-    parts: Segment[];
-}
-
-/**
- * The document as blocks the virtualiser can mount one at a time.
- *
- * A whole document is far too much to keep in the DOM: every detection is an
- * interactive element, so a few thousand of them stall the page before it can
- * be read. Blocks break at paragraph boundaries wherever the document has
- * them, so the text still flows exactly as it did; a paragraph longer than
- * `BLOCK_CHARS` is split at a segment boundary rather than kept whole, which
- * is what makes a single-paragraph document virtualisable at all.
- */
-const blocks = computed<Block[]>(() => {
-    const result: Block[] = [];
-
-    for (const page of props.slices) {
-        let parts: Segment[] = [];
-        let size = 0;
-        let blocksOnPage = 0;
-
-        const flush = (endsPage: boolean) => {
-            if (parts.length || endsPage) {
-                result.push({
-                    id: `${page.page}:${result.length}`,
-                    page: page.page,
-                    first: blocksOnPage === 0,
-                    endsPage,
-                    firstOfDocument: false,
-                    lastOfDocument: false,
-                    parts,
-                });
-                blocksOnPage += 1;
-                parts = [];
-                size = 0;
-            }
-        };
-
-        for (const part of segmentsOf(page)) {
-            parts.push(part);
-            size += part.text.length;
-
-            const endsParagraph = part.kind === "text" && part.text.endsWith("\n");
-            if (size >= BLOCK_CHARS && endsParagraph) {
-                flush(false);
-            } else if (size >= UNBROKEN_CHARS) {
-                // No paragraph break for a very long way: split regardless, and
-                // accept the one break, rather than mount the whole document.
-                flush(false);
-            }
-        }
-
-        flush(true);
-    }
-
-    const first = result.at(0);
-    const last = result.at(-1);
-    if (first && last) {
-        first.firstOfDocument = true;
-        last.lastOfDocument = true;
-    }
-
-    return result;
-});
-
-/** Rough block height, so the scrollbar is about right before measuring. */
-function estimateBlock(index: number): number {
-    const block = blocks.value[index];
-    if (!block) {
-        return 260;
-    }
-    const chars = block.parts.reduce((total, part) => total + part.text.length, 0);
-    // ~90 characters per rendered line at this width, ~22px per line.
-    return Math.max(48, Math.ceil(chars / 90) * 22 + (block.endsPage ? 60 : 0));
-}
-
 </script>
 
 <template>
@@ -324,7 +190,7 @@ function estimateBlock(index: number): number {
                     ]"
                 >
                     <div class="whitespace-pre-wrap break-words">
-                        <template v-for="(part, index) in item.parts" :key="index">
+                        <template v-for="(part, index) in item.segments" :key="index">
                             <span v-if="part.kind === 'text'">{{ part.text }}</span>
 
                             <UContextMenu v-else :items="menuItems(part.detection)">
