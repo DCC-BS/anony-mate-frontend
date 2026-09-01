@@ -19,6 +19,17 @@ const { t } = useI18n();
 
 const query = ref("");
 
+/** Groups the reader has opened; collapsed by default, as before. */
+const expanded = ref(new Set<string>());
+
+function toggleGroup(label: string): void {
+    const next = new Set(expanded.value);
+    if (!next.delete(label)) {
+        next.add(label);
+    }
+    expanded.value = next;
+}
+
 /** Groups filtered by the search box, empty groups dropped. */
 const visibleGroups = computed(() => {
     const needle = query.value.trim().toLowerCase();
@@ -35,6 +46,40 @@ const visibleGroups = computed(() => {
         }))
         .filter((group) => group.items.length > 0);
 });
+
+/**
+ * Groups and their detections as one flat list of rows.
+ *
+ * A document can carry thousands of detections, and rendering them all at once
+ * is what makes the sidebar crawl. Flattening lets a single virtualised scroll
+ * area mount only the rows on screen, which needs one list rather than a
+ * scroller per group.
+ */
+const rows = computed(() =>
+    visibleGroups.value.flatMap((group) => {
+        const header = {
+            kind: "group" as const,
+            id: `group:${group.label}`,
+            label: group.label,
+            count: group.items.length,
+            openCount: group.openCount,
+            expanded: expanded.value.has(group.label)
+        };
+
+        if (!header.expanded) {
+            return [header];
+        }
+
+        return [
+            header,
+            ...group.items.map((detection) => ({
+                kind: "item" as const,
+                id: detection.id,
+                detection
+            }))
+        ];
+    })
+);
 </script>
 
 <template>
@@ -78,18 +123,33 @@ const visibleGroups = computed(() => {
             :placeholder="t('review.searchPlaceholder')"
         />
 
-        <div class="min-h-0 flex-1 overflow-y-auto rounded-md border border-accented">
-            <ReviewDetectionGroup
-                v-for="group in visibleGroups"
-                :key="group.label"
-                v-bind="group"
-                :selected-id="props.selectedId"
-                :occurrences-of="props.occurrencesOf"
-                @select="emit('select', $event)"
-                @decide="(id, state) => emit('decide', id, state)"
-                @decide-group="(label, state) => emit('decideGroup', label, state)"
-                @decide-all="(text, state) => emit('decideAll', text, state)"
-            />
-        </div>
+        <UScrollArea
+            :items="rows"
+            :virtualize="{ estimateSize: 56, overscan: 12 }"
+            class="min-h-0 flex-1 rounded-md border border-accented"
+        >
+            <template #default="{ item }">
+                <ReviewDetectionGroup
+                    v-if="item.kind === 'group'"
+                    :label="item.label"
+                    :count="item.count"
+                    :open-count="item.openCount"
+                    :expanded="item.expanded"
+                    @toggle="toggleGroup"
+                    @decide-group="(label, state) => emit('decideGroup', label, state)"
+                />
+
+                <div v-else class="px-2 py-1">
+                    <ReviewDetectionItem
+                        :detection="item.detection"
+                        :selected="item.detection.id === props.selectedId"
+                        :occurrences="props.occurrencesOf(item.detection.text)"
+                        @select="emit('select', $event)"
+                        @decide="(id, state) => emit('decide', id, state)"
+                        @decide-all="(text, state) => emit('decideAll', text, state)"
+                    />
+                </div>
+            </template>
+        </UScrollArea>
     </div>
 </template>

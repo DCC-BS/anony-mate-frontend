@@ -134,10 +134,24 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
             .modify({ state });
     }
 
+    /**
+     * How often each detected text occurs. Counted once per change rather than
+     * per lookup: the sidebar asks for every row it renders, and scanning the
+     * whole list each time is quadratic on a document with thousands of them.
+     */
+    const occurrencesByText = computed(() => {
+        const counts = new Map<string, number>();
+
+        for (const detection of detections.value) {
+            counts.set(detection.text, (counts.get(detection.text) ?? 0) + 1);
+        }
+
+        return counts;
+    });
+
     /** How many detections share this text. */
     function occurrenceCount(text: string): number {
-        return detections.value.filter((detection) => detection.text === text)
-            .length;
+        return occurrencesByText.value.get(text) ?? 0;
     }
 
     /**
