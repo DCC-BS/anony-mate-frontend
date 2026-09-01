@@ -55,6 +55,14 @@ const visibleGroups = computed(() => {
  * area mount only the rows on screen, which needs one list rather than a
  * scroller per group.
  */
+/**
+ * Measured row heights. The virtualiser sizes the scrollbar from these until a
+ * row has been rendered and measured, so an estimate that is too small makes
+ * the track grow while the reader drags it and the list appears to stop short
+ * of the end.
+ */
+const ROW_HEIGHT = { item: 58, group: 37, groupExpanded: 69 };
+
 const rows = computed(() =>
     visibleGroups.value.flatMap((group) => {
         const header = {
@@ -80,6 +88,17 @@ const rows = computed(() =>
         ];
     })
 );
+
+function estimateRow(index: number): number {
+    const row = rows.value[index];
+    if (!row) {
+        return ROW_HEIGHT.item;
+    }
+    if (row.kind === "item") {
+        return ROW_HEIGHT.item;
+    }
+    return row.expanded ? ROW_HEIGHT.groupExpanded : ROW_HEIGHT.group;
+}
 </script>
 
 <template>
@@ -125,7 +144,7 @@ const rows = computed(() =>
 
         <UScrollArea
             :items="rows"
-            :virtualize="{ estimateSize: 56, overscan: 12 }"
+            :virtualize="{ estimateSize: estimateRow, overscan: 12 }"
             class="min-h-0 flex-1 rounded-md border border-accented"
         >
             <template #default="{ item }">

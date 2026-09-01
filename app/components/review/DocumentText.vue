@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { useIntersectionObserver } from "@vueuse/core";
 import type { DocumentPage } from "~/composables/useDocumentPages";
 import type { DocumentView } from "~/composables/useDocumentReview";
 import type { StoredDetection } from "~/types/storedDocument";
@@ -24,28 +23,32 @@ const { getEntityColor } = useEntityColor();
 
 const { renderPage } = useDocumentExport();
 
-const scroller = useTemplateRef<HTMLElement>("scroller");
-const sheets = useTemplateRef<HTMLElement[]>("sheets");
+const scroller = useTemplateRef<{ $el: HTMLElement }>("scroller");
 
 /**
  * Reports which page the reader is on, so the page rail can follow along.
- * The band stops just below the top edge, so the page the reader has scrolled
- * to counts rather than the one they are leaving behind.
+ *
+ * Read from the mounted blocks rather than an observer over page sections:
+ * only the blocks near the viewport exist, so there is nothing to observe for
+ * the rest of the document.
  */
-useIntersectionObserver(
-    sheets,
-    (entries) => {
-        const visible = entries
-            .filter((entry) => entry.isIntersecting)
-            .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+function reportVisiblePage(): void {
+    const root = scroller.value?.$el;
+    if (!root) {
+        return;
+    }
 
-        const page = Number(visible?.target.getAttribute("data-page"));
-        if (page) {
-            emit("visiblePage", page);
+    const top = root.getBoundingClientRect().top;
+    for (const element of root.querySelectorAll<HTMLElement>("[data-page]")) {
+        if (element.getBoundingClientRect().bottom > top) {
+            const page = Number(element.dataset.page);
+            if (page) {
+                emit("visiblePage", page);
+            }
+            return;
         }
-    },
-    { root: scroller, rootMargin: "0px 0px -75% 0px" }
-);
+    }
+}
 
 const isInteractive = computed(() => props.view === "original");
 
@@ -127,6 +130,9 @@ function detectionText(detection: StoredDetection, original: string): string {
         : original;
 }
 
+/** Characters a block may hold before the next paragraph starts a new one. */
+const BLOCK_CHARS = 1200;
+
 /**
  * Splits one page into plain and detected segments. Detections are sorted and
  * any overlap is skipped, so the segments always tile the page exactly once.
@@ -162,49 +168,101 @@ function segmentsOf(page: DocumentPage) {
     return parts;
 }
 
+type Segment = ReturnType<typeof segmentsOf>[number];
+
+interface Block {
+    id: string;
+    page: number;
+    /** True for the first block of a page, which carries the sheet's top edge. */
+    first: boolean;
+    /** True for the last block of a page, which carries the page footer. */
+    endsPage: boolean;
+    parts: Segment[];
+}
+
+/**
+ * The document as blocks the virtualiser can mount one at a time.
+ *
+ * A whole document is far too much to keep in the DOM: every detection is an
+ * interactive element, so a few thousand of them stall the page before it can
+ * be read. Blocks break at paragraph boundaries wherever the document has
+ * them, so the text still flows exactly as it did; a paragraph longer than
+ * `BLOCK_CHARS` is split at a segment boundary rather than kept whole, which
+ * is what makes a single-paragraph document virtualisable at all.
+ */
+const blocks = computed<Block[]>(() => {
+    const result: Block[] = [];
+
+    for (const page of props.slices) {
+        let parts: Segment[] = [];
+        let size = 0;
+        let blocksOnPage = 0;
+
+        const flush = (endsPage: boolean) => {
+            if (parts.length || endsPage) {
+                result.push({
+                    id: `${page.page}:${result.length}`,
+                    page: page.page,
+                    first: blocksOnPage === 0,
+                    endsPage,
+                    parts,
+                });
+                blocksOnPage += 1;
+                parts = [];
+                size = 0;
+            }
+        };
+
+        for (const part of segmentsOf(page)) {
+            parts.push(part);
+            size += part.text.length;
+
+            const breaks = part.kind === "text" && part.text.includes("\n");
+            if (size >= BLOCK_CHARS && breaks) {
+                flush(false);
+            } else if (size >= BLOCK_CHARS * 3) {
+                // No paragraph break in sight; split anyway rather than let one
+                // block grow back into the whole document.
+                flush(false);
+            }
+        }
+
+        flush(true);
+    }
+
+    return result;
+});
+
+/** Rough block height, so the scrollbar is about right before measuring. */
+function estimateBlock(index: number): number {
+    const block = blocks.value[index];
+    if (!block) {
+        return 260;
+    }
+    const chars = block.parts.reduce((total, part) => total + part.text.length, 0);
+    // ~90 characters per rendered line at this width, ~22px per line.
+    return Math.max(48, Math.ceil(chars / 90) * 22 + (block.endsPage ? 60 : 0));
+}
+
 </script>
 
 <template>
+    <!-- The redacted views carry no interactive elements, so they stay one
+         rendered page each; only the reviewable view needs virtualising. -->
     <div
-        ref="scroller"
+        v-if="!isInteractive"
         class="h-full min-h-0 overflow-y-auto rounded-(--ui-radius) border border-default bg-elevated/40 p-6"
+        @scroll="reportVisiblePage"
     >
         <div class="mx-auto flex w-full max-w-[880px] flex-col gap-6">
             <section
                 v-for="page in props.slices"
                 :id="`page-${page.start}`"
-                ref="sheets"
                 :key="page.page"
                 :data-page="page.page"
                 class="rounded-sm border border-default bg-default px-12 py-12 text-sm leading-relaxed shadow-[0_1px_3px_rgba(20,26,35,0.06),0_8px_24px_rgba(20,26,35,0.05)]"
             >
-                <MDC
-                    v-if="!isInteractive"
-                    :value="redactedPage(page)"
-                    class="prose prose-sm max-w-none"
-                />
-
-                <div v-else class="whitespace-pre-wrap break-words">
-                    <template v-for="(part, index) in segmentsOf(page)" :key="index">
-                        <span v-if="part.kind === 'text'">{{ part.text }}</span>
-
-                        <UContextMenu v-else :items="menuItems(part.detection)">
-                            <button
-                                :id="`detection-${part.detection.id}`"
-                                type="button"
-                                :class="[
-                                    'inline cursor-pointer rounded border px-0.5 text-left',
-                                    part.detection.state === 'rejected' && 'opacity-60',
-                                    part.detection.state === 'accepted' && 'font-mono text-[0.9em]',
-                                    part.detection.id === props.selectedId && 'ring-2 ring-(--ui-primary)'
-                                ]"
-                                :style="detectionStyle(part.detection)"
-                                :title="`${part.detection.label} · ${Math.round(part.detection.confidence * 100)}%`"
-                                @click="emit('select', part.detection.id)"
-                            >{{ detectionText(part.detection, part.text) }}</button>
-                        </UContextMenu>
-                    </template>
-                </div>
+                <MDC :value="redactedPage(page)" class="prose prose-sm max-w-none" />
 
                 <div
                     v-if="props.slices.length > 1"
@@ -215,4 +273,53 @@ function segmentsOf(page: DocumentPage) {
             </section>
         </div>
     </div>
+
+    <UScrollArea
+        v-else
+        ref="scroller"
+        :items="blocks"
+        :virtualize="{ estimateSize: estimateBlock, overscan: 4 }"
+        class="h-full min-h-0 rounded-(--ui-radius) border border-default bg-elevated/40"
+        @scroll="reportVisiblePage"
+    >
+        <template #default="{ item }">
+            <div class="mx-auto w-full max-w-[880px] px-6">
+                <div
+                    :id="`page-${item.page}`"
+                    :data-page="item.page"
+                    class="bg-default px-12 text-sm leading-relaxed"
+                    :class="[item.first && 'rounded-t-sm pt-12', item.endsPage && 'rounded-b-sm pb-12']"
+                >
+                    <div class="whitespace-pre-wrap break-words">
+                        <template v-for="(part, index) in item.parts" :key="index">
+                            <span v-if="part.kind === 'text'">{{ part.text }}</span>
+
+                            <UContextMenu v-else :items="menuItems(part.detection)">
+                                <button
+                                    :id="`detection-${part.detection.id}`"
+                                    type="button"
+                                    :class="[
+                                        'inline cursor-pointer rounded border px-0.5 text-left',
+                                        part.detection.state === 'rejected' && 'opacity-60',
+                                        part.detection.state === 'accepted' && 'font-mono text-[0.9em]',
+                                        part.detection.id === props.selectedId && 'ring-2 ring-(--ui-primary)'
+                                    ]"
+                                    :style="detectionStyle(part.detection)"
+                                    :title="`${part.detection.label} · ${Math.round(part.detection.confidence * 100)}%`"
+                                    @click="emit('select', part.detection.id)"
+                                >{{ detectionText(part.detection, part.text) }}</button>
+                            </UContextMenu>
+                        </template>
+                    </div>
+
+                    <div
+                        v-if="item.endsPage && props.slices.length > 1"
+                        class="mt-10 border-t border-default pt-3 text-center text-[0.65rem] uppercase tracking-wider text-dimmed"
+                    >
+                        {{ t("review.page", { page: item.page }) }}
+                    </div>
+                </div>
+            </div>
+        </template>
+    </UScrollArea>
 </template>
