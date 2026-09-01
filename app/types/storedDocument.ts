@@ -51,14 +51,13 @@ export const StoredDetectionSchema = z.object({
     occurrenceIndex: z.number().default(1),
     /**
      * Number of the distinct value within the label, 1-based. Every mention of
-     * the same text shares it, so "Thomas Gerig" is always person 1.
+     * the same text shares it, so one person keeps one number throughout.
      */
     subjectIndex: z.number().default(1),
     text: z.string(),
     start: z.number(),
     end: z.number(),
     confidence: z.number(),
-    /** True when the text matches a never-redact term; hidden unless asked for. */
     /** Review decision; detections start open and are decided by the user. */
     state: z.enum(["open", "accepted", "rejected"]).default("open"),
 });
