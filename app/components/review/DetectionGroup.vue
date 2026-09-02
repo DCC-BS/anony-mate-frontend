@@ -14,6 +14,7 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const { getEntityColor } = useEntityColor();
+const { entityName } = useEntityName();
 </script>
 
 <template>
@@ -29,7 +30,7 @@ const { getEntityColor } = useEntityColor();
                 class="size-4 text-(--ui-text-muted)"
             />
             <span class="size-2 rounded-full" :style="{ background: getEntityColor(props.label).solid }" />
-            <span class="flex-1 text-left">{{ props.label }}</span>
+            <span class="flex-1 text-left">{{ entityName(props.label) }}</span>
             <UBadge v-if="props.openCount" size="sm" color="warning" variant="subtle">
                 {{ t("review.openCount", { count: props.openCount }) }}
             </UBadge>

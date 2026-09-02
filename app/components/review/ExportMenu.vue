@@ -19,8 +19,6 @@ const formats = [
         <UButton
             icon="i-lucide-download"
             trailing-icon="i-lucide-chevron-down"
-            size="sm"
-            class="text-[0.82rem]"
         >
             {{ t("export.export") }}
         </UButton>

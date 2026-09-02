@@ -28,7 +28,7 @@ const items = computed(() => [
 <template>
     <nav class="flex flex-col gap-1">
         <div
-            class="px-2 pb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-dimmed"
+            class="px-2 pb-1.5 text-eyebrow font-semibold uppercase tracking-eyebrow text-dimmed"
         >
             {{ t("workspace.title") }}
         </div>
@@ -37,7 +37,7 @@ const items = computed(() => [
             orientation="vertical"
             :items="items"
             :ui="{
-                link: 'px-2.5 py-1.5 text-[0.8rem] gap-2.5',
+                link: 'px-2.5 py-1.5 text-label gap-2.5',
                 linkLeadingIcon: 'size-4'
             }"
         />

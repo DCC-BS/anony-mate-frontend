@@ -13,6 +13,7 @@ const { getEntityColor } = useEntityColor();
 
 const editing = ref(false);
 const draftName = ref(props.type.name);
+const draftDisplayName = ref(props.type.displayName);
 const draftDescription = ref(props.type.description);
 const draftReplacement = ref(props.type.replacement);
 
@@ -22,12 +23,14 @@ const replacementTokens = useReplacementTokens();
 const example = computed(() =>
     replacementFor(
         { label: props.type.name, subjectIndex: 1, occurrenceIndex: 1 },
-        props.type.replacement
+        props.type.replacement,
+        props.type.displayName
     )
 );
 
 function startEdit() {
     draftName.value = props.type.name;
+    draftDisplayName.value = props.type.displayName;
     draftDescription.value = props.type.description;
     draftReplacement.value = props.type.replacement;
     editing.value = true;
@@ -41,6 +44,7 @@ function save() {
 
     emit("save", {
         ...props.type,
+        displayName: draftDisplayName.value.trim(),
         description: draftDescription.value.trim(),
         replacement: draftReplacement.value.trim() || DEFAULT_REPLACEMENT
     });
@@ -61,6 +65,11 @@ function save() {
         <form v-if="editing" class="flex min-w-0 flex-1 flex-col gap-1.5" @submit.prevent="save">
             <UInput v-model="draftName" size="xs" :placeholder="t('entities.newType.name')" />
             <UInput
+                v-model="draftDisplayName"
+                size="xs"
+                :placeholder="t('entities.newType.displayName')"
+            />
+            <UInput
                 v-model="draftDescription"
                 size="xs"
                 :placeholder="t('entities.newType.descriptionPlaceholder')"
@@ -71,7 +80,7 @@ function save() {
                 :placeholder="DEFAULT_REPLACEMENT"
                 :ui="{ base: 'font-mono' }"
             />
-            <dl class="flex flex-col gap-0.5 text-[0.7rem] text-dimmed">
+            <dl class="flex flex-col gap-0.5 text-meta text-dimmed">
                 <div
                     v-for="entry in replacementTokens"
                     :key="entry.token"
@@ -94,13 +103,16 @@ function save() {
         <template v-else>
             <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">
-                    <span class="truncate font-mono text-[0.8rem] text-highlighted">
+                    <span class="truncate text-label font-medium text-highlighted">
+                        {{ props.type.displayName || props.type.name }}
+                    </span>
+                    <span class="truncate font-mono text-meta text-dimmed">
                         {{ props.type.name }}
                     </span>
                     <UBadge v-if="props.type.builtin" size="sm" variant="subtle" color="neutral">
                         {{ t("entities.builtin") }}
                     </UBadge>
-                    <span class="truncate font-mono text-[0.7rem] text-dimmed">
+                    <span class="truncate font-mono text-meta text-dimmed">
                         → {{ example }}
                     </span>
                 </div>

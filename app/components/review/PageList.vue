@@ -11,7 +11,7 @@ const { t } = useI18n();
 
 <template>
     <div class="flex h-full min-h-0 flex-col gap-2">
-        <div class="text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-dimmed">
+        <div class="text-eyebrow font-semibold uppercase tracking-eyebrow text-dimmed">
             {{ t("review.pages") }}
         </div>
 

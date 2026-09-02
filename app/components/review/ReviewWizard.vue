@@ -16,6 +16,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { getEntityColor } = useEntityColor();
+const { entityName } = useEntityName();
 
 /** Detections put off with "later", so the wizard does not offer them again. */
 const skipped = ref<string[]>([]);
@@ -55,15 +56,17 @@ function skip() {
     }
 }
 
-/** Moves the detection to the next entity type in the list. */
-function cycleLabel() {
-    if (!current.value || props.availableLabels.length === 0) {
-        return;
-    }
-    const index = props.availableLabels.indexOf(current.value.label);
-    const next = props.availableLabels[(index + 1) % props.availableLabels.length];
-    if (next) {
-        emit("relabel", current.value.id, next);
+const labelItems = computed(() =>
+    props.availableLabels.map((label) => ({
+        label: entityName(label),
+        value: label
+    }))
+);
+
+/** Files the detection under another entity type. */
+function chooseLabel(label: string) {
+    if (current.value && label !== current.value.label) {
+        emit("relabel", current.value.id, label);
     }
 }
 
@@ -89,23 +92,30 @@ defineShortcuts({
                 <UProgress :model-value="progressPercent" size="sm" />
 
                 <div class="flex items-center gap-2 text-sm">
-                    <span
-                        class="size-2 rounded-full"
-                        :style="{ background: getEntityColor(current.label).solid }"
-                    />
-                    <span class="font-medium">{{ current.label }}</span>
                     <span class="text-(--ui-text-muted)">
                         {{ Math.round(current.confidence * 100) }}%
                     </span>
-                    <UButton
-                        class="ms-auto"
-                        size="xs"
-                        variant="soft"
-                        color="neutral"
-                        @click="cycleLabel"
+
+                    <!-- The type is the control, not a caption: a document can
+                         carry dozens, so it is picked by name rather than by
+                         stepping through them one at a time. -->
+                    <USelectMenu
+                        class="ms-auto w-52"
+                        size="sm"
+                        :model-value="current.label"
+                        :items="labelItems"
+                        value-key="value"
+                        :search-input="{ placeholder: t('review.marker.search') }"
+                        @update:model-value="chooseLabel"
                     >
-                        {{ t("review.wizard.changeCategory") }}
-                    </UButton>
+                        <template #leading>
+                            <EntityDot :label="current.label" />
+                        </template>
+
+                        <template #item-leading="{ item }">
+                            <EntityDot :label="item.value" />
+                        </template>
+                    </USelectMenu>
                 </div>
 
                 <p class="rounded-(--ui-radius) border border-(--ui-border) p-3 text-sm leading-relaxed">

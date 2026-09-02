@@ -17,11 +17,14 @@ function add() {
 </script>
 
 <template>
-    <UCard :ui="{ body: 'flex flex-col gap-3' }">
-        <div>
-            <div class="text-sm font-semibold text-highlighted">
+    <section class="flex min-h-0 flex-col gap-2">
+        <div class="flex items-baseline justify-between">
+            <h2 class="text-eyebrow font-semibold uppercase tracking-eyebrow text-dimmed">
                 {{ t("entities.blacklist.title") }}
-            </div>
+            </h2>
+            <span class="text-meta tabular-nums text-dimmed">
+                {{ t("entities.count", { count: props.terms.length }) }}
+            </span>
         </div>
 
         <form class="flex gap-2" @submit.prevent="add">
@@ -31,12 +34,19 @@ function add() {
                 class="flex-1"
                 :placeholder="t('entities.blacklist.placeholder')"
             />
-            <UButton type="submit" size="sm" variant="soft" :disabled="!draft.trim()">
-                {{ t("entities.blacklist.add") }}
-            </UButton>
+            <UButton
+                type="submit"
+                icon="i-lucide-plus"
+                size="sm"
+                variant="soft"
+                :title="t('entities.blacklist.add')"
+                :aria-label="t('entities.blacklist.add')"
+                :disabled="!draft.trim()"
+            />
         </form>
 
-        <div v-if="props.terms.length" class="flex flex-wrap gap-1.5">
+        <div v-if="props.terms.length" class="min-h-0 flex-1 overflow-y-auto">
+          <div class="flex flex-wrap gap-1.5">
             <UBadge
                 v-for="term in props.terms"
                 :key="term"
@@ -54,8 +64,9 @@ function add() {
                     @click="emit('remove', term)"
                 />
             </UBadge>
+          </div>
         </div>
 
         <p v-else class="text-xs text-dimmed">{{ t("entities.blacklist.empty") }}</p>
-    </UCard>
+    </section>
 </template>

@@ -9,7 +9,7 @@ import {
 } from "~/types/storedEntity";
 
 /** Presets the API serves; seeded into IndexedDB as the built-in groups. */
-const BUILTIN_PRESETS: EntityTypePreset[] = ["default", "legal"];
+const BUILTIN_PRESETS: EntityTypePreset[] = ["default", "legal", "full"];
 
 /**
  * Persistence layer for entity types, detection groups and never-redact terms.
@@ -29,7 +29,14 @@ export function getEntityService() {
      * Stores an entity type, replacing one of the same name.
      */
     async function saveType(type: StoredEntityType): Promise<void> {
-        await db.entityTypes.put(StoredEntityTypeSchema.parse(type));
+        // Editing a built-in makes it the user's: the preset refresh leaves it
+        // alone from here on.
+        await db.entityTypes.put(
+            StoredEntityTypeSchema.parse({
+                ...type,
+                customised: type.customised || type.builtin,
+            }),
+        );
     }
 
     /**
@@ -137,41 +144,84 @@ export function getEntityService() {
     }
 
     /**
-     * Fills the store from the API presets the first time the app runs. Later
-     * runs keep whatever the user has edited.
+     * Brings the built-in presets in line with the API, on every run.
+     *
+     * A type's description is not a caption: it is sent to the detection model
+     * and is most of what it has to go on, so an improved one has to reach a
+     * browser that already seeded the old one. Types the user has edited, and
+     * group membership they have changed, are left alone.
      *
      * @param fetchPreset - Loads one preset's types from the API.
      */
-    async function seedBuiltins(
+    async function syncBuiltins(
         fetchPreset: (
             preset: EntityTypePreset,
-        ) => Promise<Record<string, string>>,
+        ) => Promise<Record<string, ApiEntityType>>,
     ): Promise<void> {
-        if ((await db.entityGroups.count()) > 0) {
-            return;
-        }
+        const presets: Record<string, ApiEntityType>[] = [];
 
         for (const preset of BUILTIN_PRESETS) {
             const types = await fetchPreset(preset);
+            presets.push(types);
 
-            await db.entityTypes.bulkPut(
-                Object.entries(types).map(([name, description]) =>
+            for (const [name, presetType] of Object.entries(types)) {
+                const stored = await db.entityTypes.get(name);
+                // Leave alone anything the user owns: a type they wrote
+                // themselves, or a preset they have since edited.
+                if (stored && (!stored.builtin || stored.customised)) {
+                    continue;
+                }
+
+                await db.entityTypes.put(
                     StoredEntityTypeSchema.parse({
+                        ...stored,
                         name,
-                        description,
-                        replacement: `${name.charAt(0).toUpperCase()}${name.slice(1)}-{subject}`,
+                        displayName: presetType.name,
+                        description: presetType.description,
+                        replacement: stored?.replacement ?? DEFAULT_REPLACEMENT,
                         builtin: true,
                     }),
-                ),
-            );
+                );
+            }
+
+            // A built-in group is the preset: its membership follows the API,
+            // so a label added to a preset reaches a browser that already has
+            // it. A user wanting their own selection copies it into a group of
+            // their own.
+            const existing = await db.entityGroups
+                .filter((group) => group.builtin && group.name === preset)
+                .first();
 
             await saveGroup({
+                ...(existing ?? {}),
                 name: preset,
-                description: "",
+                description: existing?.description ?? "",
                 labels: Object.keys(types),
                 builtin: true,
             });
         }
+
+        await pruneBuiltins(
+            new Set(presets.flatMap((types) => Object.keys(types))),
+        );
+    }
+
+    /**
+     * Drops built-in types no preset mentions any more.
+     *
+     * A preset can rename or retire a label, and the type it left behind would
+     * otherwise sit in the list for good. Anything the user wrote or edited is
+     * theirs and stays.
+     */
+    async function pruneBuiltins(inUse: Set<string>): Promise<void> {
+        const stale = await db.entityTypes
+            .filter(
+                (type) =>
+                    type.builtin && !type.customised && !inUse.has(type.name),
+            )
+            .toArray();
+
+        await db.entityTypes.bulkDelete(stale.map((type) => type.name));
     }
 
     return {
@@ -186,6 +236,6 @@ export function getEntityService() {
         getBlacklist,
         addBlacklistTerm,
         removeBlacklistTerm,
-        seedBuiltins,
+        syncBuiltins,
     };
 }

@@ -40,10 +40,10 @@ function create(values: Record<string, string>) {
 <template>
     <section class="flex min-h-0 flex-col gap-2">
         <div class="flex items-baseline justify-between">
-            <h2 class="text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-dimmed">
+            <h2 class="text-eyebrow font-semibold uppercase tracking-eyebrow text-dimmed">
                 {{ t("entities.groupsTitle") }}
             </h2>
-            <span class="text-[0.7rem] tabular-nums text-dimmed">
+            <span class="text-meta tabular-nums text-dimmed">
                 {{ t("entities.count", { count: props.groups.length }) }}
             </span>
         </div>
@@ -64,7 +64,7 @@ function create(values: Record<string, string>) {
             />
         </div>
 
-        <div class="space-y-2">
+        <div class="min-h-0 flex-1 space-y-2 overflow-y-auto">
             <EntitiesGroupCard
                 v-for="group in visible"
                 :key="group.id"

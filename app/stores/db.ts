@@ -87,3 +87,111 @@ db.version(3)
                 }
             });
     });
+
+/**
+ * English preset labels and the German ones that replaced them.
+ *
+ * The detection model reads the label name as well as its description, and on
+ * German documents a German name measurably beats an English one. Renaming the
+ * presets would otherwise leave documents reviewed before the change speaking a
+ * different vocabulary than the ones after it.
+ */
+const GERMAN_LABELS: Record<string, string> = {
+    location: "ort",
+    organization: "organisation",
+    address: "adresse",
+    date: "datum",
+    birth_date: "geburtsdatum",
+    money: "geldbetrag",
+    phone_number: "telefonnummer",
+    email: "e-mail-adresse",
+    social_insurance_number: "ahv-nummer",
+    case_number: "aktenzeichen",
+    service_identifier: "dienstkennung",
+    serial_number: "seriennummer",
+    ip_address: "ip-adresse",
+    mac_address: "mac-adresse",
+    licence_plate: "kfz-kennzeichen",
+    id_document_number: "ausweisnummer",
+    insurance_number: "versichertennummer",
+    patient_number: "patientennummer",
+    company_id_number: "uid-nummer",
+    job_title: "beruf",
+    nationality: "nationalitaet",
+    health_information: "gesundheitsangabe",
+    username: "benutzername",
+};
+
+db.version(4)
+    .stores({
+        documents: "id, status, name, createdAt, updatedAt",
+        detections: "id, documentId, label, state",
+        entityTypes: "name, builtin",
+        entityGroups: "id, name, builtin",
+        blacklist: "term, createdAt",
+    })
+    .upgrade(async (tx) => {
+        await tx
+            .table("detections")
+            .toCollection()
+            .modify((detection) => {
+                const german = GERMAN_LABELS[String(detection.label)];
+                if (german) {
+                    detection.label = german;
+                }
+            });
+
+        // A renamed type is the same type, so the user's own wording and
+        // replacement template come with it. Types they added themselves are
+        // not in the map and are left alone.
+        const types = await tx.table("entityTypes").toArray();
+        for (const type of types) {
+            const german = GERMAN_LABELS[String(type.name)];
+            if (!german) {
+                continue;
+            }
+
+            await tx.table("entityTypes").delete(type.name);
+            if (!(await tx.table("entityTypes").get(german))) {
+                await tx.table("entityTypes").put({
+                    ...type,
+                    name: german,
+                    replacement: `${german.charAt(0).toUpperCase()}${german.slice(1)}-{subject}`,
+                });
+            }
+        }
+
+        await tx
+            .table("entityGroups")
+            .toCollection()
+            .modify((group) => {
+                group.labels = (group.labels ?? []).map(
+                    (label: string) => GERMAN_LABELS[label] ?? label,
+                );
+            });
+    });
+
+db.version(5)
+    .stores({
+        documents: "id, status, name, createdAt, updatedAt",
+        detections: "id, documentId, label, state",
+        entityTypes: "name, builtin",
+        entityGroups: "id, name, builtin",
+        blacklist: "term, createdAt",
+    })
+    .upgrade(async (tx) => {
+        // A type now carries the name it is shown under, and writes its
+        // replacement from that name rather than spelling it out. Built-ins
+        // get theirs from the API on the next run; a type the user owns keeps
+        // its own wording, so its label stands in as the name.
+        await tx
+            .table("entityTypes")
+            .toCollection()
+            .modify((type) => {
+                type.displayName ??= "";
+
+                if (type.builtin && !type.customised) {
+                    type.replacement = "{name}-{subject}";
+                }
+            });
+    });

@@ -20,17 +20,18 @@ const labels = computed({
 });
 
 const options = computed(() => props.types.map((type) => type.name));
+const { entityName } = useEntityName();
 </script>
 
 <template>
     <UCard :ui="{ body: 'p-3 flex flex-col gap-2' }">
         <div class="flex items-baseline justify-between gap-2">
-            <span class="truncate text-[0.82rem] font-semibold text-highlighted">
+            <span class="truncate text-label font-semibold text-highlighted">
                 {{ props.group.name }}
             </span>
 
             <div class="flex items-center gap-1">
-                <span class="text-[0.7rem] tabular-nums text-dimmed">
+                <span class="text-meta tabular-nums text-dimmed">
                     {{ t("entities.groupEntities", { count: props.group.labels.length }) }}
                 </span>
                 <UButton
@@ -59,13 +60,13 @@ const options = computed(() => props.types.map((type) => type.name));
             <span
                 v-for="label in props.group.labels"
                 :key="label"
-                class="flex items-center gap-1.5 rounded-full border border-accented px-2 py-0.5 text-[0.7rem]"
+                class="flex items-center gap-1.5 rounded-full border border-accented px-2 py-0.5 text-meta"
             >
                 <span
                     class="size-1.5 rounded-full"
                     :style="{ background: getEntityColor(label).solid }"
                 />
-                {{ label }}
+                {{ entityName(label) }}
             </span>
         </div>
     </UCard>

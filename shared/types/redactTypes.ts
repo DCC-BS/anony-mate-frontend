@@ -1,6 +1,16 @@
 import z from "zod";
 
-export type EntityTypePreset = "default" | "legal";
+export type EntityTypePreset = "default" | "legal" | "full";
+
+/** One entity type as the API serves it: what it is called, and what it means. */
+export const ApiEntityTypeSchema = z.object({
+    /** The proper German name, shown in the interface, e.g. `AHV-Nummer`. */
+    name: z.string(),
+    /** What the label means, in the words the detection model reads. */
+    description: z.string(),
+});
+
+export type ApiEntityType = z.infer<typeof ApiEntityTypeSchema>;
 
 export const EntitySchema = z.object({
     id: z.string(),
@@ -26,15 +36,20 @@ export const RedactOptionsSchema = z.object({
     blacklist: z.array(z.string()).optional(),
 });
 
-export const ConversionResultSchema = z.object({
+/** A document converted and redacted in one submission. */
+export const DocumentRedactResultSchema = z.object({
+    /** The converted document, before redaction. */
     text: z.string(),
     page_offsets: z.array(z.int()).default([]),
+    /** `text` with every detection written as its placeholder. */
+    redacted_text: z.string(),
+    entities: z.record(z.string(), z.array(EntitySchema)),
 });
 
 export type Entity = z.infer<typeof EntitySchema>;
 export type RedactResult = z.infer<typeof RedactResultSchema>;
 export type RedactOptions = z.infer<typeof RedactOptionsSchema>;
-export type ConversionResult = z.infer<typeof ConversionResultSchema>;
+export type DocumentRedactResult = z.infer<typeof DocumentRedactResultSchema>;
 
 export const TaskAcceptedSchema = z.object({
     task_id: z.string(),

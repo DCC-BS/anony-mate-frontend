@@ -5,6 +5,8 @@ const props = defineProps<{
     name: string;
     total: number;
     openCount: number;
+    /** Entity types this document was detected with. */
+    labels: string[];
 }>();
 const emit = defineEmits<{
     openWizard: [];
@@ -12,9 +14,13 @@ const emit = defineEmits<{
 }>();
 
 const view = defineModel<DocumentView>("view", { default: "original" });
+/** Marking mode: selected words become a detection of the chosen type. */
+const marker = defineModel<boolean>("marker", { default: false });
+const markerLabel = defineModel<string>("markerLabel", { default: "" });
 
 const { t } = useI18n();
 const localePath = useLocalePath();
+const { canUndo, canRedo, undo, redo } = useCommandHistory();
 
 const viewItems = computed(() =>
     (["original", "anonymised", "blacked"] as const).map((value) => ({
@@ -30,13 +36,12 @@ const viewItems = computed(() =>
             variant="ghost"
             color="neutral"
             icon="i-lucide-arrow-left"
-            size="sm"
             :to="localePath('/documents')"
             :aria-label="t('review.back')"
         />
 
         <div class="min-w-0 flex-1">
-            <h1 class="truncate text-[0.95rem] font-semibold text-highlighted">
+            <h1 class="truncate text-title font-semibold text-highlighted">
                 {{ props.name }}
             </h1>
             <p class="text-xs text-muted">
@@ -45,19 +50,31 @@ const viewItems = computed(() =>
             </p>
         </div>
 
+        <UndoRedoButtons
+            :can-undo="canUndo"
+            :can-redo="canRedo"
+            @undo="undo"
+            @redo="redo"
+        />
+
+        <!-- Marking is only meaningful on the reviewable rendering, where the
+             original words are still on screen. -->
+        <ReviewMarkerControls
+            v-if="view === 'original'"
+            v-model:marker="marker"
+            v-model:marker-label="markerLabel"
+            :labels="props.labels"
+        />
+
         <UTabs
             v-model="view"
             :items="viewItems"
             :content="false"
-            size="sm"
-            :ui="{ trigger: 'text-[0.82rem]' }"
         />
 
         <UButton
             icon="i-lucide-wand-sparkles"
             variant="soft"
-            size="sm"
-            class="text-[0.82rem]"
             :disabled="props.openCount === 0"
             @click="emit('openWizard')"
         >

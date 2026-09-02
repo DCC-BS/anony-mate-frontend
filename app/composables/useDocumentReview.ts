@@ -1,5 +1,6 @@
 import { db } from "~/stores/db";
 import type { StoredDetection, StoredDocument } from "~/types/storedDocument";
+import { StoredDetectionSchema } from "~/types/storedDocument";
 
 /** Which rendering of the document the review shows. */
 export type DocumentView = "original" | "anonymised" | "blacked";
@@ -14,7 +15,7 @@ export type DocumentView = "original" | "anonymised" | "blacked";
  * @returns The review state and its operations.
  */
 export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
-    const { setDetectionState } = getDocumentService();
+    const { edit } = useDetectionCommands(documentId);
 
     const storedDocument = ref<StoredDocument>();
     /** True until the first lookup finishes, so the page can hold back the
@@ -67,10 +68,20 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
 
     const { types } = useEntityGroups();
 
-    /** Replacement template per entity type, for the redacted renderings. */
+    /** Replacement template per entity type, for the redacted renderings.
+     *
+     * `{name}` is filled in here: a type's name is the same wherever it is
+     * written, so every reader of the map — the document, the export, the
+     * preview — gets it without carrying the types around as well. */
     const replacements = computed(() =>
         Object.fromEntries(
-            types.value.map((type) => [type.name, type.replacement]),
+            types.value.map((type) => [
+                type.name,
+                type.replacement.replaceAll(
+                    "{name}",
+                    type.displayName || type.name,
+                ),
+            ]),
         ),
     );
 
@@ -82,56 +93,57 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         }
     });
 
-    /**
-     * Records a decision for one detection.
-     */
-    async function decide(
+    /** Rewrites whichever detections a filter picks out, through the history. */
+    function change(
+        pick: (detection: StoredDetection) => boolean,
+        into: (detection: StoredDetection) => StoredDetection,
+    ): Promise<void> {
+        const before = detections.value.filter(pick);
+        return edit(before, before.map(into));
+    }
+
+    /** Records a decision for one detection. */
+    function decide(
         id: string,
         state: StoredDetection["state"],
     ): Promise<void> {
-        await setDetectionState(id, state);
+        return change(
+            (detection) => detection.id === id,
+            (detection) => ({ ...detection, state }),
+        );
     }
 
-    /**
-     * Applies the same decision to every detection of one entity type.
-     */
-    async function decideGroup(
+    /** Applies the same decision to every detection of one entity type. */
+    function decideGroup(
         label: string,
         state: StoredDetection["state"],
     ): Promise<void> {
-        await db.detections
-            .where("documentId")
-            .equals(toValue(documentId))
-            .and((detection) => detection.label === label)
-            .modify({ state });
+        return change(
+            (detection) => detection.label === label,
+            (detection) => ({ ...detection, state }),
+        );
     }
 
-    /**
-     * Applies one decision to every open detection in the document.
-     */
-    async function decideAllOpen(
-        state: StoredDetection["state"],
-    ): Promise<void> {
-        await db.detections
-            .where("documentId")
-            .equals(toValue(documentId))
-            .and((detection) => detection.state === "open")
-            .modify({ state });
+    /** Applies one decision to every open detection in the document. */
+    function decideAllOpen(state: StoredDetection["state"]): Promise<void> {
+        return change(
+            (detection) => detection.state === "open",
+            (detection) => ({ ...detection, state }),
+        );
     }
 
     /**
      * Applies the same decision to every detection with the same text, so a
      * name occurring dozens of times is decided once.
      */
-    async function decideAllOccurrences(
+    function decideAllOccurrences(
         text: string,
         state: StoredDetection["state"],
     ): Promise<void> {
-        await db.detections
-            .where("documentId")
-            .equals(toValue(documentId))
-            .and((detection) => detection.text === text)
-            .modify({ state });
+        return change(
+            (detection) => detection.text === text,
+            (detection) => ({ ...detection, state }),
+        );
     }
 
     /**
@@ -155,10 +167,69 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
     }
 
     /**
+     * Records a detection the reader marked by hand.
+     *
+     * It arrives accepted: the reader picked the words and the label, so there
+     * is nothing left to review. Numbering is redone for the whole label so the
+     * new one takes its place in document order rather than being appended.
+     *
+     * Marking words that already carry a detection of this type revives it,
+     * which is what brings back one the reader had thrown away.
+     *
+     * @param label - Entity type to file it under.
+     * @param start - Character offset the mention starts at.
+     * @param end - Character offset it ends at.
+     * @param text - The marked words.
+     */
+    async function addDetection(
+        label: string,
+        start: number,
+        end: number,
+        text: string,
+    ): Promise<void> {
+        const id = `${toValue(documentId)}:${label}:${start}`;
+        const existing = detections.value.find(
+            (detection) => detection.id === id,
+        );
+        const marked = StoredDetectionSchema.parse({
+            ...(existing ?? {}),
+            id,
+            documentId: toValue(documentId),
+            label,
+            text,
+            start,
+            end,
+            confidence: 1,
+            state: "accepted",
+        });
+
+        // Words that were thrown away keep their row, so marking them again is
+        // how a reader takes that back: the detection returns, rather than the
+        // mark landing on an id that is already taken and being dropped.
+        return edit(existing ? [existing] : [], [marked]);
+    }
+
+    /**
      * Moves a detection to a different entity type, keeping its decision.
      */
-    async function relabel(id: string, label: string): Promise<void> {
-        await db.detections.update(id, { label });
+    function relabel(id: string, label: string): Promise<void> {
+        const detection = detections.value.find((item) => item.id === id);
+        if (!detection || detection.label === label) {
+            return Promise.resolve();
+        }
+
+        // The id carries the label, so a relabelled detection is a new row and
+        // the old one goes away with it.
+        return edit(
+            [detection],
+            [
+                StoredDetectionSchema.parse({
+                    ...detection,
+                    id: `${toValue(documentId)}:${label}:${detection.start}`,
+                    label,
+                }),
+            ],
+        );
     }
 
     return {
@@ -175,5 +246,6 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         decideAllOpen,
         occurrenceCount,
         relabel,
+        addDetection,
     };
 }

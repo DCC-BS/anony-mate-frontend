@@ -187,7 +187,12 @@
         "acceptAllOccurrencesShort": "Alle Vorkommen übernehmen",
         "rejectAllOccurrencesShort": "Alle Vorkommen verwerfen",
         "acceptAllOpen": "Alle {count} offenen übernehmen",
-        "rejectAllOpen": "Alle verwerfen"
+        "rejectAllOpen": "Alle verwerfen",
+        "marker": {
+            "toggle": "Markieren",
+            "search": "Entität suchen…"
+        },
+        "relabel": "Entität ändern"
     },
     "entities": {
         "title": "Entitäten",
@@ -204,6 +209,7 @@
         },
         "newType": {
             "name": "Bezeichnung",
+            "displayName": "Anzeigename, z. B. Person",
             "description": "Beschreibung",
             "add": "Anlegen",
             "title": "Neue Entität",
@@ -235,7 +241,8 @@
         "replacement": {
             "label": "Ersetzung im Dokument",
             "tokens": {
-                "label": "Entitätsname",
+                "name": "Anzeigename der Entität",
+                "label": "technische Bezeichnung",
                 "subject": "gleiche Treffer gleich nummeriert",
                 "occurrence": "jedes Vorkommen einzeln nummeriert"
             }

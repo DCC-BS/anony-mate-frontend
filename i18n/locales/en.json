@@ -187,7 +187,12 @@
         "acceptAllOccurrencesShort": "Accept all occurrences",
         "rejectAllOccurrencesShort": "Discard all occurrences",
         "acceptAllOpen": "Accept all {count} open",
-        "rejectAllOpen": "Discard all"
+        "rejectAllOpen": "Discard all",
+        "marker": {
+            "toggle": "Mark",
+            "search": "Search entity…"
+        },
+        "relabel": "Change entity"
     },
     "entities": {
         "title": "Entities",
@@ -204,6 +209,7 @@
         },
         "newType": {
             "name": "Name",
+            "displayName": "Display name, e.g. Person",
             "description": "Description",
             "add": "Create",
             "title": "New entity",
@@ -235,7 +241,8 @@
         "replacement": {
             "label": "Replacement in the document",
             "tokens": {
-                "label": "entity name",
+                "name": "entity display name",
+                "label": "technical label",
                 "subject": "same match, same number",
                 "occurrence": "every mention numbered"
             }

@@ -127,24 +127,17 @@ export const useDocumentQueue = createSharedComposable(() => {
     }
 
     /**
-     * Converts a document when needed, then redacts it.
+     * Puts one document through the API and stores what comes back.
+     *
+     * An upload goes as a file and comes back converted and scanned; pasted
+     * text only needs scanning.
      */
     async function processDocument(document: StoredDocument): Promise<void> {
         try {
-            let text = document.text;
+            const result = document.text
+                ? await redactText(document, document.text)
+                : await redactFile(document);
 
-            if (!text && document.file) {
-                await updateDocument(document.id, { status: "converting" });
-                const converted = await convert(document);
-                text = converted.text;
-                await updateDocument(document.id, {
-                    text,
-                    pageOffsets: converted.page_offsets,
-                });
-            }
-
-            await updateDocument(document.id, { status: "redacting" });
-            const result = await redact(document, text);
             const detectionCount = await replaceDetections(
                 document.id,
                 result.entities,
@@ -153,9 +146,11 @@ export const useDocumentQueue = createSharedComposable(() => {
 
             await updateDocument(document.id, {
                 status: "ready",
-                redactedText: result.text,
+                text: result.text,
+                pageOffsets: result.pageOffsets,
+                redactedText: result.redactedText,
                 detectionCount,
-                // The upload is only needed to retry a failed conversion.
+                // The upload is only needed to retry a failed run.
                 file: undefined,
             });
         } catch (error) {
@@ -169,44 +164,82 @@ export const useDocumentQueue = createSharedComposable(() => {
         }
     }
 
-    async function convert(document: StoredDocument) {
+    /**
+     * Converts and redacts an uploaded document in one submission.
+     *
+     * The file travels, the text does not: the API keeps what it converted and
+     * scans it there, rather than handing the largest thing this app carries
+     * back for the browser to send in again.
+     */
+    async function redactFile(document: StoredDocument) {
+        await updateDocument(document.id, { status: "converting" });
+
         const formData = new FormData();
         formData.append("file", document.file as Blob, document.name);
+        formData.append("options", JSON.stringify(redactOptions(document)));
 
-        return await runApiTask(
+        const result = await runApiTask(
             () =>
-                $fetch<unknown>("/api/convert", {
+                $fetch<unknown>("/api/redact-document", {
                     method: "POST",
                     body: formData,
                     headers: { "X-Client-Id": clientId() },
                 }),
-            ConversionResultSchema,
-            ({ queuePosition }) => {
+            DocumentRedactResultSchema,
+            ({ progress, queuePosition }) => {
                 queuePositions.value[document.id] = queuePosition;
+
+                // One task covers both halves and only the scan reports a
+                // fraction, so its first one says conversion is done.
+                if (progress !== null && document.status !== "redacting") {
+                    document.status = "redacting";
+                    void updateDocument(document.id, { status: "redacting" });
+                }
             },
         );
+
+        return {
+            text: result.text,
+            pageOffsets: result.page_offsets,
+            redactedText: result.redacted_text,
+            entities: result.entities,
+        };
     }
 
-    async function redact(document: StoredDocument, text: string) {
-        return await runApiTask(
+    /** Scans text the reader pasted in, which never needed converting. */
+    async function redactText(document: StoredDocument, text: string) {
+        await updateDocument(document.id, { status: "redacting" });
+
+        const result = await runApiTask(
             () =>
                 $fetch<unknown>("/api/redact", {
                     method: "POST",
                     headers: { "X-Client-Id": clientId() },
-                    body: {
-                        text,
-                        entity_types: document.entityTypes,
-                        threshold: document.threshold,
-                        // Blacklisting happens client-side, so a term added
-                        // later applies without asking the API again.
-                        blacklist: [],
-                    },
+                    body: { text, ...redactOptions(document) },
                 }),
             RedactResultSchema,
             ({ queuePosition }) => {
                 queuePositions.value[document.id] = queuePosition;
             },
         );
+
+        return {
+            text,
+            pageOffsets: document.pageOffsets,
+            redactedText: result.text,
+            entities: result.entities,
+        };
+    }
+
+    /** What the API needs to know beyond the text itself. */
+    function redactOptions(document: StoredDocument) {
+        return {
+            entity_types: document.entityTypes,
+            threshold: document.threshold,
+            // Blacklisting happens client-side, so a term added later applies
+            // without asking the API again.
+            blacklist: [],
+        };
     }
 
     /**

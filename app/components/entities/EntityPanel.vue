@@ -33,6 +33,11 @@ const addFields = computed(() => [
         placeholder: t("entities.newType.namePlaceholder")
     },
     {
+        key: "displayName",
+        label: t("entities.newType.displayName"),
+        placeholder: t("entities.newType.displayName")
+    },
+    {
         key: "description",
         label: t("entities.newType.description"),
         placeholder: t("entities.newType.descriptionPlaceholder")
@@ -50,9 +55,11 @@ const addFields = computed(() => [
 function create(values: Record<string, string>) {
     emit("save", {
         name: values.name as string,
+        displayName: values.displayName ?? "",
         description: values.description ?? "",
         replacement: values.replacement || DEFAULT_REPLACEMENT,
-        builtin: false
+        builtin: false,
+        customised: false
     });
 }
 </script>
@@ -60,10 +67,10 @@ function create(values: Record<string, string>) {
 <template>
     <section class="flex min-h-0 flex-col gap-2">
         <div class="flex items-baseline justify-between">
-            <h2 class="text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-dimmed">
+            <h2 class="text-eyebrow font-semibold uppercase tracking-eyebrow text-dimmed">
                 {{ t("entities.typesTitle") }}
             </h2>
-            <span class="text-[0.7rem] tabular-nums text-dimmed">
+            <span class="text-meta tabular-nums text-dimmed">
                 {{ t("entities.count", { count: props.types.length }) }}
             </span>
         </div>

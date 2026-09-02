@@ -1,3 +1,36 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 @import "@dcc-bs/common-ui.bs.js";
+
+/**
+ * Sizes this interface uses that Tailwind's own scale has no step for, named
+ * after what they are for rather than how big they are. Nothing here overrides
+ * a Tailwind or Nuxt UI token; these sit alongside them.
+ */
+@theme {
+    /* Uppercase label above a section or a column. */
+    --text-eyebrow: 0.65rem;
+    --tracking-eyebrow: 0.08em;
+    /* Counts, chips, hints — anything that reads beside a name. */
+    --text-meta: 0.7rem;
+    /* Names in lists and navigation: an entity, a group, a workspace link. */
+    --text-label: 0.8rem;
+    /* Page and document titles. */
+    --text-title: 0.95rem;
+    /* A replacement set in mono inside the document, sized to the line it
+       sits in rather than to the root. */
+    --text-redaction: 0.9em;
+
+    /* A page of the document, lying on the review surface. */
+    --shadow-sheet:
+        0 1px 3px rgba(20, 26, 35, 0.06), 0 8px 24px rgba(20, 26, 35, 0.05);
+    /* How wide that page is; a line longer than this is tiring to read. */
+    --container-sheet: 55rem;
+
+    /* The columns beside the document: the page rail and the detections. */
+    --width-page-rail: 8rem;
+    --width-detections: 20.625rem;
+    /* The workspace navigation, and one column of the entity workbench. */
+    --width-workspace-nav: 12.25rem;
+    --width-entities-column: 22.5rem;
+}

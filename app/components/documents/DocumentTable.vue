@@ -30,7 +30,7 @@ function formatDate(date: Date): string {
         :ui="{ body: 'min-h-0 flex-1 p-0 sm:p-0 overflow-y-auto' }"
     >
         <div
-            class="border-b border-default bg-muted px-5 py-2.5 text-[0.72rem] font-medium uppercase tracking-wider text-dimmed"
+            class="border-b border-default bg-muted px-5 py-2.5 text-meta font-medium uppercase tracking-wider text-dimmed"
             :class="rowGrid"
         >
             <div>{{ t("documents.table.document") }}</div>
@@ -43,7 +43,7 @@ function formatDate(date: Date): string {
             v-for="document in props.documents"
             :key="document.id"
             :to="localePath(`/documents/${document.id}`)"
-            class="border-b border-default px-5 py-3 text-[0.88rem] transition-colors last:border-b-0 hover:bg-muted"
+            class="border-b border-default px-5 py-3 text-sm transition-colors last:border-b-0 hover:bg-muted"
             :class="rowGrid"
         >
             <div class="flex min-w-0 items-center gap-3">

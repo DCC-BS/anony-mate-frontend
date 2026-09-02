@@ -21,6 +21,7 @@ const {
     decideAllOpen,
     occurrenceCount,
     relabel,
+    addDetection,
 } = useDocumentReview(documentId);
 
 const { slices, hasPages, pageOf, detectionCounts } = useDocumentPages(
@@ -31,6 +32,8 @@ const { slices, hasPages, pageOf, detectionCounts } = useDocumentPages(
 
 const view = ref<DocumentView>("original");
 const activePage = ref(1);
+const markerActive = ref(false);
+const markerLabel = ref("");
 
 const { exportAsMarkdown, exportAsText, exportAsDocx, renderPage } =
     useDocumentExport();
@@ -97,12 +100,31 @@ function selectDetection(id: string) {
 const availableLabels = computed(() =>
     Object.keys(storedDocument.value?.entityTypes ?? {})
 );
+
+// Marking needs a type to file the words under; the first is as good a default
+// as any and the reader can change it in the picker.
+watchEffect(() => {
+    if (!markerLabel.value && availableLabels.value.length) {
+        markerLabel.value = availableLabels.value[0] as string;
+    }
+});
+
+/** Files the reader's selection under the type the marker is set to. */
+function annotate(start: number, end: number, text: string) {
+    if (!markerLabel.value) {
+        return;
+    }
+    return addDetection(markerLabel.value, start, end, text);
+}
 </script>
 
 <template>
     <div v-if="storedDocument" class="flex h-full min-h-0 flex-col gap-3 px-4 py-3">
         <ReviewHeader
             v-model:view="view"
+            v-model:marker="markerActive"
+            v-model:marker-label="markerLabel"
+            :labels="availableLabels"
             :name="storedDocument.name"
             :total="counts.total"
             :open-count="counts.open"
@@ -113,8 +135,8 @@ const availableLabels = computed(() =>
         <div
             class="grid min-h-0 flex-1 gap-4"
             :class="hasPages
-                ? 'lg:grid-cols-[128px_minmax(0,1fr)_330px]'
-                : 'lg:grid-cols-[minmax(0,1fr)_330px]'"
+                ? 'lg:grid-cols-[var(--width-page-rail)_minmax(0,1fr)_var(--width-detections)]'
+                : 'lg:grid-cols-[minmax(0,1fr)_var(--width-detections)]'"
         >
             <ReviewPageList
                 v-if="hasPages"
@@ -129,10 +151,15 @@ const availableLabels = computed(() =>
                 :view="view"
                 :replacements="replacements"
                 :selected-id="selectedId"
+                :labels="availableLabels"
+                :marker="markerActive"
+                :marker-label="markerLabel"
                 @visible-page="activePage = $event"
                 @select="selectDetection"
                 @decide="decide"
                 @decide-all="decideAllOccurrences"
+                @relabel="relabel"
+                @annotate="annotate"
             />
 
             <ReviewDetectionSidebar

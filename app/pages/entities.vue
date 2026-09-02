@@ -37,7 +37,10 @@ function updateGroup(group: StoredEntityGroup) {
             <h1 class="text-xl font-bold text-highlighted">{{ t("entities.title") }}</h1>
         </div>
 
-        <div class="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <!-- Entities need the room to read a description; the groups and the
+             never-redact list are both short lines, so they get a column each
+             rather than sharing one and pushing the other out of view. -->
+        <div class="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_var(--width-entities-column)_var(--width-entities-column)]">
             <EntitiesEntityPanel
                 :types="types"
                 @save="saveType"
@@ -45,21 +48,19 @@ function updateGroup(group: StoredEntityGroup) {
                 @remove="deleteType"
             />
 
-            <div class="flex min-h-0 flex-col gap-3 overflow-y-auto">
-                <EntitiesGroupPanel
-                    :groups="sortedGroups"
-                    :types="types"
-                    @create="createGroup"
-                    @update="updateGroup"
-                    @remove="deleteGroup"
-                />
+            <EntitiesGroupPanel
+                :groups="sortedGroups"
+                :types="types"
+                @create="createGroup"
+                @update="updateGroup"
+                @remove="deleteGroup"
+            />
 
-                <EntitiesBlacklistEditor
-                    :terms="blacklist"
-                    @add="addBlacklistTerm"
-                    @remove="removeBlacklistTerm"
-                />
-            </div>
+            <EntitiesBlacklistEditor
+                :terms="blacklist"
+                @add="addBlacklistTerm"
+                @remove="removeBlacklistTerm"
+            />
         </div>
     </div>
 </template>
