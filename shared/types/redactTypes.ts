@@ -2,15 +2,28 @@ import z from "zod";
 
 export type EntityTypePreset = "default" | "legal" | "full";
 
-/** One entity type as the API serves it: what it is called, and what it means. */
-export const ApiEntityTypeSchema = z.object({
-    /** The proper German name, shown in the interface, e.g. `AHV-Nummer`. */
-    name: z.string(),
-    /** What the label means, in the words the detection model reads. */
-    description: z.string(),
-});
+/**
+ * One entity type as the API serves it: what it is called, and what it means.
+ *
+ * An API that predates display names serves the description on its own. It is
+ * read as a type without a name, which the interface shows under its label, so
+ * a frontend deployed ahead of its API loses the names rather than the presets.
+ */
+export const ApiEntityTypeSchema = z.union([
+    z.object({
+        /** The proper German name, shown in the interface, e.g. `AHV-Nummer`. */
+        name: z.string(),
+        /** What the label means, in the words the detection model reads. */
+        description: z.string(),
+    }),
+    z.string().transform((description) => ({ name: "", description })),
+]);
+
+/** A preset: the entity types it detects, by label. */
+export const ApiEntityPresetSchema = z.record(z.string(), ApiEntityTypeSchema);
 
 export type ApiEntityType = z.infer<typeof ApiEntityTypeSchema>;
+export type ApiEntityPreset = z.infer<typeof ApiEntityPresetSchema>;
 
 export const EntitySchema = z.object({
     id: z.string(),

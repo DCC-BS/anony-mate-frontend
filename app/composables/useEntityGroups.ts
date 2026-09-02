@@ -6,7 +6,7 @@ import type {
     StoredEntityGroup,
     StoredEntityType,
 } from "~/types/storedEntity";
-import type { ApiEntityType } from "~~/shared/types/redactTypes";
+import { ApiEntityPresetSchema } from "~~/shared/types/redactTypes";
 
 /**
  * Entity types, detection groups and never-redact terms, kept in IndexedDB and
@@ -38,7 +38,7 @@ export const useEntityGroups = createSharedComposable(() => {
     onMounted(async () => {
         try {
             await service.syncBuiltins(async (preset) => {
-                const response = await apiFetch<Record<string, ApiEntityType>>(
+                const response = await apiFetch<object>(
                     `/api/entity_types/${preset}`,
                 );
 
@@ -46,7 +46,7 @@ export const useEntityGroups = createSharedComposable(() => {
                     throw response;
                 }
 
-                return response;
+                return ApiEntityPresetSchema.parse(response);
             });
         } catch (error) {
             logger.error({ error }, "Could not sync entity presets");

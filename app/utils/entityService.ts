@@ -7,6 +7,7 @@ import {
     type StoredEntityType,
     StoredEntityTypeSchema,
 } from "~/types/storedEntity";
+import type { ApiEntityPreset } from "~~/shared/types/redactTypes";
 
 /** Presets the API serves; seeded into IndexedDB as the built-in groups. */
 const BUILTIN_PRESETS: EntityTypePreset[] = ["default", "legal", "full"];
@@ -154,11 +155,9 @@ export function getEntityService() {
      * @param fetchPreset - Loads one preset's types from the API.
      */
     async function syncBuiltins(
-        fetchPreset: (
-            preset: EntityTypePreset,
-        ) => Promise<Record<string, ApiEntityType>>,
+        fetchPreset: (preset: EntityTypePreset) => Promise<ApiEntityPreset>,
     ): Promise<void> {
-        const presets: Record<string, ApiEntityType>[] = [];
+        const presets: ApiEntityPreset[] = [];
 
         for (const preset of BUILTIN_PRESETS) {
             const types = await fetchPreset(preset);
