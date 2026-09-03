@@ -1,14 +1,19 @@
 <script lang="ts" setup>
+import type { DetectionState } from "~/types/storedDocument";
+
 const props = defineProps<{
     label: string;
     /** Detections in this group. */
     count: number;
-    openCount: number;
+    /** How many of them the reader has taken the redaction off. */
+    unredactedCount: number;
     expanded: boolean;
+    /** The preview only reads the document; deciding happens in the editor. */
+    readonly?: boolean;
 }>();
 const emit = defineEmits<{
     toggle: [label: string];
-    decideGroup: [label: string, state: "accepted" | "rejected"];
+    setGroupState: [label: string, state: DetectionState];
 }>();
 
 const { t } = useI18n();
@@ -31,31 +36,41 @@ const { entityName } = useEntityName();
             />
             <span class="size-2 rounded-full" :style="{ background: getEntityColor(props.label).solid }" />
             <span class="flex-1 text-left">{{ entityName(props.label) }}</span>
-            <UBadge v-if="props.openCount" size="sm" color="warning" variant="subtle">
-                {{ t("review.openCount", { count: props.openCount }) }}
+            <!-- Redacted is the resting state of every group, so saying so on
+                 each one says nothing. What is worth a badge is the exception:
+                 words this group is letting through. -->
+            <UBadge
+                v-if="props.unredactedCount"
+                size="sm"
+                color="neutral"
+                variant="subtle"
+            >
+                {{ t("review.unredactedCount", { count: props.unredactedCount }) }}
             </UBadge>
             <span class="tabular-nums text-xs text-(--ui-text-muted)">
                 {{ props.count }}
             </span>
         </button>
 
-        <div v-if="props.expanded" class="flex gap-2 px-2 pb-2">
+        <div v-if="props.expanded && !props.readonly" class="flex gap-2 px-2 pb-2">
             <UButton
                 size="xs"
                 variant="soft"
                 block
-                @click="emit('decideGroup', props.label, 'accepted')"
+                icon="i-lucide-eye-off"
+                @click="emit('setGroupState', props.label, 'redacted')"
             >
-                {{ t("review.acceptAll") }}
+                {{ t("review.redactAll") }}
             </UButton>
             <UButton
                 size="xs"
                 variant="soft"
                 color="neutral"
                 block
-                @click="emit('decideGroup', props.label, 'rejected')"
+                icon="i-lucide-eye"
+                @click="emit('setGroupState', props.label, 'unredacted')"
             >
-                {{ t("review.rejectAll") }}
+                {{ t("review.unredactAll") }}
             </UButton>
         </div>
     </div>

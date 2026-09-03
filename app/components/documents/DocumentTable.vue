@@ -3,7 +3,6 @@ import type { StoredDocument } from "~/types/storedDocument";
 
 const props = defineProps<{
     documents: StoredDocument[];
-    openCounts: Record<string, number>;
     queuePositions: Record<string, number | null>;
 }>();
 const emit = defineEmits<{ retry: [id: string]; remove: [id: string] }>();
@@ -13,9 +12,18 @@ const localePath = useLocalePath();
 
 // Status is shown at every width, so the narrow layout needs a column for it
 // too: with only name and actions, the header's status label would sit over
-// the buttons. Detections stay hidden below `sm`.
+// the buttons. The detection group and the count stay hidden below `lg`.
 const rowGrid =
-    "grid grid-cols-[minmax(0,1fr)_auto_88px] items-center gap-3 sm:grid-cols-[minmax(0,1fr)_150px_130px_92px]";
+    "grid grid-cols-[minmax(0,1fr)_auto_124px] items-center gap-3 lg:grid-cols-[minmax(0,1fr)_150px_minmax(0,150px)_90px_124px]";
+
+/** Documents still on their way through the API cannot be sent again. */
+function isBusy(document: StoredDocument): boolean {
+    return (
+        document.status === "staged" ||
+        document.status === "converting" ||
+        document.status === "redacting"
+    );
+}
 
 function formatDate(date: Date): string {
     return date.toLocaleString(locale.value);
@@ -35,7 +43,8 @@ function formatDate(date: Date): string {
         >
             <div>{{ t("documents.table.document") }}</div>
             <div>{{ t("documents.table.status") }}</div>
-            <div class="hidden sm:block">{{ t("documents.table.detections") }}</div>
+            <div class="hidden lg:block">{{ t("documents.table.group") }}</div>
+            <div class="hidden lg:block">{{ t("documents.table.detections") }}</div>
             <div />
         </div>
 
@@ -68,16 +77,24 @@ function formatDate(date: Date): string {
             <div>
                 <DocumentsDocumentStatusBadge
                     :document="document"
-                    :open-count="props.openCounts[document.id] ?? 0"
                     :queue-position="props.queuePositions[document.id] ?? null"
                 />
             </div>
 
-            <div class="hidden tabular-nums text-muted sm:block">
+            <div class="hidden min-w-0 truncate text-muted lg:block" :title="document.entityGroupName">
+                {{ document.entityGroupName || "—" }}
+            </div>
+
+            <div class="hidden tabular-nums text-muted lg:block">
                 {{ document.status === "ready" ? document.detectionCount : "—" }}
             </div>
 
             <div class="flex justify-end gap-1">
+                <RecomputeButton
+                    :document-id="document.id"
+                    :group-id="document.entityGroupId"
+                    :busy="isBusy(document)"
+                />
                 <UButton
                     v-if="document.status === 'failed'"
                     icon="i-lucide-rotate-ccw"

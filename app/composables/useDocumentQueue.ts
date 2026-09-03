@@ -1,6 +1,7 @@
 import { createSharedComposable } from "@vueuse/core";
 import { db } from "~/stores/db";
 import type { StoredDocument } from "~/types/storedDocument";
+import type { StoredEntityGroup } from "~/types/storedEntity";
 
 /** Statuses that mean the document still needs work. */
 const UNFINISHED: StoredDocument["status"][] = [
@@ -29,22 +30,6 @@ export const useDocumentQueue = createSharedComposable(() => {
         () => db.documents.orderBy("createdAt").reverse().toArray(),
         [],
     );
-    /** Undecided detections per document, for the "reviewed" status. */
-    const openDetections = useLiveQuery(
-        () => db.detections.where("state").equals("open").toArray(),
-        [],
-    );
-    const openCounts = computed(() => {
-        const counts: Record<string, number> = {};
-
-        for (const detection of openDetections.value) {
-            counts[detection.documentId] =
-                (counts[detection.documentId] ?? 0) + 1;
-        }
-
-        return counts;
-    });
-
     const isProcessing = ref(false);
     /**
      * Place in the API's queue per document, while it is waiting on a busy
@@ -250,9 +235,38 @@ export const useDocumentQueue = createSharedComposable(() => {
         void pump();
     }
 
+    /**
+     * Detects the document again with another set of entity types.
+     *
+     * The conversion is not repeated: a document that has been through it
+     * carries its text, and the queue sends text straight to detection. What
+     * comes back replaces the detections wholesale, so every decision the
+     * reader had recorded is gone with them.
+     *
+     * @param id - Document to detect again.
+     * @param group - Detection group to use this time.
+     * @param entityTypes - That group's entity types, as the API wants them.
+     */
+    async function recompute(
+        id: string,
+        group: Pick<StoredEntityGroup, "id" | "name">,
+        entityTypes: Record<string, string>,
+    ): Promise<void> {
+        await updateDocument(id, {
+            status: "staged",
+            errorMessage: undefined,
+            entityTypes,
+            entityGroupId: group.id,
+            entityGroupName: group.name,
+        });
+
+        // The queue reports progress through the document's own status, so the
+        // caller follows it there rather than waiting on the whole drain.
+        void pump();
+    }
+
     return {
         documents,
-        openCounts,
         queuePositions,
         pending,
         activeDocument,
@@ -260,5 +274,6 @@ export const useDocumentQueue = createSharedComposable(() => {
         progress,
         pump,
         retry,
+        recompute,
     };
 });

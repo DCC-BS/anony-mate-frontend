@@ -11,14 +11,16 @@ const {
     storedDocument,
     isLoading,
     detections,
-    openDetections,
     counts,
     groups,
     replacements,
-    decide,
-    decideGroup,
-    decideAllOccurrences,
-    decideAllOpen,
+    threshold,
+    thresholdFloor,
+    setState,
+    setGroupState,
+    setAllOccurrences,
+    setAllStates,
+    setThreshold,
     occurrenceCount,
     relabel,
     addDetection,
@@ -30,10 +32,19 @@ const { slices, hasPages, pageOf, detectionCounts } = useDocumentPages(
     detections
 );
 
-const view = ref<DocumentView>("original");
+const view = ref<DocumentView>("editor");
+const blackout = ref(false);
 const activePage = ref(1);
 const markerActive = ref(false);
 const markerLabel = ref("");
+
+/** The document is out at the API, so its detections are about to be replaced. */
+const isBusy = computed(
+    () =>
+        storedDocument.value?.status === "staged" ||
+        storedDocument.value?.status === "converting" ||
+        storedDocument.value?.status === "redacting"
+);
 
 const { exportAsMarkdown, exportAsText, exportAsDocx, renderPage } =
     useDocumentExport();
@@ -43,7 +54,7 @@ const exportPages = computed(() =>
     slices.value.map((page) =>
         renderPage(
             page,
-            view.value === "blacked" ? "blacked" : "placeholder",
+            blackout.value ? "blacked" : "placeholder",
             replacements.value
         )
     )
@@ -84,14 +95,32 @@ function goToPage(page: number) {
 const wizardOpen = ref(false);
 const selectedId = ref<string>();
 
-/** Selects a detection, scrolls it into view and follows it in the page rail. */
-function selectDetection(id: string) {
+/**
+ * Selects a detection and follows it in the page rail.
+ *
+ * Clicking a detection in the document does not move the document: the reader
+ * is already looking at it, and scrolling it to the middle of the pane pulls
+ * the page out from under them. Only a click from a list, where the detection
+ * is somewhere off screen, brings it into view.
+ */
+async function selectDetection(id: string | undefined, reveal = false) {
     selectedId.value = id;
+    if (!id) {
+        return;
+    }
+
     const detection = detections.value.find((item) => item.id === id);
     if (detection) {
         activePage.value = pageOf(detection.start);
     }
 
+    if (!reveal) {
+        return;
+    }
+
+    // The preview writes its detections as markdown and renders them after the
+    // view switches, so the element may not be there on the first look.
+    await nextTick();
     document
         .getElementById(`detection-${id}`)
         ?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -122,12 +151,12 @@ function annotate(start: number, end: number, text: string) {
     <div v-if="storedDocument" class="flex h-full min-h-0 flex-col gap-3 px-4 py-3">
         <ReviewHeader
             v-model:view="view"
+            v-model:blackout="blackout"
             v-model:marker="markerActive"
             v-model:marker-label="markerLabel"
             :labels="availableLabels"
             :name="storedDocument.name"
-            :total="counts.total"
-            :open-count="counts.open"
+            :counts="counts"
             @open-wizard="wizardOpen = true"
             @export="onExport"
         />
@@ -149,40 +178,47 @@ function annotate(start: number, end: number, text: string) {
             <ReviewDocumentText
                 :slices="slices"
                 :view="view"
+                :blackout="blackout"
                 :replacements="replacements"
                 :selected-id="selectedId"
                 :labels="availableLabels"
                 :marker="markerActive"
                 :marker-label="markerLabel"
                 @visible-page="activePage = $event"
-                @select="selectDetection"
-                @decide="decide"
-                @decide-all="decideAllOccurrences"
+                @select="selectDetection($event)"
+                @set-state="setState"
+                @set-all-occurrences="setAllOccurrences"
                 @relabel="relabel"
                 @annotate="annotate"
             />
 
             <ReviewDetectionSidebar
+                :threshold="threshold"
+                :threshold-floor="thresholdFloor"
+                :document-id="documentId"
+                :group-id="storedDocument.entityGroupId"
+                :busy="isBusy"
                 :groups="groups"
                 :counts="counts"
                 :selected-id="selectedId"
                 :occurrences-of="occurrenceCount"
-                @visible-page="activePage = $event"
-                @select="selectDetection"
-                @decide="decide"
-                @decide-group="decideGroup"
-                @decide-all="decideAllOccurrences"
-                @decide-all-open="decideAllOpen"
+                :readonly="view !== 'editor'"
+                @update:threshold="setThreshold"
+                @select="selectDetection($event, true)"
+                @set-state="setState"
+                @set-group-state="setGroupState"
+                @set-all-occurrences="setAllOccurrences"
+                @set-all-states="setAllStates"
             />
         </div>
 
         <ReviewWizard
             v-model:open="wizardOpen"
-            :items="openDetections"
+            :items="detections"
             :text="storedDocument.text"
             :available-labels="availableLabels"
             :total="counts.total"
-            @decide="decide"
+            @set-state="setState"
             @relabel="relabel"
         />
     </div>

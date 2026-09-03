@@ -103,16 +103,16 @@
             "detections": "Erkennungen",
             "review": "Prüfen",
             "retry": "Erneut versuchen",
-            "remove": "Entfernen"
+            "remove": "Entfernen",
+            "group": "Erkennungsgruppe"
         },
         "status": {
             "staged": "Wartet",
             "converting": "Wird gelesen",
             "redacting": "Wird geprüft",
-            "ready": "Bereit zur Prüfung",
+            "ready": "Geschwärzt",
             "failed": "Fehlgeschlagen",
             "failedHint": "Verarbeitung fehlgeschlagen. Bitte erneut versuchen.",
-            "reviewed": "Geprüft",
             "queued": "Wartet ({position}.)"
         },
         "search": "Dokument suchen…",
@@ -136,10 +136,6 @@
             "title": "Erkennungsgruppe",
             "entityCount": "{count} Entitäten",
             "manage": "Gruppen bearbeiten"
-        },
-        "threshold": {
-            "title": "Mindestkonfidenz",
-            "hint": "Tiefer erkennt mehr, bringt aber mehr Fehltreffer."
         }
     },
     "review": {
@@ -148,51 +144,49 @@
         "notFound": "Dieses Dokument ist nicht mehr vorhanden.",
         "detections": "Erkennungen",
         "found": "{count} gefunden",
-        "openCount": "{count} offen",
-        "accept": "Übernehmen",
-        "reject": "Verwerfen",
-        "acceptAll": "Alle übernehmen",
-        "rejectAll": "Alle verwerfen",
         "searchPlaceholder": "Begriff im Dokument suchen…",
         "stats": {
-            "open": "offen",
-            "accepted": "freigegeben",
-            "rejected": "verworfen"
+            "redacted": "geschwärzt",
+            "unredacted": "nicht geschwärzt"
         },
         "state": {
-            "open": "Offen",
-            "accepted": "Freigegeben",
-            "rejected": "Verworfen"
+            "redacted": "Geschwärzt",
+            "unredacted": "Nicht geschwärzt"
         },
         "view": {
-            "original": "Original",
-            "anonymised": "Anonymisiert",
-            "blacked": "Geschwärzt"
+            "editor": "Editor",
+            "preview": "Vorschau"
         },
         "wizard": {
             "title": "Prüfassistent",
-            "open": "Assistent · {count} offen",
+            "open": "Prüfassistent",
             "progress": "{done} von {total} geprüft",
             "changeCategory": "Kategorie ändern",
-            "later": "Später",
-            "hint": "Nichts wird verändert, solange der Export nicht ausgeführt wird.",
-            "done": "Keine offenen Erkennungen mehr",
+            "keep": "Geschwärzt lassen",
+            "hint": "Geschwärzt lassen ist die sichere Wahl; entfernen macht den Originaltext wieder sichtbar.",
+            "done": "Alle Erkennungen geprüft",
             "close": "Zurück zum Dokument"
         },
         "copy": "Kopieren",
         "copied": "Kopiert",
         "pages": "Seiten",
         "page": "Seite {page}",
-        "acceptAllOccurrences": "Alle {count} Vorkommen übernehmen",
-        "acceptAllOccurrencesShort": "Alle Vorkommen übernehmen",
-        "rejectAllOccurrencesShort": "Alle Vorkommen verwerfen",
-        "acceptAllOpen": "Alle {count} offenen übernehmen",
-        "rejectAllOpen": "Alle verwerfen",
         "marker": {
             "toggle": "Markieren",
             "search": "Entität suchen…"
         },
-        "relabel": "Entität ändern"
+        "relabel": "Entität ändern",
+        "redact": "Schwärzen",
+        "unredact": "Schwärzung aufheben",
+        "redactAll": "Alle schwärzen",
+        "unredactAll": "Alle aufheben",
+        "redactAllOccurrences": "Alle {count} Vorkommen schwärzen",
+        "unredactAllOccurrences": "Alle {count} Vorkommen aufheben",
+        "redactAllOccurrencesShort": "Alle Vorkommen schwärzen",
+        "unredactAllOccurrencesShort": "Alle Vorkommen aufheben",
+        "settings": "Einstellungen",
+        "unredactedCount": "{count} nicht geschwärzt",
+        "redactedCount": "{count} geschwärzt"
     },
     "entities": {
         "title": "Entitäten",
@@ -250,8 +244,7 @@
     },
     "export": {
         "export": "Exportieren",
-        "openWarning": "{count} Erkennungen sind noch offen und bleiben sichtbar.",
-        "hint": "Nur übernommene Erkennungen werden ersetzt.",
+        "hint": "Nur geschwärzte Erkennungen werden ersetzt; nicht geschwärzte bleiben im Original.",
         "formats": {
             "title": "Format",
             "markdown": "Markdown (.md)",
@@ -260,5 +253,26 @@
             "clipboard": "In die Zwischenablage"
         },
         "copied": "Kopiert"
+    },
+    "threshold": {
+        "title": "Mindestkonfidenz",
+        "hint": "Tiefer erkennt mehr, bringt aber mehr Fehltreffer."
+    },
+    "recompute": {
+        "action": "Neu erkennen",
+        "chooseGroup": "Erkennungsgruppe wählen",
+        "confirmTitle": "Mit «{group}» neu erkennen?",
+        "confirmHint": "Die aktuellen Erkennungen und alle Entscheidungen dazu werden vollständig ersetzt.",
+        "back": "Zurück",
+        "start": "Neu erkennen"
+    },
+    "redactionStyle": {
+        "title": "Darstellung der Schwärzung",
+        "placeholder": "Platzhalter",
+        "placeholderExample": "Person-1",
+        "placeholderHint": "Jede Schwärzung wird als benannter Platzhalter geschrieben; gleiche Treffer behalten ihre Nummer.",
+        "blacked": "Schwarze Balken",
+        "blackedExample": "████████",
+        "blackedHint": "Jede Schwärzung wird durch einen schwarzen Balken ersetzt; die Art der Angabe ist danach nicht mehr erkennbar."
     }
 }

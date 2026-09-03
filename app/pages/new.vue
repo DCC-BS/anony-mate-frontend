@@ -8,7 +8,8 @@ const { addDocument } = getDocumentService();
 const { pump } = useDocumentQueue();
 
 const selectedGroup = ref<string>();
-const threshold = ref(0.5);
+/** True from the click until the queue has the documents and the route moves. */
+const isStarting = ref(false);
 
 // Pick the first group as soon as the presets are seeded.
 watch(
@@ -47,29 +48,45 @@ const canStart = computed(
  * where the queue reports progress.
  */
 async function start() {
-    const shared = {
-        status: "staged" as const,
-        entityTypes: payloadFor(selectedGroup.value as string),
-        threshold: threshold.value,
-        blacklist: blacklist.value
-    };
-
-    if (tab.value === "files") {
-        for (const file of stagedFiles.value) {
-            await addDocument({ ...shared, name: file.name, text: "", file });
-        }
-        stagedFiles.value = [];
-    } else {
-        await addDocument({
-            ...shared,
-            name: t("new.pastedName", { date: new Date().toLocaleString() }),
-            text: pastedText.value
-        });
-        pastedText.value = "";
+    // Queueing takes long enough on a handful of files for a second click to
+    // land, and each one would queue the same documents again.
+    if (isStarting.value) {
+        return;
     }
+    isStarting.value = true;
 
-    void pump();
-    await router.push(localePath("/documents"));
+    try {
+        const group = groups.value.find(
+            (entry) => entry.id === selectedGroup.value
+        );
+        const shared = {
+            status: "staged" as const,
+            entityTypes: payloadFor(selectedGroup.value as string),
+            entityGroupId: group?.id ?? "",
+            entityGroupName: group?.name ?? "",
+            threshold: DETECTION_THRESHOLD,
+            blacklist: blacklist.value
+        };
+
+        if (tab.value === "files") {
+            for (const file of stagedFiles.value) {
+                await addDocument({ ...shared, name: file.name, text: "", file });
+            }
+            stagedFiles.value = [];
+        } else {
+            await addDocument({
+                ...shared,
+                name: t("new.pastedName", { date: new Date().toLocaleString() }),
+                text: pastedText.value
+            });
+            pastedText.value = "";
+        }
+
+        void pump();
+        await router.push(localePath("/documents"));
+    } finally {
+        isStarting.value = false;
+    }
 }
 </script>
 
@@ -123,15 +140,14 @@ async function start() {
             <div class="flex flex-col gap-4">
                 <UCard :ui="{ body: 'sm:p-5 p-4 flex flex-col gap-4' }">
                     <NewGroupSelect v-model="selectedGroup" :groups="groups" />
-
-                    <NewThresholdSlider v-model="threshold" />
                 </UCard>
 
                 <UButton
                     block
                     size="lg"
                     icon="i-lucide-wand-sparkles"
-                    :disabled="!canStart"
+                    :loading="isStarting"
+                    :disabled="!canStart || isStarting"
                     @click="start"
                 >
                     {{ t("new.start") }}

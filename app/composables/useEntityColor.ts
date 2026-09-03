@@ -28,6 +28,18 @@ function hashOf(label: string): number {
     return Math.abs(hash);
 }
 
+/** The colour in a given slot of the palette. */
+function colorAt(slot: number): EntityColor {
+    return colorOfHue(ENTITY_HUES[slot % ENTITY_HUES.length] as number);
+}
+
+function colorOfHue(hue: number): EntityColor {
+    return {
+        solid: `oklch(0.55 0.13 ${hue})`,
+        soft: `oklch(0.55 0.13 ${hue} / 0.16)`,
+    };
+}
+
 /**
  * Colour registry for entity types.
  *
@@ -42,12 +54,24 @@ function hashOf(label: string): number {
 export function useEntityColor() {
     const { types } = useEntityGroups();
 
-    const order = computed(() =>
-        types.value
+    /**
+     * Colour per entity type, built once per change to the stored types.
+     *
+     * The document draws one element per detection and asks for a colour on
+     * every one of them, so this is a map lookup rather than a scan: searching
+     * the ordered list per detection is what made a document with thousands of
+     * them slow to redraw.
+     */
+    const colors = computed(() => {
+        const order = types.value
             .map((type) => type.name)
             .filter((name) => !(name in BUILTIN_HUES))
-            .sort((a, b) => a.localeCompare(b)),
-    );
+            .sort((a, b) => a.localeCompare(b));
+
+        return new Map(
+            order.map((name, index) => [name, colorAt(index)] as const),
+        );
+    });
 
     /**
      * Colour assigned to an entity type.
@@ -56,16 +80,12 @@ export function useEntityColor() {
      * @returns The colour for that type.
      */
     function getEntityColor(label: string): EntityColor {
-        const index = order.value.indexOf(label);
-        const slot = index >= 0 ? index : hashOf(label);
-        const hue =
-            BUILTIN_HUES[label] ??
-            (ENTITY_HUES[slot % ENTITY_HUES.length] as number);
+        const builtin = BUILTIN_HUES[label];
+        if (builtin !== undefined) {
+            return colorOfHue(builtin);
+        }
 
-        return {
-            solid: `oklch(0.55 0.13 ${hue})`,
-            soft: `oklch(0.55 0.13 ${hue} / 0.16)`,
-        };
+        return colors.value.get(label) ?? colorAt(hashOf(label));
     }
 
     return { getEntityColor };

@@ -1,9 +1,13 @@
 import { db } from "~/stores/db";
-import type { StoredDetection, StoredDocument } from "~/types/storedDocument";
+import type {
+    DetectionState,
+    StoredDetection,
+    StoredDocument,
+} from "~/types/storedDocument";
 import { StoredDetectionSchema } from "~/types/storedDocument";
 
 /** Which rendering of the document the review shows. */
-export type DocumentView = "original" | "anonymised" | "blacked";
+export type DocumentView = "editor" | "preview";
 
 /**
  * Loads one document with its detections and records the review decisions.
@@ -17,11 +21,21 @@ export type DocumentView = "original" | "anonymised" | "blacked";
 export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
     const { edit } = useDetectionCommands(documentId);
 
-    const storedDocument = ref<StoredDocument>();
-    /** True until the first lookup finishes, so the page can hold back the
-     *  "not found" message instead of flashing it during hydration. */
-    const isLoading = ref(true);
-    const detections = useLiveQuery<StoredDetection[]>(
+    /**
+     * Live rather than read once: a re-detection rewrites the row underneath
+     * the open review, and the confidence slider writes to it.
+     *
+     * `undefined` means the lookup has not answered yet and `null` that it
+     * answered with nothing, so the page can hold back the "not found" message
+     * instead of flashing it while the query is still out.
+     */
+    const documentQuery = useLiveQuery<StoredDocument | null | undefined>(
+        async () => (await db.documents.get(toValue(documentId))) ?? null,
+        undefined,
+    );
+    const storedDocument = computed(() => documentQuery.value ?? undefined);
+    const isLoading = computed(() => documentQuery.value === undefined);
+    const allDetections = useLiveQuery<StoredDetection[]>(
         () =>
             db.detections
                 .where("documentId")
@@ -30,23 +44,46 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         [],
     );
 
-    const openDetections = computed(() =>
-        detections.value.filter((detection) => detection.state === "open"),
+    /** Lowest confidence the document holds anything for. */
+    const thresholdFloor = computed(
+        () => storedDocument.value?.threshold ?? DETECTION_THRESHOLD,
     );
-    const counts = computed(() => ({
-        total: detections.value.length,
-        open: openDetections.value.length,
-        accepted: detections.value.filter((d) => d.state === "accepted").length,
-        rejected: detections.value.filter((d) => d.state === "rejected").length,
-    }));
+    /** Lowest confidence the review shows, which starts at that floor. */
+    const threshold = computed(
+        () => storedDocument.value?.reviewThreshold ?? thresholdFloor.value,
+    );
+
+    /**
+     * The detections the review works on.
+     *
+     * The confidence the document was detected with is the floor; raising it
+     * afterwards drops the weaker detections out of the review and out of the
+     * result, rather than leaving them on screen to be dismissed one by one.
+     * A detection the reader marked by hand is certain and never filtered.
+     */
+    const detections = computed(() =>
+        allDetections.value.filter(
+            (detection) => detection.confidence >= threshold.value,
+        ),
+    );
+
+    const counts = computed(() => {
+        const redacted = detections.value.filter(
+            (detection) => detection.state === "redacted",
+        ).length;
+
+        return {
+            total: detections.value.length,
+            redacted,
+            unredacted: detections.value.length - redacted,
+        };
+    });
 
     /** Detections grouped by entity type, each group sorted by position. */
     const groups = computed(() => {
         const byLabel = new Map<string, StoredDetection[]>();
 
-        for (const detection of [...detections.value].sort(
-            (a, b) => a.start - b.start,
-        )) {
+        for (const detection of detections.value) {
             byLabel.set(detection.label, [
                 ...(byLabel.get(detection.label) ?? []),
                 detection,
@@ -55,14 +92,12 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
 
         return [...byLabel.entries()].map(([label, items]) => ({
             label,
-            // Open first, decided sink to the bottom: once a detection is
-            // settled it no longer needs looking at.
-            items: [...items].sort(
-                (a, b) =>
-                    Number(a.state !== "open") - Number(b.state !== "open") ||
-                    a.start - b.start,
-            ),
-            openCount: items.filter((item) => item.state === "open").length,
+            // Document order, and only that. Sorting the decided ones to the
+            // bottom would move a row out from under the click that decided
+            // it, which reads as the detection vanishing.
+            items,
+            unredactedCount: items.filter((item) => item.state === "unredacted")
+                .length,
         }));
     });
 
@@ -85,14 +120,6 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         ),
     );
 
-    onMounted(async () => {
-        try {
-            storedDocument.value = await db.documents.get(toValue(documentId));
-        } finally {
-            isLoading.value = false;
-        }
-    });
-
     /** Rewrites whichever detections a filter picks out, through the history. */
     function change(
         pick: (detection: StoredDetection) => boolean,
@@ -102,11 +129,8 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         return edit(before, before.map(into));
     }
 
-    /** Records a decision for one detection. */
-    function decide(
-        id: string,
-        state: StoredDetection["state"],
-    ): Promise<void> {
+    /** Redacts or un-redacts one detection. */
+    function setState(id: string, state: DetectionState): Promise<void> {
         return change(
             (detection) => detection.id === id,
             (detection) => ({ ...detection, state }),
@@ -114,20 +138,12 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
     }
 
     /** Applies the same decision to every detection of one entity type. */
-    function decideGroup(
+    function setGroupState(
         label: string,
-        state: StoredDetection["state"],
+        state: DetectionState,
     ): Promise<void> {
         return change(
             (detection) => detection.label === label,
-            (detection) => ({ ...detection, state }),
-        );
-    }
-
-    /** Applies one decision to every open detection in the document. */
-    function decideAllOpen(state: StoredDetection["state"]): Promise<void> {
-        return change(
-            (detection) => detection.state === "open",
             (detection) => ({ ...detection, state }),
         );
     }
@@ -136,12 +152,20 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
      * Applies the same decision to every detection with the same text, so a
      * name occurring dozens of times is decided once.
      */
-    function decideAllOccurrences(
+    function setAllOccurrences(
         text: string,
-        state: StoredDetection["state"],
+        state: DetectionState,
     ): Promise<void> {
         return change(
             (detection) => detection.text === text,
+            (detection) => ({ ...detection, state }),
+        );
+    }
+
+    /** Applies one decision to every detection in the document. */
+    function setAllStates(state: DetectionState): Promise<void> {
+        return change(
+            (detection) => detection.state !== state,
             (detection) => ({ ...detection, state }),
         );
     }
@@ -169,12 +193,13 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
     /**
      * Records a detection the reader marked by hand.
      *
-     * It arrives accepted: the reader picked the words and the label, so there
-     * is nothing left to review. Numbering is redone for the whole label so the
-     * new one takes its place in document order rather than being appended.
+     * It arrives redacted: marking words is how a reader says they must not be
+     * read, so the mark takes effect at once. Numbering is redone for the whole
+     * label so the new one takes its place in document order rather than being
+     * appended.
      *
      * Marking words that already carry a detection of this type revives it,
-     * which is what brings back one the reader had thrown away.
+     * which is what brings back one the reader had un-redacted.
      *
      * @param label - Entity type to file it under.
      * @param start - Character offset the mention starts at.
@@ -188,7 +213,7 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         text: string,
     ): Promise<void> {
         const id = `${toValue(documentId)}:${label}:${start}`;
-        const existing = detections.value.find(
+        const existing = allDetections.value.find(
             (detection) => detection.id === id,
         );
         const marked = StoredDetectionSchema.parse({
@@ -200,12 +225,12 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
             start,
             end,
             confidence: 1,
-            state: "accepted",
+            state: "redacted",
         });
 
-        // Words that were thrown away keep their row, so marking them again is
-        // how a reader takes that back: the detection returns, rather than the
-        // mark landing on an id that is already taken and being dropped.
+        // Words the reader un-redacted keep their row, so marking them again is
+        // how they take that back: the detection returns, rather than the mark
+        // landing on an id that is already taken and being dropped.
         return edit(existing ? [existing] : [], [marked]);
     }
 
@@ -232,18 +257,31 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         );
     }
 
+    /**
+     * Sets the confidence a detection needs to stay in the review.
+     *
+     * It is stored on the document rather than held in the page, so the
+     * reader's choice survives leaving the review and coming back.
+     */
+    async function setThreshold(value: number): Promise<void> {
+        const { updateDocument } = getDocumentService();
+        await updateDocument(toValue(documentId), { reviewThreshold: value });
+    }
+
     return {
         storedDocument,
         isLoading,
         detections,
-        openDetections,
         counts,
         groups,
         replacements,
-        decide,
-        decideGroup,
-        decideAllOccurrences,
-        decideAllOpen,
+        threshold,
+        thresholdFloor,
+        setState,
+        setGroupState,
+        setAllOccurrences,
+        setAllStates,
+        setThreshold,
         occurrenceCount,
         relabel,
         addDetection,

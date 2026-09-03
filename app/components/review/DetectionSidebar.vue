@@ -1,19 +1,38 @@
 <script lang="ts" setup>
-import type { StoredDetection } from "~/types/storedDocument";
+import type { DetectionState, StoredDetection } from "~/types/storedDocument";
 
 const props = defineProps<{
-    groups: { label: string; items: StoredDetection[]; openCount: number }[];
-    counts: { total: number; open: number; accepted: number; rejected: number };
+    groups: {
+        label: string;
+        items: StoredDetection[];
+        unredactedCount: number;
+    }[];
+    counts: { total: number; redacted: number; unredacted: number };
     selectedId?: string;
     occurrencesOf: (text: string) => number;
+    /** The preview only reads the document; deciding happens in the editor. */
+    readonly?: boolean;
+    /** Confidence the document was detected with; the slider starts there. */
+    thresholdFloor?: number;
+    documentId: string;
+    /** Detection group the document was detected with, if it records one. */
+    groupId?: string;
+    /** True while the document is queued or being detected again. */
+    busy?: boolean;
 }>();
 const emit = defineEmits<{
-    select: [id: string];
-    decide: [id: string, state: StoredDetection["state"]];
-    decideGroup: [label: string, state: StoredDetection["state"]];
-    decideAll: [text: string, state: StoredDetection["state"]];
-    decideAllOpen: [state: StoredDetection["state"]];
+    /** The detection now under the ring, or nothing once it is let go. */
+    select: [id: string | undefined];
+    setState: [id: string, state: DetectionState];
+    setGroupState: [label: string, state: DetectionState];
+    setAllOccurrences: [text: string, state: DetectionState];
+    setAllStates: [state: DetectionState];
 }>();
+
+/** Confidence a detection needs to stay in the review. */
+const threshold = defineModel<number>("threshold", {
+    default: DETECTION_THRESHOLD
+});
 
 const { t } = useI18n();
 
@@ -70,7 +89,7 @@ const rows = computed(() =>
             id: `group:${group.label}`,
             label: group.label,
             count: group.items.length,
-            openCount: group.openCount,
+            unredactedCount: group.unredactedCount,
             expanded: expanded.value.has(group.label)
         };
 
@@ -97,41 +116,81 @@ function estimateRow(index: number): number {
     if (row.kind === "item") {
         return ROW_HEIGHT.item;
     }
-    return row.expanded ? ROW_HEIGHT.groupExpanded : ROW_HEIGHT.group;
+    // The bulk actions the header opens onto are not there to measure while
+    // the preview has them hidden.
+    return row.expanded && !props.readonly
+        ? ROW_HEIGHT.groupExpanded
+        : ROW_HEIGHT.group;
 }
 </script>
 
 <template>
     <div class="flex h-full min-h-0 flex-col gap-3">
-        <div class="flex items-baseline justify-between">
+        <div class="flex items-center justify-between gap-2">
             <h2 class="font-semibold text-(--ui-text-highlighted)">
                 {{ t("review.detections") }}
             </h2>
-            <span class="text-xs text-(--ui-text-muted)">
-                {{ t("review.found", { count: props.counts.total }) }}
-            </span>
+
+            <div class="flex items-center gap-1.5">
+                <span class="text-xs text-(--ui-text-muted)">
+                    {{ t("review.found", { count: props.counts.total }) }}
+                </span>
+
+                <!-- Re-detecting throws this whole list away and builds a new
+                     one, so it sits with the list rather than with the
+                     document's own tools. -->
+                <RecomputeButton
+                    size="xs"
+                    :document-id="props.documentId"
+                    :group-id="props.groupId"
+                    :busy="props.busy"
+                />
+
+                <UPopover>
+                    <UButton
+                        icon="i-lucide-settings-2"
+                        variant="ghost"
+                        color="neutral"
+                        size="xs"
+                        :aria-label="t('review.settings')"
+                        :title="t('review.settings')"
+                    />
+
+                    <template #content>
+                        <div class="w-64 p-3">
+                            <ThresholdSlider
+                                v-model="threshold"
+                                :min="props.thresholdFloor"
+                            />
+                        </div>
+                    </template>
+                </UPopover>
+            </div>
         </div>
 
         <ReviewDetectionStats :counts="props.counts" />
 
-        <div v-if="props.counts.open" class="flex gap-2">
+        <div v-if="!props.readonly && props.counts.total" class="flex gap-2">
             <UButton
                 size="xs"
                 variant="soft"
                 block
-                icon="i-lucide-check-check"
-                @click="emit('decideAllOpen', 'accepted')"
+                icon="i-lucide-eye-off"
+                :disabled="props.counts.unredacted === 0"
+                @click="emit('setAllStates', 'redacted')"
             >
-                {{ t("review.acceptAllOpen", { count: props.counts.open }) }}
+                {{ t("review.redactAll") }}
             </UButton>
             <UButton
                 size="xs"
                 variant="soft"
                 color="neutral"
                 block
-                @click="emit('decideAllOpen', 'rejected')"
+                icon="i-lucide-eye"
+                :disabled="props.counts.redacted === 0"
+                @click="emit('setAllStates', 'unredacted')"
             >
-                {{ t("review.rejectAllOpen") }}
+                {{ t("review.unredactAll") }}
             </UButton>
         </div>
 
@@ -152,10 +211,11 @@ function estimateRow(index: number): number {
                     v-if="item.kind === 'group'"
                     :label="item.label"
                     :count="item.count"
-                    :open-count="item.openCount"
+                    :unredacted-count="item.unredactedCount"
                     :expanded="item.expanded"
+                    :readonly="props.readonly"
                     @toggle="toggleGroup"
-                    @decide-group="(label, state) => emit('decideGroup', label, state)"
+                    @set-group-state="(label, state) => emit('setGroupState', label, state)"
                 />
 
                 <div v-else class="px-2 py-1">
@@ -163,9 +223,13 @@ function estimateRow(index: number): number {
                         :detection="item.detection"
                         :selected="item.detection.id === props.selectedId"
                         :occurrences="props.occurrencesOf(item.detection.text)"
-                        @select="emit('select', $event)"
-                        @decide="(id, state) => emit('decide', id, state)"
-                        @decide-all="(text, state) => emit('decideAll', text, state)"
+                        :readonly="props.readonly"
+                        @select="emit(
+                            'select',
+                            $event === props.selectedId ? undefined : $event
+                        )"
+                        @set-state="(id, state) => emit('setState', id, state)"
+                        @set-all-occurrences="(text, state) => emit('setAllOccurrences', text, state)"
                     />
                 </div>
             </template>

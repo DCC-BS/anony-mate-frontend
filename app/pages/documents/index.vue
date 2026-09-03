@@ -3,7 +3,6 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const {
     documents,
-    openCounts,
     queuePositions,
     pending,
     progress,
@@ -62,7 +61,6 @@ const hasDocuments = computed(() => documents.value.length > 0);
         <div v-if="hasDocuments" class="flex min-h-0 flex-1 flex-col">
             <DocumentsDocumentTable
                 :documents="visibleDocuments"
-                :open-counts="openCounts"
                 :queue-positions="queuePositions"
                 @retry="retry"
                 @remove="deleteDocument"

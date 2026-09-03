@@ -3,8 +3,7 @@ import type { DocumentView } from "~/composables/useDocumentReview";
 
 const props = defineProps<{
     name: string;
-    total: number;
-    openCount: number;
+    counts: { total: number; redacted: number; unredacted: number };
     /** Entity types this document was detected with. */
     labels: string[];
 }>();
@@ -13,7 +12,9 @@ const emit = defineEmits<{
     export: [format: "markdown" | "text" | "docx" | "clipboard"];
 }>();
 
-const view = defineModel<DocumentView>("view", { default: "original" });
+const view = defineModel<DocumentView>("view", { default: "editor" });
+/** Preview only: write redactions as black bars instead of placeholders. */
+const blackout = defineModel<boolean>("blackout", { default: false });
 /** Marking mode: selected words become a detection of the chosen type. */
 const marker = defineModel<boolean>("marker", { default: false });
 const markerLabel = defineModel<string>("markerLabel", { default: "" });
@@ -22,8 +23,10 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const { canUndo, canRedo, undo, redo } = useCommandHistory();
 
+const isEditing = computed(() => view.value === "editor");
+
 const viewItems = computed(() =>
-    (["original", "anonymised", "blacked"] as const).map((value) => ({
+    (["editor", "preview"] as const).map((value) => ({
         label: t(`review.view.${value}`),
         value
     }))
@@ -31,56 +34,86 @@ const viewItems = computed(() =>
 </script>
 
 <template>
-    <div class="flex flex-wrap items-center gap-2">
-        <UButton
-            variant="ghost"
-            color="neutral"
-            icon="i-lucide-arrow-left"
-            :to="localePath('/documents')"
-            :aria-label="t('review.back')"
-        />
+    <!-- Three tracks rather than one row: the outer two take whatever the
+         controls need and the tabs sit in the middle, where they stay put as
+         the controls beside them come and go.
 
-        <div class="min-w-0 flex-1">
-            <h1 class="truncate text-title font-semibold text-highlighted">
-                {{ props.name }}
-            </h1>
-            <p class="text-xs text-muted">
-                {{ t("review.found", { count: props.total }) }}
-                · {{ t("review.openCount", { count: props.openCount }) }}
-            </p>
+         The middle of this toolbar is not the middle of the window: the
+         workspace nav takes a column to the left of it. The tabs are pulled
+         back by half that column so they line up with the centre of the
+         footer, and the title gives up the same half so the two never meet. -->
+    <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+        <div
+            class="flex min-w-0 items-center gap-2 lg:pe-[calc(var(--width-workspace-nav)/2)]"
+        >
+            <UButton
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-arrow-left"
+                :to="localePath('/documents')"
+                :aria-label="t('review.back')"
+            />
+
+            <div class="min-w-0">
+                <h1 class="truncate text-title font-semibold text-highlighted">
+                    {{ props.name }}
+                </h1>
+                <p class="text-xs text-muted">
+                    {{ t("review.found", { count: props.counts.total }) }}
+                    · {{ t("review.redactedCount", { count: props.counts.redacted }) }}
+                </p>
+            </div>
         </div>
 
-        <UndoRedoButtons
-            :can-undo="canUndo"
-            :can-redo="canRedo"
-            @undo="undo"
-            @redo="redo"
-        />
+        <div class="flex items-center lg:translate-x-[calc(var(--width-workspace-nav)/-2)]">
+            <UTabs
+                v-model="view"
+                :items="viewItems"
+                :content="false"
+            />
+        </div>
 
-        <!-- Marking is only meaningful on the reviewable rendering, where the
-             original words are still on screen. -->
-        <ReviewMarkerControls
-            v-if="view === 'original'"
-            v-model:marker="marker"
-            v-model:marker-label="markerLabel"
-            :labels="props.labels"
-        />
+        <div class="flex items-center justify-end gap-2">
+            <!-- How a redaction is written is a property of the result, not a
+                 view of its own: the document underneath is the same either
+                 way. It sits with the tools rather than with the tabs, which
+                 leaves the tabs alone in the middle. -->
+            <ReviewRedactionStyle
+                v-if="!isEditing"
+                v-model="blackout"
+                class="whitespace-nowrap"
+            />
 
-        <UTabs
-            v-model="view"
-            :items="viewItems"
-            :content="false"
-        />
+            <!-- Editing is the only place decisions are made, so the tools that
+                 make them are only there. -->
+            <template v-if="isEditing">
+                <UndoRedoButtons
+                    :can-undo="canUndo"
+                    :can-redo="canRedo"
+                    @undo="undo"
+                    @redo="redo"
+                />
 
-        <UButton
-            icon="i-lucide-wand-sparkles"
-            variant="soft"
-            :disabled="props.openCount === 0"
-            @click="emit('openWizard')"
-        >
-            {{ t("review.wizard.open", { count: props.openCount }) }}
-        </UButton>
+                <ReviewMarkerControls
+                    v-model:marker="marker"
+                    v-model:marker-label="markerLabel"
+                    :labels="props.labels"
+                />
 
-        <ReviewExportMenu :open-count="props.openCount" @export="emit('export', $event)" />
+                <UButton
+                    icon="i-lucide-wand-sparkles"
+                    variant="soft"
+                    :disabled="props.counts.total === 0"
+                    :title="t('review.wizard.open')"
+                    :aria-label="t('review.wizard.open')"
+                    @click="emit('openWizard')"
+                />
+            </template>
+
+            <ReviewExportMenu
+                v-model:blackout="blackout"
+                @export="emit('export', $event)"
+            />
+        </div>
     </div>
 </template>

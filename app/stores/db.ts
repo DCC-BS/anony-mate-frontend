@@ -195,3 +195,41 @@ db.version(5)
                 }
             });
     });
+
+/**
+ * The review used to have three states — open, accepted, rejected — with new
+ * detections arriving undecided and staying in the document until someone
+ * accepted them. It now has two, and starts from the safe one: everything is
+ * redacted until a reader takes a redaction off.
+ *
+ * An undecided detection was visible but meant to be looked at, so it becomes
+ * redacted rather than un-redacted; that is the state a reader would have
+ * reached by accepting it, and it errs towards hiding rather than revealing.
+ */
+db.version(6)
+    .stores({
+        documents: "id, status, name, createdAt, updatedAt",
+        detections: "id, documentId, label, state",
+        entityTypes: "name, builtin",
+        entityGroups: "id, name, builtin",
+        blacklist: "term, createdAt",
+    })
+    .upgrade(async (tx) => {
+        await tx
+            .table("detections")
+            .toCollection()
+            .modify((detection) => {
+                detection.state =
+                    detection.state === "rejected" ? "unredacted" : "redacted";
+            });
+
+        // A document now remembers which group it was detected with, so the
+        // review can swap it. Documents from before have no record of one.
+        await tx
+            .table("documents")
+            .toCollection()
+            .modify((document) => {
+                document.entityGroupId ??= "";
+                document.entityGroupName ??= "";
+            });
+    });

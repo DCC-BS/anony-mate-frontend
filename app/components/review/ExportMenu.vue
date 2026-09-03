@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-const props = defineProps<{ openCount: number }>();
 const emit = defineEmits<{
     export: [format: "markdown" | "text" | "docx" | "clipboard"];
 }>();
+
+/** Write redactions as black bars rather than as their placeholder. */
+const blackout = defineModel<boolean>("blackout", { default: false });
 
 const { t } = useI18n();
 
@@ -12,6 +14,12 @@ const formats = [
     { format: "text" as const, icon: "i-lucide-file" },
     { format: "docx" as const, icon: "i-lucide-file-type" }
 ];
+
+/** The two ways a redaction can read in the exported document. */
+const styles = [
+    { blacked: false, key: "placeholder" },
+    { blacked: true, key: "blacked" }
+] as const;
 </script>
 
 <template>
@@ -24,14 +32,41 @@ const formats = [
         </UButton>
 
         <template #content>
-            <div class="flex w-64 flex-col gap-1 p-3">
+            <div class="flex w-72 flex-col gap-1 p-3">
+                <!-- Which of the two the export writes is the one thing about
+                     it a reader cannot take back, so it is asked here rather
+                     than only implied by the preview's toggle. Both controls
+                     hold the same setting, so the preview shows the answer. -->
                 <span class="text-xs font-semibold uppercase tracking-wide text-muted">
-                    {{ t("export.formats.title") }}
+                    {{ t("redactionStyle.title") }}
                 </span>
 
-                <p v-if="props.openCount" class="pb-1 text-xs text-warning">
-                    {{ t("export.openWarning", { count: props.openCount }) }}
-                </p>
+                <UButton
+                    v-for="style in styles"
+                    :key="style.key"
+                    block
+                    :variant="blackout === style.blacked ? 'soft' : 'ghost'"
+                    :color="blackout === style.blacked ? 'primary' : 'neutral'"
+                    class="justify-start"
+                    :trailing-icon="blackout === style.blacked ? 'i-lucide-check' : undefined"
+                    :ui="{ trailingIcon: 'ms-auto' }"
+                    @click="blackout = style.blacked"
+                >
+                    <template #leading>
+                        <ReviewRedactionStyleMark :blacked="style.blacked" />
+                    </template>
+
+                    <span class="flex min-w-0 flex-col items-start">
+                        <span>{{ t(`redactionStyle.${style.key}`) }}</span>
+                        <span class="font-mono text-xs text-muted">
+                            {{ t(`redactionStyle.${style.key}Example`) }}
+                        </span>
+                    </span>
+                </UButton>
+
+                <span class="pt-2 text-xs font-semibold uppercase tracking-wide text-muted">
+                    {{ t("export.formats.title") }}
+                </span>
 
                 <UButton
                     v-for="entry in formats"

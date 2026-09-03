@@ -103,16 +103,16 @@
             "detections": "Detections",
             "review": "Review",
             "retry": "Try again",
-            "remove": "Remove"
+            "remove": "Remove",
+            "group": "Detection group"
         },
         "status": {
             "staged": "Queued",
             "converting": "Reading",
             "redacting": "Detecting",
-            "ready": "Ready for review",
+            "ready": "Redacted",
             "failed": "Failed",
             "failedHint": "Processing failed. Please try again.",
-            "reviewed": "Reviewed",
             "queued": "Queued (#{position})"
         },
         "search": "Search documents…",
@@ -136,10 +136,6 @@
             "title": "Detection group",
             "entityCount": "{count} entities",
             "manage": "Manage groups"
-        },
-        "threshold": {
-            "title": "Minimum confidence",
-            "hint": "Lower finds more, at the cost of false positives."
         }
     },
     "review": {
@@ -148,51 +144,49 @@
         "notFound": "This document no longer exists.",
         "detections": "Detections",
         "found": "{count} found",
-        "openCount": "{count} open",
-        "accept": "Accept",
-        "reject": "Discard",
-        "acceptAll": "Accept all",
-        "rejectAll": "Discard all",
         "searchPlaceholder": "Search the document…",
         "stats": {
-            "open": "open",
-            "accepted": "approved",
-            "rejected": "discarded"
+            "redacted": "redacted",
+            "unredacted": "not redacted"
         },
         "state": {
-            "open": "Open",
-            "accepted": "Approved",
-            "rejected": "Discarded"
+            "redacted": "Redacted",
+            "unredacted": "Not redacted"
         },
         "view": {
-            "original": "Original",
-            "anonymised": "Anonymised",
-            "blacked": "Blacked out"
+            "editor": "Editor",
+            "preview": "Preview"
         },
         "wizard": {
             "title": "Review assistant",
-            "open": "Assistant · {count} open",
+            "open": "Review assistant",
             "progress": "{done} of {total} reviewed",
             "changeCategory": "Change category",
-            "later": "Later",
-            "hint": "Nothing is changed until the export is run.",
-            "done": "No open detections left",
+            "keep": "Keep redacted",
+            "hint": "Keeping the redaction is the safe choice; un-redacting puts the original words back.",
+            "done": "Every detection reviewed",
             "close": "Back to the document"
         },
         "copy": "Copy",
         "copied": "Copied",
         "pages": "Pages",
         "page": "Page {page}",
-        "acceptAllOccurrences": "Accept all {count} occurrences",
-        "acceptAllOccurrencesShort": "Accept all occurrences",
-        "rejectAllOccurrencesShort": "Discard all occurrences",
-        "acceptAllOpen": "Accept all {count} open",
-        "rejectAllOpen": "Discard all",
         "marker": {
             "toggle": "Mark",
             "search": "Search entity…"
         },
-        "relabel": "Change entity"
+        "relabel": "Change entity",
+        "redact": "Redact",
+        "unredact": "Un-redact",
+        "redactAll": "Redact all",
+        "unredactAll": "Un-redact all",
+        "redactAllOccurrences": "Redact all {count} occurrences",
+        "unredactAllOccurrences": "Un-redact all {count} occurrences",
+        "redactAllOccurrencesShort": "Redact all occurrences",
+        "unredactAllOccurrencesShort": "Un-redact all occurrences",
+        "settings": "Settings",
+        "unredactedCount": "{count} not redacted",
+        "redactedCount": "{count} redacted"
     },
     "entities": {
         "title": "Entities",
@@ -250,8 +244,7 @@
     },
     "export": {
         "export": "Export",
-        "openWarning": "{count} detections are still open and stay visible.",
-        "hint": "Only accepted detections are replaced.",
+        "hint": "Only redacted detections are replaced; un-redacted ones stay as they are.",
         "formats": {
             "title": "Format",
             "markdown": "Markdown (.md)",
@@ -260,5 +253,26 @@
             "clipboard": "Copy to clipboard"
         },
         "copied": "Copied"
+    },
+    "threshold": {
+        "title": "Minimum confidence",
+        "hint": "Lower finds more, at the cost of false positives."
+    },
+    "recompute": {
+        "action": "Detect again",
+        "chooseGroup": "Choose a detection group",
+        "confirmTitle": "Detect again with “{group}”?",
+        "confirmHint": "The current detections, and every decision made on them, are replaced.",
+        "back": "Back",
+        "start": "Detect again"
+    },
+    "redactionStyle": {
+        "title": "Redaction style",
+        "placeholder": "Placeholder",
+        "placeholderExample": "Person-1",
+        "placeholderHint": "Each redaction is written as a named placeholder; repeated mentions keep their number.",
+        "blacked": "Black bars",
+        "blackedExample": "████████",
+        "blackedHint": "Each redaction becomes a black bar; what kind of detail it was is no longer visible."
     }
 }

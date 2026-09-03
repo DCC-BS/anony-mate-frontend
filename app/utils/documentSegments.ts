@@ -6,8 +6,8 @@ import type { StoredDetection } from "~/types/storedDocument";
  *
  * `start` and `end` are offsets into the page's own text. They are carried
  * rather than derived, because what a segment renders is not always what the
- * document says: an accepted detection shows its replacement instead of the
- * words it stands for.
+ * document says: the preview shows a redacted detection's replacement instead
+ * of the words it stands for.
  */
 export type DocumentSegment = { start: number; end: number } & (
     | { kind: "text"; text: string }
@@ -18,18 +18,17 @@ export type DocumentSegment = { start: number; end: number } & (
  * Splits one page into plain and detected segments. Detections are sorted and
  * any overlap is skipped, so the segments always tile the page exactly once.
  *
- * A rejected detection is one the reader has decided is not a mention, so its
- * words read as ordinary text again rather than staying marked up.
+ * Un-redacted detections are segments too. The reader took the redaction off,
+ * not the finding, so the words stay marked — outlined rather than filled — and
+ * can be redacted again with one click.
  */
 export function segmentsOf(page: DocumentPage): DocumentSegment[] {
     const segments: DocumentSegment[] = [];
     let cursor = 0;
 
-    const shown = page.detections.filter(
-        (detection) => detection.state !== "rejected",
-    );
-
-    for (const detection of [...shown].sort((a, b) => a.start - b.start)) {
+    for (const detection of [...page.detections].sort(
+        (a, b) => a.start - b.start,
+    )) {
         if (detection.start < cursor) {
             continue;
         }

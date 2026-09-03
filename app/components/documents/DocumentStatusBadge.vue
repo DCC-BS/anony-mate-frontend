@@ -3,7 +3,6 @@ import type { StoredDocument } from "~/types/storedDocument";
 
 const props = defineProps<{
     document: StoredDocument;
-    openCount?: number;
     /** Place in the API queue, when the work is waiting on a busy service. */
     queuePosition?: number | null;
 }>();
@@ -11,14 +10,11 @@ const props = defineProps<{
 const { t } = useI18n();
 
 /**
- * A ready document whose detections have all been decided is shown as
- * reviewed, so the list distinguishes "still to do" from "done".
+ * A document is redacted the moment its detections arrive — everything found
+ * is taken out until a reader says otherwise — so a ready document is a done
+ * one, and the review is where it is refined rather than completed.
  */
-const status = computed(() =>
-    props.document.status === "ready" && props.openCount === 0
-        ? "reviewed"
-        : props.document.status
-);
+const status = computed(() => props.document.status);
 
 const presentation = computed(
     () =>
@@ -26,8 +22,7 @@ const presentation = computed(
             staged: { color: "neutral" as const, icon: "i-lucide-clock" },
             converting: { color: "info" as const, icon: "i-lucide-file-cog" },
             redacting: { color: "info" as const, icon: "i-lucide-scan-text" },
-            ready: { color: "warning" as const, icon: "i-lucide-eye" },
-            reviewed: { color: "success" as const, icon: "i-lucide-check" },
+            ready: { color: "success" as const, icon: "i-lucide-check" },
             failed: { color: "error" as const, icon: "i-lucide-circle-alert" }
         })[status.value]
 );

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { StoredDetection } from "~/types/storedDocument";
+import type { DetectionState, StoredDetection } from "~/types/storedDocument";
 
 const props = defineProps<{
     open: boolean;
@@ -10,7 +10,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
     "update:open": [value: boolean];
-    decide: [id: string, state: StoredDetection["state"]];
+    setState: [id: string, state: DetectionState];
     relabel: [id: string, label: string];
 }>();
 
@@ -21,8 +21,18 @@ const { entityName } = useEntityName();
 /** Detections put off with "later", so the wizard does not offer them again. */
 const skipped = ref<string[]>([]);
 
+/**
+ * What is left to look at.
+ *
+ * Everything starts redacted, so the wizard walks the redactions rather than a
+ * queue of undecided findings: each step asks whether this one has to be taken
+ * out, and un-redacting it is what settles it.
+ */
 const queue = computed(() =>
-    props.items.filter((item) => !skipped.value.includes(item.id))
+    props.items.filter(
+        (item) =>
+            item.state === "redacted" && !skipped.value.includes(item.id)
+    )
 );
 const current = computed(() => queue.value[0]);
 
@@ -44,9 +54,9 @@ const context = computed(() => {
     };
 });
 
-function decide(state: StoredDetection["state"]) {
+function setState(state: DetectionState) {
     if (current.value) {
-        emit("decide", current.value.id, state);
+        emit("setState", current.value.id, state);
     }
 }
 
@@ -71,8 +81,8 @@ function chooseLabel(label: string) {
 }
 
 defineShortcuts({
-    enter: () => props.open && decide("accepted"),
-    backspace: () => props.open && decide("rejected"),
+    enter: () => props.open && skip(),
+    backspace: () => props.open && setState("unredacted"),
     arrowright: () => props.open && skip()
 });
 </script>
@@ -142,15 +152,20 @@ defineShortcuts({
         </template>
 
         <template #footer>
+            <!-- Keeping the redaction is the safe move and the one the reader
+                 makes most, so it is the primary button and the one Enter
+                 presses. -->
             <div v-if="current" class="flex w-full gap-2">
-                <UButton variant="soft" color="neutral" @click="decide('rejected')">
-                    {{ t("review.reject") }} ⌫
+                <UButton
+                    variant="soft"
+                    color="neutral"
+                    icon="i-lucide-eye"
+                    @click="setState('unredacted')"
+                >
+                    {{ t("review.unredact") }} ⌫
                 </UButton>
-                <UButton variant="ghost" color="neutral" @click="skip">
-                    {{ t("review.wizard.later") }} →
-                </UButton>
-                <UButton class="ms-auto" color="primary" @click="decide('accepted')">
-                    {{ t("review.accept") }} ⏎
+                <UButton class="ms-auto" color="primary" icon="i-lucide-eye-off" @click="skip">
+                    {{ t("review.wizard.keep") }} ⏎
                 </UButton>
             </div>
 

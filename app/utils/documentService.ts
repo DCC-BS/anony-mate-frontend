@@ -116,7 +116,7 @@ export function getDocumentService() {
                     start: entity.start,
                     end: entity.end,
                     confidence: entity.confidence,
-                    state: "open",
+                    state: "redacted",
                 }),
             ),
         );
@@ -127,16 +127,6 @@ export function getDocumentService() {
         });
 
         return detections.length;
-    }
-
-    /**
-     * Records a review decision for one detection.
-     */
-    async function setDetectionState(
-        id: string,
-        state: StoredDetection["state"],
-    ): Promise<void> {
-        await db.detections.update(id, { state });
     }
 
     /**
@@ -169,7 +159,6 @@ export function getDocumentService() {
         deleteDocument,
         getDetections,
         replaceDetections,
-        setDetectionState,
         cleanupOldDocuments,
     };
 }

@@ -1,11 +1,11 @@
 import type { DropdownMenuItem } from "@nuxt/ui";
-import type { StoredDetection } from "~/types/storedDocument";
+import type { DetectionState, StoredDetection } from "~/types/storedDocument";
 
 /** What the menu can ask of the detection it was opened on. */
 export interface DetectionMenuActions {
     relabel: (id: string, label: string) => void;
-    decide: (id: string, state: StoredDetection["state"]) => void;
-    decideAll: (text: string, state: StoredDetection["state"]) => void;
+    setState: (id: string, state: DetectionState) => void;
+    setAllOccurrences: (text: string, state: DetectionState) => void;
 }
 
 /**
@@ -47,6 +47,8 @@ export function useDetectionMenu(
             return [];
         }
 
+        const isRedacted = detection.state === "redacted";
+
         return [
             [
                 {
@@ -69,30 +71,35 @@ export function useDetectionMenu(
                         })),
                 },
             ],
+            // Only the move this detection can make: the state it is already in
+            // would be an entry that does nothing.
             [
-                {
-                    label: t("review.accept"),
-                    icon: "i-lucide-check",
-                    onSelect: () => actions.decide(detection.id, "accepted"),
-                },
-                {
-                    label: t("review.reject"),
-                    icon: "i-lucide-x",
-                    onSelect: () => actions.decide(detection.id, "rejected"),
-                },
+                isRedacted
+                    ? {
+                          label: t("review.unredact"),
+                          icon: "i-lucide-eye",
+                          onSelect: () =>
+                              actions.setState(detection.id, "unredacted"),
+                      }
+                    : {
+                          label: t("review.redact"),
+                          icon: "i-lucide-eye-off",
+                          onSelect: () =>
+                              actions.setState(detection.id, "redacted"),
+                      },
             ],
             [
                 {
-                    label: t("review.acceptAllOccurrencesShort"),
-                    icon: "i-lucide-check-check",
+                    label: t("review.redactAllOccurrencesShort"),
+                    icon: "i-lucide-eye-off",
                     onSelect: () =>
-                        actions.decideAll(detection.text, "accepted"),
+                        actions.setAllOccurrences(detection.text, "redacted"),
                 },
                 {
-                    label: t("review.rejectAllOccurrencesShort"),
-                    icon: "i-lucide-x-circle",
+                    label: t("review.unredactAllOccurrencesShort"),
+                    icon: "i-lucide-eye",
                     onSelect: () =>
-                        actions.decideAll(detection.text, "rejected"),
+                        actions.setAllOccurrences(detection.text, "unredacted"),
                 },
             ],
         ];

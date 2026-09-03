@@ -1,5 +1,3 @@
-import type { DocumentView } from "~/composables/useDocumentReview";
-
 /** About a second at 60Hz: long enough for a view to render, short enough
  *  that a view which never settles does not hold the reader. */
 const FRAMES_AWAITING_LAYOUT = 60;
@@ -12,11 +10,11 @@ const FRAMES_AWAITING_LAYOUT = 60;
  * how far into it the reader had come.
  *
  * @param scroller - The scrolling pane holding the pages.
- * @param view - The view being switched between.
+ * @param view - What is being switched between; any change re-anchors.
  */
 export function useViewAnchor(
     scroller: Ref<HTMLElement | null>,
-    view: MaybeRefOrGetter<DocumentView>,
+    view: MaybeRefOrGetter<string>,
 ) {
     const anchor = ref<{ page: number; fraction: number }>();
 
