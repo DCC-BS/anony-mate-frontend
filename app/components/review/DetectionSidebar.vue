@@ -1,12 +1,9 @@
 <script lang="ts" setup>
-import type { DetectionState, StoredDetection } from "~/types/storedDocument";
+import type { DetectionGroup } from "~/composables/useDetectionGroups";
+import type { DetectionState } from "~/types/storedDocument";
 
 const props = defineProps<{
-    groups: {
-        label: string;
-        items: StoredDetection[];
-        unredactedCount: number;
-    }[];
+    groups: DetectionGroup[];
     counts: { total: number; redacted: number; unredacted: number };
     selectedId?: string;
     occurrencesOf: (text: string) => number;
@@ -36,137 +33,22 @@ const threshold = defineModel<number>("threshold", {
 
 const { t } = useI18n();
 
-const query = ref("");
-
-/** Groups the reader has opened. */
-const expanded = ref(new Set<string>());
-
-function toggleGroup(label: string): void {
-    const next = new Set(expanded.value);
-    if (!next.delete(label)) {
-        next.add(label);
-    }
-    expanded.value = next;
-}
-
-/** Groups filtered by the search box, empty groups dropped. */
-const visibleGroups = computed(() => {
-    const needle = query.value.trim().toLowerCase();
-    if (!needle) {
-        return props.groups;
-    }
-
-    return props.groups
-        .map((group) => ({
-            ...group,
-            items: group.items.filter((item) =>
-                item.text.toLowerCase().includes(needle)
-            )
-        }))
-        .filter((group) => group.items.length > 0);
-});
-
-/**
- * Groups and their detections as one flat list of rows.
- *
- * A document can carry thousands of detections, and rendering them all at once
- * is what makes the sidebar crawl. Flattening lets a single virtualised scroll
- * area mount only the rows on screen, which needs one list rather than a
- * scroller per group.
- */
-/**
- * Measured row heights. The virtualiser sizes the scrollbar from these until a
- * row has been rendered and measured, so an estimate that is too small makes
- * the track grow while the reader drags it and the list appears to stop short
- * of the end.
- */
-const ROW_HEIGHT = { item: 58, group: 37, groupExpanded: 69 };
-
-const rows = computed(() =>
-    visibleGroups.value.flatMap((group) => {
-        const header = {
-            kind: "group" as const,
-            id: `group:${group.label}`,
-            label: group.label,
-            count: group.items.length,
-            unredactedCount: group.unredactedCount,
-            expanded: expanded.value.has(group.label)
-        };
-
-        if (!header.expanded) {
-            return [header];
-        }
-
-        return [
-            header,
-            ...group.items.map((detection) => ({
-                kind: "item" as const,
-                id: detection.id,
-                detection
-            }))
-        ];
-    })
+const { query, rows, estimateRow, toggleGroup } = useDetectionRows(
+    () => props.groups,
+    () => !props.readonly
 );
-
-function estimateRow(index: number): number {
-    const row = rows.value[index];
-    if (!row) {
-        return ROW_HEIGHT.item;
-    }
-    if (row.kind === "item") {
-        return ROW_HEIGHT.item;
-    }
-    // The bulk actions the header opens onto are not there to measure while
-    // the preview has them hidden.
-    return row.expanded && !props.readonly
-        ? ROW_HEIGHT.groupExpanded
-        : ROW_HEIGHT.group;
-}
 </script>
 
 <template>
     <div class="flex h-full min-h-0 flex-col gap-3">
-        <div class="flex items-center justify-between gap-2">
-            <h2 class="font-semibold text-(--ui-text-highlighted)">
-                {{ t("review.detections") }}
-            </h2>
-
-            <div class="flex items-center gap-1.5">
-                <span class="text-xs text-(--ui-text-muted)">
-                    {{ t("review.found", { count: props.counts.total }) }}
-                </span>
-
-                <!-- Re-detecting throws this whole list away and builds a new
-                     one, so it sits with the list rather than with the
-                     document's own tools. -->
-                <RecomputeButton
-                    size="xs"
-                    :document-id="props.documentId"
-                    :group-id="props.groupId"
-                    :busy="props.busy"
-                />
-
-                <UPopover>
-                    <UButton
-                        icon="i-lucide-settings-2"
-                        variant="ghost"
-                        color="neutral"
-                        size="xs"
-                        :aria-label="t('review.settings')"
-                        :title="t('review.settings')"
-                    />
-
-                    <template #content>
-                        <div class="w-64 p-3">
-                            <ThresholdSlider
-                                v-model="threshold"
-                                :min="props.thresholdFloor"
-                            />
-                        </div>
-                    </template>
-                </UPopover>
-            </div>
-        </div>
+        <ReviewDetectionToolbar
+            v-model:threshold="threshold"
+            :total="props.counts.total"
+            :document-id="props.documentId"
+            :group-id="props.groupId"
+            :busy="props.busy"
+            :threshold-floor="props.thresholdFloor"
+        />
 
         <ReviewDetectionStats :counts="props.counts" />
 
@@ -224,10 +106,7 @@ function estimateRow(index: number): number {
                         :selected="item.detection.id === props.selectedId"
                         :occurrences="props.occurrencesOf(item.detection.text)"
                         :readonly="props.readonly"
-                        @select="emit(
-                            'select',
-                            $event === props.selectedId ? undefined : $event
-                        )"
+                        @select="emit('select', $event === props.selectedId ? undefined : $event)"
                         @set-state="(id, state) => emit('setState', id, state)"
                         @set-all-occurrences="(text, state) => emit('setAllOccurrences', text, state)"
                     />

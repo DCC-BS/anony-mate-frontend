@@ -15,11 +15,6 @@ const formats = [
     { format: "docx" as const, icon: "i-lucide-file-type" }
 ];
 
-/** The two ways a redaction can read in the exported document. */
-const styles = [
-    { blacked: false, key: "placeholder" },
-    { blacked: true, key: "blacked" }
-] as const;
 </script>
 
 <template>
@@ -42,7 +37,7 @@ const styles = [
                 </span>
 
                 <UButton
-                    v-for="style in styles"
+                    v-for="style in REDACTION_STYLES"
                     :key="style.key"
                     block
                     :variant="blackout === style.blacked ? 'soft' : 'ghost'"

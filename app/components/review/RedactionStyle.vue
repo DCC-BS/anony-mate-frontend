@@ -4,10 +4,6 @@ const blackout = defineModel<boolean>({ default: false });
 
 const { t } = useI18n();
 
-const styles = [
-    { blacked: false, key: "placeholder" },
-    { blacked: true, key: "blacked" }
-] as const;
 </script>
 
 <template>
@@ -16,7 +12,7 @@ const styles = [
          reader what turning it off gives them. -->
     <UFieldGroup>
         <UButton
-            v-for="style in styles"
+            v-for="style in REDACTION_STYLES"
             :key="style.key"
             variant="subtle"
             :color="blackout === style.blacked ? 'primary' : 'neutral'"
