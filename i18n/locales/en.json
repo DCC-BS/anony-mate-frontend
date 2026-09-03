@@ -184,6 +184,7 @@
         "unredactAllOccurrences": "Un-redact all {count} occurrences",
         "redactAllOccurrencesShort": "Redact all occurrences",
         "unredactAllOccurrencesShort": "Un-redact all occurrences",
+        "removeDetection": "Delete detection",
         "settings": "Settings",
         "unredactedCount": "{count} not redacted",
         "redactedCount": "{count} redacted"

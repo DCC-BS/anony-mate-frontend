@@ -6,6 +6,7 @@ export interface DetectionMenuActions {
     relabel: (id: string, label: string) => void;
     setState: (id: string, state: DetectionState) => void;
     setAllOccurrences: (text: string, state: DetectionState) => void;
+    removeDetection: (id: string) => void;
 }
 
 /**
@@ -100,6 +101,16 @@ export function useDetectionMenu(
                     icon: "i-lucide-eye",
                     onSelect: () =>
                         actions.setAllOccurrences(detection.text, "unredacted"),
+                },
+            ],
+            [
+                {
+                    // Removing is the one move that needs spelling out: every
+                    // other entry changes how a mention is written, this one
+                    // says it is not sensitive at all.
+                    label: t("review.removeDetection"),
+                    icon: "i-lucide-trash-2",
+                    onSelect: () => actions.removeDetection(detection.id),
                 },
             ],
         ];

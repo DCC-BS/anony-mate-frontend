@@ -87,6 +87,7 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         setAllOccurrences,
         setAllStates,
         addDetection: recordDetection,
+        removeDetection,
         relabel,
     } = useDetectionEditing(documentId, detections);
 
@@ -131,5 +132,6 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         occurrenceCount,
         relabel,
         addDetection,
+        removeDetection,
     };
 }

@@ -184,6 +184,7 @@
         "unredactAllOccurrences": "Alle {count} Vorkommen aufheben",
         "redactAllOccurrencesShort": "Alle Vorkommen schwärzen",
         "unredactAllOccurrencesShort": "Alle Vorkommen aufheben",
+        "removeDetection": "Erkennung löschen",
         "settings": "Einstellungen",
         "unredactedCount": "{count} nicht geschwärzt",
         "redactedCount": "{count} geschwärzt"

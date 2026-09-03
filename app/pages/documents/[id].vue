@@ -23,6 +23,7 @@ const {
     occurrenceCount,
     relabel,
     addDetection,
+    removeDetection,
 } = useDocumentReview(documentId);
 
 const { slices, hasPages, pageOf, detectionCounts } = useDocumentPages(
@@ -123,6 +124,7 @@ function annotate(start: number, end: number, text: string) {
                 @set-state="setState"
                 @set-all-occurrences="setAllOccurrences"
                 @relabel="relabel"
+                @remove-detection="removeDetection"
                 @annotate="annotate"
             />
 

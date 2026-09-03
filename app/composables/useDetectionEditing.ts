@@ -113,6 +113,19 @@ export function useDetectionEditing(
         return edit(existing ? [existing] : [], [marked]);
     }
 
+    /**
+     * Takes a detection out of the document for good.
+     *
+     * A decision changes how a mention is written; removing it says the
+     * mention is not sensitive at all, so the row goes and the words are
+     * plain text again. The command history still holds it, so it can be
+     * brought back with undo like any other edit.
+     */
+    function removeDetection(id: string): Promise<void> {
+        const detection = toValue(detections).find((item) => item.id === id);
+        return detection ? edit([detection], []) : Promise.resolve();
+    }
+
     /** Moves a detection to a different entity type, keeping its decision. */
     function relabel(id: string, label: string): Promise<void> {
         const detection = toValue(detections).find((item) => item.id === id);
@@ -140,6 +153,7 @@ export function useDetectionEditing(
         setAllOccurrences,
         setAllStates,
         addDetection,
+        removeDetection,
         relabel,
     };
 }

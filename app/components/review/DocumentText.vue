@@ -27,6 +27,7 @@ const emit = defineEmits<{
     setState: [id: string, state: DetectionState];
     setAllOccurrences: [text: string, state: DetectionState];
     relabel: [id: string, label: string];
+    removeDetection: [id: string];
     annotate: [start: number, end: number, text: string];
 }>();
 
@@ -90,10 +91,10 @@ function previewPage(page: DocumentPage): string {
     );
 }
 
-/** In marking mode a click on a detection takes it back out of the document. */
+/** In marking mode a click on a detection erases it from the document. */
 function onDetectionClick(detection: StoredDetection): void {
     if (props.marker) {
-        emit("setState", detection.id, "unredacted");
+        emit("removeDetection", detection.id);
         return;
     }
 
@@ -156,6 +157,7 @@ useEventListener(scroller, "click", (event: MouseEvent) => {
         @relabel="(id, label) => emit('relabel', id, label)"
         @set-state="(id, state) => emit('setState', id, state)"
         @set-all-occurrences="(text, state) => emit('setAllOccurrences', text, state)"
+        @remove-detection="(id) => emit('removeDetection', id)"
     />
 </template>
 

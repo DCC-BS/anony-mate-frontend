@@ -14,7 +14,7 @@ export function useMarkerCursor(colour: MaybeRefOrGetter<string>) {
         ),
     );
 
-    /** An eraser: clicking a detection in marking mode takes it out again. */
+    /** An eraser: clicking a detection in marking mode deletes it. */
     const eraser = computed(() =>
         cursor(
             `<g transform="rotate(38 13 13)">

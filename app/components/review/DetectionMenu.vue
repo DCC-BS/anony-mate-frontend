@@ -9,6 +9,7 @@ const emit = defineEmits<{
     relabel: [id: string, label: string];
     setState: [id: string, state: DetectionState];
     setAllOccurrences: [text: string, state: DetectionState];
+    removeDetection: [id: string];
 }>();
 
 /**
@@ -26,6 +27,7 @@ const menu = useDetectionMenu(
         setState: (id, state) => emit("setState", id, state),
         setAllOccurrences: (text, state) =>
             emit("setAllOccurrences", text, state),
+        removeDetection: (id) => emit("removeDetection", id),
     },
 );
 
