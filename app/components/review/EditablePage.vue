@@ -78,7 +78,7 @@ function presentationOf(detection: StoredDetection) {
 
 <template>
     <div
-        class="whitespace-pre-wrap break-words"
+        class="whitespace-pre-wrap wrap-break-word"
         :style="toolStyle"
     >
         <template v-for="(part, index) in segments" :key="index">
