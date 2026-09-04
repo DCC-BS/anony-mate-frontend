@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import { useEventListener } from "@vueuse/core";
 import type { DocumentPage } from "~/composables/useDocumentPages";
-import type { DocumentView } from "~/composables/useDocumentReview";
+import type {
+    DocumentView,
+    ReviewTool,
+} from "~/composables/useDocumentReview";
 import type { DetectionState, StoredDetection } from "~/types/storedDocument";
 
 const props = defineProps<{
@@ -15,8 +18,8 @@ const props = defineProps<{
     replacements: Record<string, string>;
     /** Entity types this document was detected with, for relabelling. */
     labels: string[];
-    /** Marking mode: a selection becomes a detection, a click removes one. */
-    marker?: boolean;
+    /** The tool in the reader's hand: a selection marks, an eraser removes. */
+    tool?: ReviewTool;
     /** Entity type a mark is filed under, and the colour the cursors take. */
     markerLabel?: string;
 }>();
@@ -50,7 +53,7 @@ useViewAnchor(scroller, () => `${props.view}:${props.blackout}`);
 useMarkSelection(
     scroller,
     () => props.slices,
-    () => props.marker,
+    () => props.tool === "mark",
     (start, end, text) => emit("annotate", start, end, text),
 );
 
@@ -91,9 +94,9 @@ function previewPage(page: DocumentPage): string {
     );
 }
 
-/** In marking mode a click on a detection erases it from the document. */
+/** A click on a detection acts with the tool in the reader's hand. */
 function onDetectionClick(detection: StoredDetection): void {
-    if (props.marker) {
+    if (props.tool === "erase") {
         emit("removeDetection", detection.id);
         return;
     }
@@ -135,7 +138,7 @@ useEventListener(scroller, "click", (event: MouseEvent) => {
                     v-if="isEditing"
                     :page="page"
                     :replacements="props.replacements"
-                    :marker="props.marker"
+                    :tool="props.tool"
                     :nib="nib"
                     :eraser="eraser"
                     @select="onDetectionClick"

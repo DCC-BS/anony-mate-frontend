@@ -1,5 +1,5 @@
 /**
- * The pointers marking mode uses.
+ * The pointers the review's tools use.
  *
  * A cursor is an image, so its colour cannot come from CSS: the nib is an
  * inline SVG rebuilt when the type changes, and carries that type's colour. The

@@ -171,8 +171,14 @@
         "copied": "Kopiert",
         "pages": "Seiten",
         "page": "Seite {page}",
+        "collapsePages": "Seitenübersicht einklappen",
+        "expandPages": "Seitenübersicht ausklappen",
         "marker": {
-            "toggle": "Markieren",
+            "tool": {
+                "select": "Auswählen",
+                "mark": "Markieren",
+                "erase": "Radieren"
+            },
             "search": "Entität suchen…"
         },
         "relabel": "Entität ändern",

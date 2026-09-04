@@ -171,8 +171,14 @@
         "copied": "Copied",
         "pages": "Pages",
         "page": "Page {page}",
+        "collapsePages": "Collapse page overview",
+        "expandPages": "Expand page overview",
         "marker": {
-            "toggle": "Mark",
+            "tool": {
+                "select": "Select",
+                "mark": "Mark",
+                "erase": "Erase"
+            },
             "search": "Search entity…"
         },
         "relabel": "Change entity",

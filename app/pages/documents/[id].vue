@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-import type { DocumentView } from "~/composables/useDocumentReview";
+import type {
+    DocumentView,
+    ReviewTool,
+} from "~/composables/useDocumentReview";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -34,8 +37,10 @@ const { slices, hasPages, pageOf, detectionCounts } = useDocumentPages(
 
 const view = ref<DocumentView>("editor");
 const blackout = ref(false);
-const markerActive = ref(false);
+const tool = ref<ReviewTool>("select");
 const markerLabel = ref("");
+/** Whether the page rail is folded down to its strip. */
+const pagesCollapsed = ref(false);
 
 /** The document is out at the API, so its detections are about to be replaced. */
 const isBusy = computed(
@@ -87,7 +92,7 @@ function annotate(start: number, end: number, text: string) {
         <ReviewHeader
             v-model:view="view"
             v-model:blackout="blackout"
-            v-model:marker="markerActive"
+            v-model:tool="tool"
             v-model:marker-label="markerLabel"
             :labels="availableLabels"
             :name="storedDocument.name"
@@ -99,12 +104,15 @@ function annotate(start: number, end: number, text: string) {
         <div
             class="grid min-h-0 flex-1 gap-4"
             :class="hasPages
-                ? 'lg:grid-cols-[var(--width-page-rail)_minmax(0,1fr)_var(--width-detections)]'
+                ? (pagesCollapsed
+                    ? 'lg:grid-cols-[var(--width-page-rail-collapsed)_minmax(0,1fr)_var(--width-detections)] lg:gap-2'
+                    : 'lg:grid-cols-[var(--width-page-rail)_minmax(0,1fr)_var(--width-detections)]')
                 : 'lg:grid-cols-[minmax(0,1fr)_var(--width-detections)]'"
         >
             <ReviewPageList
                 v-if="hasPages"
                 class="hidden lg:flex"
+                v-model:collapsed="pagesCollapsed"
                 :counts="detectionCounts"
                 :active-page="activePage"
                 @select="goToPage"
@@ -117,7 +125,7 @@ function annotate(start: number, end: number, text: string) {
                 :replacements="replacements"
                 :selected-id="selectedId"
                 :labels="availableLabels"
-                :marker="markerActive"
+                :tool="tool"
                 :marker-label="markerLabel"
                 @visible-page="activePage = $event"
                 @select="selectDetection($event)"

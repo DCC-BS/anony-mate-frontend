@@ -29,6 +29,8 @@
 
     /* The columns beside the document: the page rail and the detections. */
     --width-page-rail: 8rem;
+    /* The page rail folded down to the one button that reopens it. */
+    --width-page-rail-collapsed: 1.75rem;
     --width-detections: 20.625rem;
     /* The workspace navigation, and one column of the entity workbench. */
     --width-workspace-nav: 12.25rem;

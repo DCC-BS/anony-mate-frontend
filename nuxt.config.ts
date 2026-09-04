@@ -60,6 +60,21 @@ export default defineNuxtConfig({
     ui: {
         colorMode: false,
     },
+    icon: {
+        clientBundle: {
+            // The app and the DCC shared layers pick icons by string (e.g.
+            // "i-lucide-files", "lucide:history"), which the default bundle
+            // misses. Scan sources so every used icon ships in the bundle and
+            // nothing falls back to a remote fetch at runtime. The default
+            // glob omits plain .ts/.js, so icons named inside composables and
+            // utils never made it into the bundle.
+            scan: {
+                // Keep the defaults and add the script/asset extensions the
+                // app names icons from.
+                globInclude: ["**/*.{vue,js,jsx,ts,tsx,md,mdc,mdx,yml,yaml}"],
+            },
+        },
+    },
     modules: [
         "@nuxt/ui",
         "@nuxtjs/i18n",

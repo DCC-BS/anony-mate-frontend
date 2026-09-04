@@ -5,6 +5,15 @@ import type { StoredDetection, StoredDocument } from "~/types/storedDocument";
 export type DocumentView = "editor" | "preview";
 
 /**
+ * The tool in the reader's hand.
+ *
+ * The review's editor is a surface the reader draws decisions on: words are
+ * picked (select), inked as detections (mark), or rubbed back out (erase) —
+ * so the tools of a drawing app describe its three modes.
+ */
+export type ReviewTool = "select" | "mark" | "erase";
+
+/**
  * Loads one document with its detections and records the review decisions.
  *
  * Decisions are written straight to IndexedDB, so a reload picks the review up

@@ -26,10 +26,6 @@ const { t } = useI18n();
         </h2>
 
         <div class="flex items-center gap-1.5">
-            <span class="text-xs text-(--ui-text-muted)">
-                {{ t("review.found", { count: props.total }) }}
-            </span>
-
             <!-- Re-detecting throws this whole list away and builds a new one,
                  so it sits with the list rather than with the document's own
                  tools. -->

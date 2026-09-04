@@ -1,13 +1,14 @@
 <script lang="ts" setup>
 import type { DocumentPage } from "~/composables/useDocumentPages";
+import type { ReviewTool } from "~/composables/useDocumentReview";
 import type { StoredDetection } from "~/types/storedDocument";
 
 const props = defineProps<{
     page: DocumentPage;
     /** Replacement template per entity type, for the tooltips. */
     replacements: Record<string, string>;
-    /** Marking mode: the cursors change and a click erases rather than selects. */
-    marker?: boolean;
+    /** The tool in the reader's hand: the cursor changes with it. */
+    tool?: ReviewTool;
     /** Cursor while marking, and the one shown over an existing detection. */
     nib?: string;
     eraser?: string;
@@ -34,6 +35,22 @@ const segments = computed(() =>
             : segment,
     ),
 );
+
+/** How the page's cursor reads, from the tool in the reader's hand. */
+const toolStyle = computed(() => {
+    if (props.tool === "mark") {
+        return { cursor: props.nib };
+    }
+    if (props.tool === "erase") {
+        return { cursor: props.eraser };
+    }
+    return undefined;
+});
+
+/** A detection keeps the eraser while erasing; otherwise it points. */
+function detectionStyle(part: { style: Record<string, string> }) {
+    return [part.style, props.tool === "erase" ? { cursor: props.eraser } : {}];
+}
 
 /** How one detection is drawn and what its tooltip says. */
 function presentationOf(detection: StoredDetection) {
@@ -62,7 +79,7 @@ function presentationOf(detection: StoredDetection) {
 <template>
     <div
         class="whitespace-pre-wrap break-words"
-        :style="props.marker ? { cursor: props.nib } : undefined"
+        :style="toolStyle"
     >
         <template v-for="(part, index) in segments" :key="index">
             <span
@@ -77,7 +94,7 @@ function presentationOf(detection: StoredDetection) {
                 :data-offset="part.start"
                 :data-end="part.end"
                 class="detection-mark inline cursor-pointer rounded border px-0.5 text-left leading-tight"
-                :style="[part.style, props.marker ? { cursor: props.eraser } : {}]"
+                :style="detectionStyle(part)"
                 :title="part.title"
                 @click="emit('select', part.detection)"
                 @contextmenu.prevent="emit('menu', $event, part.detection)"

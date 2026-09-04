@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-import type { DocumentView } from "~/composables/useDocumentReview";
+import type {
+    DocumentView,
+    ReviewTool,
+} from "~/composables/useDocumentReview";
 
 const props = defineProps<{
     name: string;
@@ -15,8 +18,8 @@ const emit = defineEmits<{
 const view = defineModel<DocumentView>("view", { default: "editor" });
 /** Preview only: write redactions as black bars instead of placeholders. */
 const blackout = defineModel<boolean>("blackout", { default: false });
-/** Marking mode: selected words become a detection of the chosen type. */
-const marker = defineModel<boolean>("marker", { default: false });
+/** The tool in the reader's hand, and the type a mark is filed under. */
+const tool = defineModel<ReviewTool>("tool", { default: "select" });
 const markerLabel = defineModel<string>("markerLabel", { default: "" });
 
 const { t } = useI18n();
@@ -28,7 +31,8 @@ const isEditing = computed(() => view.value === "editor");
 const viewItems = computed(() =>
     (["editor", "preview"] as const).map((value) => ({
         label: t(`review.view.${value}`),
-        value
+        value,
+        icon: value === "editor" ? "i-lucide-pen-line" : "i-lucide-eye"
     }))
 );
 </script>
@@ -95,7 +99,7 @@ const viewItems = computed(() =>
                 />
 
                 <ReviewMarkerControls
-                    v-model:marker="marker"
+                    v-model:tool="tool"
                     v-model:marker-label="markerLabel"
                     :labels="props.labels"
                 />
