@@ -21,7 +21,7 @@ const { t } = useI18n();
 
 <template>
     <div class="flex items-center justify-between gap-2">
-        <h2 class="font-semibold text-(--ui-text-highlighted)">
+        <h2 class="font-semibold text-highlighted">
             {{ t("review.detections") }}
         </h2>
 

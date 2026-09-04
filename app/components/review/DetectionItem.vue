@@ -46,7 +46,7 @@ const nextState = computed<DetectionState>(() =>
             @click="emit('select', props.detection.id)"
         >
             <div class="truncate font-mono text-xs">{{ props.detection.text }}</div>
-            <div class="flex items-center gap-2 text-xs text-(--ui-text-muted)">
+            <div class="flex items-center gap-2 text-xs text-muted">
                 <span class="tabular-nums">{{ confidencePercent }}%</span>
                 <span>·</span>
                 <span>{{ t(`review.state.${props.detection.state}`) }}</span>

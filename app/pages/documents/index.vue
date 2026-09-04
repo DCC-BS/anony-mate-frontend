@@ -30,7 +30,7 @@ const hasDocuments = computed(() => documents.value.length > 0);
     <div class="flex h-full min-h-0 flex-col gap-3 px-4 py-3">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="text-xl font-bold text-(--ui-text-highlighted)">
+                <h1 class="text-xl font-bold text-highlighted">
                     {{ t("documents.title") }}
                 </h1>
             </div>
@@ -42,10 +42,10 @@ const hasDocuments = computed(() => documents.value.length > 0);
 
         <UCard v-if="isProcessing && pending.length > 1" :ui="{ body: 'flex flex-col gap-2' }">
             <div class="flex items-center justify-between text-sm">
-                <span class="text-(--ui-text-muted)">
+                <span class="text-muted">
                     {{ t("documents.processing", { count: pending.length }) }}
                 </span>
-                <span class="tabular-nums text-(--ui-text-muted)">{{ progress }}%</span>
+                <span class="tabular-nums text-muted">{{ progress }}%</span>
             </div>
             <UProgress :model-value="progress" />
         </UCard>
@@ -75,8 +75,8 @@ const hasDocuments = computed(() => documents.value.length > 0);
         </div>
 
         <UCard v-else :ui="{ body: 'p-10 text-center flex flex-col items-center gap-3' }">
-            <UIcon name="i-lucide-inbox" class="size-8 text-(--ui-text-dimmed)" />
-            <p class="text-sm text-(--ui-text-muted)">{{ t("documents.empty") }}</p>
+            <UIcon name="i-lucide-inbox" class="size-8 text-dimmed" />
+            <p class="text-sm text-muted">{{ t("documents.empty") }}</p>
             <UButton variant="soft" :to="localePath('/new')">
                 {{ t("documents.new") }}
             </UButton>

@@ -93,7 +93,7 @@ async function start() {
 <template>
     <div class="flex h-full flex-col gap-4 overflow-y-auto px-4 py-3">
         <div>
-            <h1 class="text-xl font-bold text-(--ui-text-highlighted)">
+            <h1 class="text-xl font-bold text-highlighted">
                 {{ t("new.title") }}
             </h1>
         </div>

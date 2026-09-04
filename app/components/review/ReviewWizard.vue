@@ -102,7 +102,7 @@ defineShortcuts({
                 <UProgress :model-value="progressPercent" size="sm" />
 
                 <div class="flex items-center gap-2 text-sm">
-                    <span class="text-(--ui-text-muted)">
+                    <span class="text-muted">
                         {{ Math.round(current.confidence * 100) }}%
                     </span>
 
@@ -128,8 +128,8 @@ defineShortcuts({
                     </USelectMenu>
                 </div>
 
-                <p class="rounded-(--ui-radius) border border-(--ui-border) p-3 text-sm leading-relaxed">
-                    <span class="text-(--ui-text-muted)">…{{ context.before }}</span>
+                <p class="rounded-(--ui-radius) border border-default p-3 text-sm leading-relaxed">
+                    <span class="text-muted">…{{ context.before }}</span>
                     <span
                         class="rounded border px-0.5"
                         :style="{
@@ -139,14 +139,14 @@ defineShortcuts({
                     >
                         {{ context.match }}
                     </span>
-                    <span class="text-(--ui-text-muted)">{{ context.after }}…</span>
+                    <span class="text-muted">{{ context.after }}…</span>
                 </p>
 
-                <p class="text-xs text-(--ui-text-muted)">{{ t("review.wizard.hint") }}</p>
+                <p class="text-xs text-muted">{{ t("review.wizard.hint") }}</p>
             </div>
 
             <div v-else class="flex flex-col items-center gap-3 py-8 text-center">
-                <UIcon name="i-lucide-check-circle" class="size-8 text-(--ui-success)" />
+                <UIcon name="i-lucide-check-circle" class="size-8 text-success" />
                 <p class="text-sm">{{ t("review.wizard.done") }}</p>
             </div>
         </template>

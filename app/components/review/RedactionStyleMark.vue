@@ -10,7 +10,7 @@ defineProps<{ blacked: boolean }>();
          surface, where black on black would disappear. -->
     <span
         v-if="blacked"
-        class="my-auto h-2.5 w-4 shrink-0 rounded-[2px] bg-black ring-1 ring-inset ring-white/30"
+        class="my-auto h-2.5 w-4 shrink-0 rounded-xs bg-black ring-1 ring-inset ring-white/30"
     />
 
     <UIcon v-else name="i-lucide-baseline" class="size-5 shrink-0" />

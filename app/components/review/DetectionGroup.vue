@@ -23,16 +23,16 @@ const { entityName } = useEntityName();
 </script>
 
 <template>
-    <div class="border-b border-(--ui-border)">
+    <div class="border-b border-default">
         <button
             type="button"
-            class="flex w-full items-center gap-2 p-2 text-sm hover:bg-(--ui-bg-muted)"
+            class="flex w-full items-center gap-2 p-2 text-sm hover:bg-muted"
             :aria-expanded="props.expanded"
             @click="emit('toggle', props.label)"
         >
             <UIcon
                 :name="props.expanded ? 'i-lucide-chevron-down' : 'i-lucide-chevron-right'"
-                class="size-4 text-(--ui-text-muted)"
+                class="size-4 text-muted"
             />
             <span class="size-2 rounded-full" :style="{ background: getEntityColor(props.label).solid }" />
             <span class="flex-1 text-left">{{ entityName(props.label) }}</span>
@@ -47,7 +47,7 @@ const { entityName } = useEntityName();
             >
                 {{ t("review.unredactedCount", { count: props.unredactedCount }) }}
             </UBadge>
-            <span class="tabular-nums text-xs text-(--ui-text-muted)">
+            <span class="tabular-nums text-xs text-muted">
                 {{ props.count }}
             </span>
         </button>

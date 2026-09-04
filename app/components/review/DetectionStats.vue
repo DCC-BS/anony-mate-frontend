@@ -32,7 +32,7 @@ const stats = computed(() => [
             <div :class="['text-lg font-semibold tabular-nums', stat.color]">
                 {{ stat.value }}
             </div>
-            <div class="text-xs text-(--ui-text-muted)">
+            <div class="text-xs text-muted">
                 {{ t(`review.stats.${stat.key}`) }}
             </div>
         </div>
