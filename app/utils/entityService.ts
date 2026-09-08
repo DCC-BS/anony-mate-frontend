@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import type { ApiEntityPreset } from "#shared/types/redactTypes";
 import { db } from "~/stores/db";
 import {
     type StoredBlacklistTerm,
@@ -7,7 +8,7 @@ import {
     type StoredEntityType,
     StoredEntityTypeSchema,
 } from "~/types/storedEntity";
-import type { ApiEntityPreset } from "~~/shared/types/redactTypes";
+import { DEFAULT_REPLACEMENT } from "~/utils/replacementText";
 
 /** Presets the API serves; seeded into IndexedDB as the built-in groups. */
 const BUILTIN_PRESETS: EntityTypePreset[] = ["default", "legal", "full"];

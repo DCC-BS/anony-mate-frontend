@@ -129,20 +129,20 @@ run = [
 
 # ── Testing ───────────────────────────────────────────────────────────────────
 
-# disabled because there are no test yet
-# [tasks."test:unit"]
-# env = { APP_MODE= "ci" }
-# description = "run unit tests"
-# run = "bunx vitest"
+[tasks."test:unit"]
+env = { APP_MODE = "ci" }
+description = "run unit tests"
+run = "bunx vitest run --config test/vitest.config.mts"
 
 [tasks."test:watch"]
 env = { APP_MODE= "ci" }
 description = "run unit tests in watch mode"
-run = "bunx vitest --watch"
+run = "bunx vitest --config test/vitest.config.mts --watch"
 
 [tasks."test:coverage"]
+env = { APP_MODE= "ci" }
 description = "run unit tests with coverage report"
-run = "bunx vitest run --coverage"
+run = "bunx vitest run --config test/vitest.config.mts --coverage"
 
 [tasks."e2e:build"]
 env = { APP_MODE = "ci", AUTH_MODE = "none", DUMMY = true }
