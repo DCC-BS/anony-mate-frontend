@@ -52,6 +52,7 @@
         "@vitejs/plugin-vue": "^6.0.3",
         "@vitest/coverage-v8": "^4.0.17",
         "@vue/test-utils": "^2.4.6",
+        "fake-indexeddb": "^6.2.5",
         "happy-dom": "^20.3.1",
         "jiti": "^2.6.1",
         "pino-pretty": "^13.1.3",
