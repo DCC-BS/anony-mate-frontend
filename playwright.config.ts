@@ -8,7 +8,11 @@ export default defineConfig({
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
-    reporter: process.env.CI ? "github" : "list",
+    // The shared CI workflow's report-summary action reads `results.json`, so
+    // it is always emitted; locally the list reporter keeps the run readable.
+    reporter: process.env.CI
+        ? [["github"], ["json", { outputFile: "results.json" }]]
+        : "list",
     use: {
         baseURL: BASE_URL,
         trace: "on-first-retry",
