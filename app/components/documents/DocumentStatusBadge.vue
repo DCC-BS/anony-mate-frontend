@@ -31,15 +31,23 @@ const isBusy = computed(
     () => status.value === "converting" || status.value === "redacting"
 );
 
+/** A PDF that came back marked is done here: it is refined in an editor such as Kofax. */
+const isMarked = computed(
+    () => status.value === "ready" && props.document.markedPdf
+);
+
 /**
  * A queued document says how many are ahead of it, so a long wait reads as a
  * queue rather than as a stall.
  */
-const label = computed(() =>
-    isBusy.value && props.queuePosition
-        ? t("documents.status.queued", { position: props.queuePosition })
-        : t(`documents.status.${status.value}`)
-);
+const label = computed(() => {
+    if (isBusy.value && props.queuePosition) {
+        return t("documents.status.queued", { position: props.queuePosition });
+    }
+    return isMarked.value
+        ? t("documents.status.marked")
+        : t(`documents.status.${status.value}`);
+});
 </script>
 
 <template>
@@ -47,7 +55,7 @@ const label = computed(() =>
         variant="subtle"
         size="sm"
         :color="presentation.color"
-        :icon="presentation.icon"
+        :icon="isMarked ? 'i-lucide-file-check' : presentation.icon"
         :ui="{ leadingIcon: isBusy ? 'animate-pulse' : undefined }"
     >
         {{ label }}

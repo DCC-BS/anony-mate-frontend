@@ -90,7 +90,7 @@
         "title": "Arbeitsbereich",
         "documents": "Dokumente",
         "new": "Neu anonymisieren",
-        "entities": "Entitäten"
+        "entities": "Such-Schema"
     },
     "documents": {
         "title": "Dokumente",
@@ -104,7 +104,8 @@
             "review": "Prüfen",
             "retry": "Erneut versuchen",
             "remove": "Entfernen",
-            "group": "Erkennungsgruppe"
+            "group": "Erkennungsgruppe",
+            "download": "Markiertes PDF herunterladen"
         },
         "status": {
             "staged": "Wartet",
@@ -113,7 +114,8 @@
             "ready": "Geschwärzt",
             "failed": "Fehlgeschlagen",
             "failedHint": "Verarbeitung fehlgeschlagen. Bitte erneut versuchen.",
-            "queued": "Wartet ({position}.)"
+            "queued": "Wartet ({position}.)",
+            "marked": "PDF markiert"
         },
         "search": "Dokument suchen…",
         "noMatches": "Keine Treffer."
@@ -136,6 +138,13 @@
             "title": "Erkennungsgruppe",
             "entityCount": "{count} Entitäten",
             "manage": "Gruppen bearbeiten"
+        },
+        "output": {
+            "title": "Ausgabe",
+            "markedPdf": "PDF mit Schwärzungsmarkierungen",
+            "markedPdfHint": "Nur für PDF-Dateien",
+            "markedPdfHelpLabel": "Was bedeutet das?",
+            "markedPdfHelp": "Statt den Text hier zur Prüfung aufzubereiten, erhalten Sie das PDF selbst zurück – mit einer Schwärzungsmarkierung auf allem, was erkannt wurde. Die Markierungen sind standardisierte Schwärzungsanmerkungen (ISO 32000): Programme wie Kofax Power PDF oder Adobe Acrobat zeigen sie an. Dort können Sie Markierungen bearbeiten, löschen oder ergänzen und das Dokument anschliessend schwärzen. Zusätzlich liest docTR Text in Bildern, Plänen und Scans, damit auch dieser markiert wird. Andere Dateitypen werden wie gewohnt verarbeitet."
         }
     },
     "review": {
@@ -196,7 +205,7 @@
         "redactedCount": "{count} geschwärzt"
     },
     "entities": {
-        "title": "Entitäten",
+        "title": "Such-Schema",
         "typesTitle": "Entitäten",
         "groupsTitle": "Erkennungsgruppen",
         "builtin": "Vorgabe",

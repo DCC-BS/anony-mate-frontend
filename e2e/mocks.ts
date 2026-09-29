@@ -33,6 +33,9 @@ export const REDACT_RESULT = {
     },
 };
 
+/** What the API sends back for a PDF marked for redaction: the PDF itself. */
+export const MARKED_PDF = "%PDF-1.7\n% marked\n%%EOF\n";
+
 /**
  * Intercepts every API call the app makes and answers it from fixtures, so
  * the e2e run needs no backend.
@@ -66,5 +69,13 @@ export async function mockApi(page: Page): Promise<void> {
 
     await page.route("**/api/resource/**", (route) => {
         void route.fulfill({ json: REDACT_RESULT });
+    });
+
+    await page.route("**/api/marked-pdf/**", (route) => {
+        void route.fulfill({
+            body: MARKED_PDF,
+            contentType: "application/pdf",
+            headers: { "X-Mark-Count": "3" },
+        });
     });
 }

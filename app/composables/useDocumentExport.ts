@@ -95,20 +95,6 @@ export function useDocumentExport() {
     }
 
     /**
-     * Triggers a browser download for the given content.
-     */
-    function download(content: Blob, filename: string): void {
-        const url = URL.createObjectURL(content);
-        const anchor = document.createElement("a");
-
-        anchor.href = url;
-        anchor.download = filename;
-        anchor.click();
-
-        URL.revokeObjectURL(url);
-    }
-
-    /**
      * One page as it reads once the redactions are applied, ready to
      * render or export.
      *
@@ -143,14 +129,14 @@ export function useDocumentExport() {
     }
 
     function exportAsMarkdown(name: string, content: string): void {
-        download(
+        downloadBlob(
             new Blob([content], { type: "text/markdown" }),
             `${baseName(name)}.md`,
         );
     }
 
     function exportAsText(name: string, content: string): void {
-        download(
+        downloadBlob(
             new Blob([content], { type: "text/plain" }),
             `${baseName(name)}.txt`,
         );
@@ -164,7 +150,7 @@ export function useDocumentExport() {
         const { convertMarkdownToDocx } = await import("@mohtasham/md-to-docx");
         const blob = await convertMarkdownToDocx(pages.join(DOCX_PAGE_BREAK));
 
-        download(blob, `${baseName(name)}.docx`);
+        downloadBlob(blob, `${baseName(name)}.docx`);
     }
 
     return {

@@ -90,7 +90,7 @@
         "title": "Workspace",
         "documents": "Documents",
         "new": "New anonymisation",
-        "entities": "Entities"
+        "entities": "Search schema"
     },
     "documents": {
         "title": "Documents",
@@ -104,7 +104,8 @@
             "review": "Review",
             "retry": "Try again",
             "remove": "Remove",
-            "group": "Detection group"
+            "group": "Detection group",
+            "download": "Download marked PDF"
         },
         "status": {
             "staged": "Queued",
@@ -113,7 +114,8 @@
             "ready": "Redacted",
             "failed": "Failed",
             "failedHint": "Processing failed. Please try again.",
-            "queued": "Queued (#{position})"
+            "queued": "Queued (#{position})",
+            "marked": "PDF marked"
         },
         "search": "Search documents…",
         "noMatches": "No matches."
@@ -136,6 +138,13 @@
             "title": "Detection group",
             "entityCount": "{count} entities",
             "manage": "Manage groups"
+        },
+        "output": {
+            "title": "Output",
+            "markedPdf": "PDF with redaction marks",
+            "markedPdfHint": "PDF files only",
+            "markedPdfHelpLabel": "What does this mean?",
+            "markedPdfHelp": "Instead of preparing the text for review here, you get the PDF itself back – with a redaction mark on everything that was detected. The marks are standard redaction annotations (ISO 32000): programs such as Kofax Power PDF or Adobe Acrobat show them. There you can edit, delete or add marks and then redact the document. In addition, docTR reads text in pictures, plans and scans so that it is marked as well. Other file types are processed as usual."
         }
     },
     "review": {
@@ -196,7 +205,7 @@
         "redactedCount": "{count} redacted"
     },
     "entities": {
-        "title": "Entities",
+        "title": "Search schema",
         "typesTitle": "Entities",
         "groupsTitle": "Detection groups",
         "builtin": "Built-in",

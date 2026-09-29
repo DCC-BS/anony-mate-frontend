@@ -9,6 +9,7 @@ const emit = defineEmits<{ retry: [id: string]; remove: [id: string] }>();
 
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
+const NuxtLink = resolveComponent("NuxtLink");
 
 // Status is shown at every width, so the narrow layout needs a column for it
 // too: with only name and actions, the header's status label would sit over
@@ -27,6 +28,20 @@ function isBusy(document: StoredDocument): boolean {
 
 function formatDate(date: Date): string {
     return date.toLocaleString(locale.value);
+}
+
+/**
+ * A marked PDF has no review here: it is downloaded and opened in an editor
+ * such as Kofax, so its row leads nowhere and offers the file instead.
+ */
+function isMarked(document: StoredDocument): boolean {
+    return Boolean(document.markedPdf);
+}
+
+function downloadMarked(document: StoredDocument): void {
+    if (document.markedFile) {
+        downloadBlob(document.markedFile, markedPdfName(document.name));
+    }
 }
 </script>
 
@@ -48,10 +63,11 @@ function formatDate(date: Date): string {
             <div />
         </div>
 
-        <NuxtLink
+        <component
+            :is="isMarked(document) ? 'div' : NuxtLink"
             v-for="document in props.documents"
             :key="document.id"
-            :to="localePath(`/documents/${document.id}`)"
+            :to="isMarked(document) ? undefined : localePath(`/documents/${document.id}`)"
             class="border-b border-default px-5 py-3 text-sm transition-colors last:border-b-0 hover:bg-muted"
             :class="rowGrid"
         >
@@ -59,7 +75,10 @@ function formatDate(date: Date): string {
                 <span
                     class="grid size-7.5 flex-none place-items-center rounded-lg bg-(--ui-primary-soft) text-(--ui-primary-strong)"
                 >
-                    <UIcon name="i-lucide-file-text" class="size-4" />
+                    <UIcon
+                        :name="isMarked(document) ? 'i-lucide-file-check' : 'i-lucide-file-text'"
+                        class="size-4"
+                    />
                 </span>
                 <span class="min-w-0">
                     <span class="block truncate font-medium" :title="document.name">
@@ -90,7 +109,18 @@ function formatDate(date: Date): string {
             </div>
 
             <div class="flex justify-end gap-1">
+                <UButton
+                    v-if="isMarked(document) && document.markedFile"
+                    icon="i-lucide-download"
+                    variant="ghost"
+                    color="primary"
+                    size="sm"
+                    :title="t('documents.table.download')"
+                    :aria-label="t('documents.table.download')"
+                    @click.prevent.stop="downloadMarked(document)"
+                />
                 <RecomputeButton
+                    v-if="!isMarked(document)"
                     :document-id="document.id"
                     :group-id="document.entityGroupId"
                     :busy="isBusy(document)"
@@ -113,6 +143,6 @@ function formatDate(date: Date): string {
                     @click.prevent.stop="emit('remove', document.id)"
                 />
             </div>
-        </NuxtLink>
+        </component>
     </UCard>
 </template>

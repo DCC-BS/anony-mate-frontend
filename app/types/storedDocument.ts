@@ -24,6 +24,15 @@ export const StoredDocumentSchema = z.object({
     pageOffsets: z.array(z.number()).default([]),
     /** Original upload, kept until conversion succeeds so a reload can retry it. */
     file: z.instanceof(Blob).optional(),
+    /**
+     * Whether the PDF comes back itself, with a redaction mark on every
+     * detection, instead of as text to review here. The marks are standard
+     * PDF redaction annotations, which an editor such as Kofax Power PDF
+     * lists, lets a reader change, and applies.
+     */
+    markedPdf: z.boolean().default(false),
+    /** The marked PDF, once the API has returned it. */
+    markedFile: z.instanceof(Blob).optional(),
     /** Entity types and threshold this document was queued with. */
     entityTypes: z.record(z.string(), z.string()),
     /** Detection group the entity types came from, so it can be swapped. */

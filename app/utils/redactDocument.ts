@@ -78,6 +78,66 @@ export async function redactUploadedFile(
     };
 }
 
+/** A PDF handed back with a redaction mark on every detection. */
+export interface MarkedPdfResult {
+    file: Blob;
+    /** Number of redaction marks on it. */
+    markCount: number;
+}
+
+/**
+ * Sends an uploaded PDF to be marked for redaction instead of converted.
+ *
+ * Nothing is reviewed here afterwards: the marks are for an editor such as
+ * Kofax Power PDF to list, change and apply. So the blacklist goes along and
+ * the API leaves its words unmarked, where the text path applies it
+ * client-side.
+ *
+ * @param document - The document, with the upload still on it.
+ * @param progress - Where to report the queue position and the handover.
+ * @returns The marked PDF and how many marks it carries.
+ */
+export async function markUploadedPdf(
+    document: StoredDocument,
+    progress: RedactionProgress,
+): Promise<MarkedPdfResult> {
+    const formData = new FormData();
+    formData.append("file", document.file as Blob, document.name);
+    formData.append(
+        "options",
+        JSON.stringify({
+            ...redactOptions(document),
+            blacklist: document.blacklist,
+            marked_pdf: true,
+        }),
+    );
+
+    let isScanning = false;
+    const resourceId = await awaitApiTask(
+        () =>
+            $fetch<unknown>("/api/redact-document", {
+                method: "POST",
+                body: formData,
+                headers: { "X-Client-Id": clientId() },
+            }),
+        ({ progress: fraction, queuePosition }) => {
+            progress.onQueuePosition(queuePosition);
+            if (fraction !== null && !isScanning) {
+                isScanning = true;
+                progress.onScanning();
+            }
+        },
+    );
+
+    const response = await $fetch.raw<Blob>(`/api/marked-pdf/${resourceId}`, {
+        responseType: "blob",
+    });
+    return {
+        file: response._data as Blob,
+        markCount: Number(response.headers.get("x-mark-count") ?? 0),
+    };
+}
+
 /**
  * Scans text that never needed converting: text the reader pasted in, or a
  * document already converted and now being detected again.

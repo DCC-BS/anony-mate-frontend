@@ -96,8 +96,12 @@ _Avoid_: post-processing, curation
 The two ways the review shows a document, and the two tabs it is switched with. **Editor** is the original text with every detection marked on it, and the only place decisions are made. **Preview** is the result — each redaction written as its placeholder, or as black bars — and is read-only.
 _Avoid_: original, anonymised (the first names the text the editor shows, not the mode; the second was the preview's old name)
 
+**Marked PDF**:
+A PDF that comes back as itself instead of as text, with a redaction mark on every detection: a standard PDF redaction annotation (ISO 32000) that an editor such as Kofax Power PDF lists, lets a reader edit or delete, and applies. Chosen per upload under "Output", only for PDFs; it has no review here, only a download. The API also reads it with docTR, so text in pictures, plans and scans is marked too.
+_Avoid_: annotated PDF, redacted PDF (nothing is removed until the editor applies the marks)
+
 **Document Status**:
-Where a document stands in the client-owned pipeline: `staged` (queued, nothing sent yet), `converting` (uploaded file is at docling), `redacting` (text is at the redact endpoint), `ready` (detections stored, waiting for review), or `failed`. The API is stateless, so this status is the only record of progress and it lives in IndexedDB.
+Where a document stands in the client-owned pipeline: `staged` (queued, nothing sent yet), `converting` (uploaded file is at docling), `redacting` (text is at the redact endpoint), `ready` (detections stored, waiting for review; for a **Marked PDF**, the marked copy stored, waiting to be downloaded), or `failed`. The API is stateless, so this status is the only record of progress and it lives in IndexedDB.
 _Avoid_: state, phase
 
 **Queue**:
