@@ -144,7 +144,7 @@
             "markedPdf": "PDF mit Schwärzungsmarkierungen",
             "markedPdfHint": "Nur für PDF-Dateien",
             "markedPdfHelpLabel": "Was bedeutet das?",
-            "markedPdfHelp": "Statt den Text hier zur Prüfung aufzubereiten, erhalten Sie das PDF selbst zurück – mit einer Schwärzungsmarkierung auf allem, was erkannt wurde. Die Markierungen sind standardisierte Schwärzungsanmerkungen (ISO 32000): Programme wie Kofax Power PDF oder Adobe Acrobat zeigen sie an. Dort können Sie Markierungen bearbeiten, löschen oder ergänzen und das Dokument anschliessend schwärzen. Zusätzlich liest docTR Text in Bildern, Plänen und Scans, damit auch dieser markiert wird. Andere Dateitypen werden wie gewohnt verarbeitet."
+            "markedPdfHelp": "Sie erhalten das PDF selbst zurück, mit einer Schwärzungsmarkierung auf allem, was erkannt wurde – auch auf Text in Bildern, Plänen und Scans und auf Text, den das Dokument enthält, aber nicht anzeigt. Die Markierungen sind standardisierte Schwärzungsanmerkungen (ISO 32000) und nennen jeweils den gefundenen Text: In Programmen wie Kofax Power PDF oder Adobe Acrobat prüfen Sie sie, bearbeiten, löschen oder ergänzen sie und schwärzen das Dokument anschliessend."
         }
     },
     "review": {

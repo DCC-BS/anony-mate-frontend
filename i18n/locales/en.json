@@ -144,7 +144,7 @@
             "markedPdf": "PDF with redaction marks",
             "markedPdfHint": "PDF files only",
             "markedPdfHelpLabel": "What does this mean?",
-            "markedPdfHelp": "Instead of preparing the text for review here, you get the PDF itself back – with a redaction mark on everything that was detected. The marks are standard redaction annotations (ISO 32000): programs such as Kofax Power PDF or Adobe Acrobat show them. There you can edit, delete or add marks and then redact the document. In addition, docTR reads text in pictures, plans and scans so that it is marked as well. Other file types are processed as usual."
+            "markedPdfHelp": "You get the PDF itself back, with a redaction mark on everything that was detected – including text in pictures, plans and scans, and text the document contains but does not show. The marks are standard redaction annotations (ISO 32000) and each names the text it covers: in programs such as Kofax Power PDF or Adobe Acrobat you review them, edit, delete or add marks, and then redact the document."
         }
     },
     "review": {

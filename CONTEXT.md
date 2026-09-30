@@ -97,7 +97,7 @@ The two ways the review shows a document, and the two tabs it is switched with. 
 _Avoid_: original, anonymised (the first names the text the editor shows, not the mode; the second was the preview's old name)
 
 **Marked PDF**:
-A PDF that comes back as itself instead of as text, with a redaction mark on every detection: a standard PDF redaction annotation (ISO 32000) that an editor such as Kofax Power PDF lists, lets a reader edit or delete, and applies. Chosen per upload under "Output", only for PDFs; it has no review here, only a download. The API also reads it with docTR, so text in pictures, plans and scans is marked too.
+A PDF that comes back as itself instead of as text, with a redaction mark on every detection: a standard PDF redaction annotation (ISO 32000) that an editor such as Kofax Power PDF lists, lets a reader edit or delete, and applies. Chosen per upload under "Output", only for PDFs; it has no review here, only a download. The API gets its words and their places from docling-serve, OCR included, so text in pictures, plans and scans is marked too.
 _Avoid_: annotated PDF, redacted PDF (nothing is removed until the editor applies the marks)
 
 **Document Status**:
