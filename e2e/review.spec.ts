@@ -10,7 +10,7 @@ async function openReview(page: import("@playwright/test").Page) {
     await page.getByRole("tab", { name: "Text einfügen" }).click();
     await page
         .getByPlaceholder(
-            "Text hier einfügen – z. B. eine Aktennotiz oder ein Protokollausschnitt.",
+            "Text hier einfügen, z. B. eine Aktennotiz oder einen Protokollausschnitt.",
         )
         .fill("Max Mustermann wohnt in Berlin.");
     await page.getByRole("button", { name: "Verarbeitung starten" }).click();

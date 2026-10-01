@@ -33,16 +33,17 @@
             "add": "Hinzufügen",
             "addType": "Typ hinzufügen",
             "threshold": "Konfidenzschwelle",
-            "thresholdStrict": "Streng — nur sehr sichere Erkennungen werden geschwärzt.",
-            "thresholdBalanced": "Ausgewogen — für die meisten Fälle empfohlen.",
-            "thresholdLoose": "Locker — mehr Erkennungen, aber auch mehr Fehltreffer.",
+            "thresholdStrict": "Streng: Nur sehr sichere Erkennungen werden geschwärzt.",
+            "thresholdBalanced": "Ausgewogen: Für die meisten Fälle empfohlen.",
+            "thresholdLoose": "Locker: Mehr Erkennungen, aber auch mehr Fehltreffer.",
             "blacklist": "Nie schwärzen",
             "blacklistHint": "Begriffe, die sichtbar bleiben, auch wenn erkannt.",
             "blacklistPlaceholder": "z. B. Müller, Berlin"
         },
         "preset": {
             "default": "Standard",
-            "legal": "Rechtlich"
+            "legal": "Rechtlich",
+            "full": "Vollständig"
         },
         "confirm": {
             "title": "Preset wechseln?",
@@ -90,7 +91,7 @@
         "title": "Arbeitsbereich",
         "documents": "Dokumente",
         "new": "Neu anonymisieren",
-        "entities": "Entitäten"
+        "entities": "Such-Schema"
     },
     "documents": {
         "title": "Dokumente",
@@ -104,7 +105,8 @@
             "review": "Prüfen",
             "retry": "Erneut versuchen",
             "remove": "Entfernen",
-            "group": "Erkennungsgruppe"
+            "group": "Erkennungsgruppe",
+            "download": "Markiertes PDF herunterladen"
         },
         "status": {
             "staged": "Wartet",
@@ -113,7 +115,8 @@
             "ready": "Geschwärzt",
             "failed": "Fehlgeschlagen",
             "failedHint": "Verarbeitung fehlgeschlagen. Bitte erneut versuchen.",
-            "queued": "Wartet ({position}.)"
+            "queued": "Wartet ({position}.)",
+            "marked": "PDF markiert"
         },
         "search": "Dokument suchen…",
         "noMatches": "Keine Treffer."
@@ -128,7 +131,7 @@
         "dropHint": "PDF, DOCX, MD, TXT · Scans werden per OCR erschlossen",
         "chooseFiles": "Dateien auswählen",
         "staged": "Bereit zur Verarbeitung ({count})",
-        "pastePlaceholder": "Text hier einfügen – z. B. eine Aktennotiz oder ein Protokollausschnitt.",
+        "pastePlaceholder": "Text hier einfügen, z. B. eine Aktennotiz oder einen Protokollausschnitt.",
         "pasteHint": "{chars} Zeichen · verlässt die eigene Infrastruktur nicht",
         "pastedName": "Eingefügter Text {date}",
         "start": "Verarbeitung starten",
@@ -136,6 +139,13 @@
             "title": "Erkennungsgruppe",
             "entityCount": "{count} Entitäten",
             "manage": "Gruppen bearbeiten"
+        },
+        "output": {
+            "title": "Ausgabe",
+            "markedPdf": "PDF mit Schwärzungsmarkierungen",
+            "markedPdfHint": "Nur für PDF-Dateien",
+            "markedPdfHelpLabel": "Was bedeutet das?",
+            "markedPdfHelp": "Sie erhalten das PDF selbst zurück, mit einer Schwärzungsmarkierung auf allem, was erkannt wurde, auch auf Text in Bildern, Plänen und Scans und auf Text, den das Dokument enthält, aber nicht anzeigt. Die Markierungen sind standardisierte Schwärzungsanmerkungen (ISO 32000) und nennen jeweils den gefundenen Text: In Programmen wie Kofax Power PDF oder Adobe Acrobat prüfen Sie sie, bearbeiten, löschen oder ergänzen sie und schwärzen das Dokument anschliessend."
         }
     },
     "review": {
@@ -196,7 +206,7 @@
         "redactedCount": "{count} geschwärzt"
     },
     "entities": {
-        "title": "Entitäten",
+        "title": "Such-Schema",
         "typesTitle": "Entitäten",
         "groupsTitle": "Erkennungsgruppen",
         "builtin": "Vorgabe",
@@ -281,5 +291,59 @@
         "blacked": "Schwarze Balken",
         "blackedExample": "████████",
         "blackedHint": "Jede Schwärzung wird durch einen schwarzen Balken ersetzt; die Art der Angabe ist danach nicht mehr erkennbar."
+    },
+    "onboarding": {
+        "next": "Weiter",
+        "previous": "Zurück",
+        "done": "Fertig",
+        "progress": "{'{{current}}'} von {'{{total}}'}",
+        "welcome": {
+            "title": "Willkommen bei AnonyMate",
+            "description": "AnonyMate findet Personendaten in Ihren Dokumenten, etwa Namen, Adressen und Telefonnummern, und hilft Ihnen, sie zu schwärzen oder zu ersetzen. Alle Daten werden auf Servern der IT BS verarbeitet. Diese kurze Tour zeigt Ihnen die wichtigsten Funktionen."
+        },
+        "documentList": {
+            "title": "Ihre Dokumente",
+            "description": "Hier sehen Sie alle Dokumente, die Sie bearbeitet haben, und ihren Stand. Ein Dokument, das als Text bearbeitet wurde, öffnen Sie mit einem Klick zur Prüfung; ein PDF mit Schwärzungsmarkierungen laden Sie herunter."
+        },
+        "newDocument": {
+            "title": "Neues Dokument",
+            "description": "Hier starten Sie eine neue Anonymisierung."
+        },
+        "upload": {
+            "title": "Dokumente hinzufügen",
+            "description": "Ziehen Sie eine oder mehrere Dateien hierher oder fügen Sie Text direkt ein."
+        },
+        "group": {
+            "title": "Was gesucht wird",
+            "description": "Wählen Sie, welche Arten von Personendaten gesucht werden: «Standard» sucht nur Personen und Orte, «Vollständig» alle Kategorien. Eigene Zusammenstellungen legen Sie unter «Such-Schema» an."
+        },
+        "outputText": {
+            "title": "Weg 1: Text prüfen und exportieren (Standard)",
+            "description": "Ist der Schalter aus, liest AnonyMate den Text aus dem Dokument (PDF, Word, …) und markiert die Personendaten darin. Sie prüfen jede Fundstelle hier in AnonyMate, entscheiden, was ersetzt wird, und exportieren den anonymisierten Text als Word, Text oder Markdown. Das Ergebnis ist ein neuer Text: Layout, Bilder und Formatierung des Originals bleiben dabei nicht erhalten."
+        },
+        "outputMarkedPdf": {
+            "title": "Weg 2: PDF mit Schwärzungsmarkierungen",
+            "description": "Ist der Schalter ein, erhalten Sie bei PDF-Dateien das Original-PDF unverändert zurück, mit einer Schwärzungsmarkierung auf jeder Fundstelle, auch auf Text in Bildern, Plänen und Scans. Geprüft wird nicht hier, sondern in Kofax Power PDF oder Adobe Acrobat: Dort bearbeiten, löschen oder ergänzen Sie die Markierungen und wenden sie an. Erst dann ist der Inhalt entfernt. Bis dahin ist nichts geschwärzt."
+        },
+        "start": {
+            "title": "Starten",
+            "description": "Damit beginnt die Erkennung. Den Fortschritt sehen Sie in der Dokumentenliste."
+        },
+        "entityTypes": {
+            "title": "Entitäten",
+            "description": "Jede Kategorie hat eine Beschreibung, nach der die Erkennung sucht, und eine Vorlage, wie eine Fundstelle ersetzt wird (z. B. «Person-1»). Sie können beides anpassen und eigene Kategorien anlegen."
+        },
+        "entityGroups": {
+            "title": "Erkennungsgruppen",
+            "description": "Eine Gruppe fasst Kategorien zusammen, die gemeinsam gesucht werden. Die vorgegebenen Gruppen «Standard», «Rechtlich» und «Vollständig» bleiben bestehen; eigene legen Sie hier an."
+        },
+        "blacklist": {
+            "title": "Nie schwärzen",
+            "description": "Begriffe in dieser Liste bleiben immer sichtbar, auch wenn sie erkannt werden, etwa der Name Ihrer Dienststelle."
+        },
+        "complete": {
+            "title": "Sie sind startklar",
+            "description": "Die Tour starten Sie jederzeit erneut über «Hilfe» oben rechts."
+        }
     }
 }

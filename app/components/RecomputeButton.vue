@@ -13,6 +13,7 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
+const { groupName } = useGroupName();
 const { groups, payloadFor } = useEntityGroups();
 const { recompute } = useDocumentQueue();
 
@@ -85,7 +86,7 @@ async function confirm(): Promise<void> {
                     @click="pendingId = group.id"
                 >
                     <span class="flex min-w-0 flex-col items-start">
-                        <span class="truncate">{{ group.name }}</span>
+                        <span class="truncate">{{ groupName(group) }}</span>
                         <span class="text-xs text-muted">
                             {{ t("new.group.entityCount", { count: group.labels.length }) }}
                         </span>
@@ -96,7 +97,7 @@ async function confirm(): Promise<void> {
             <div v-else class="flex w-72 flex-col gap-3 p-3">
                 <div class="flex flex-col gap-1">
                     <span class="text-sm font-semibold text-highlighted">
-                        {{ t("recompute.confirmTitle", { group: pending.name }) }}
+                        {{ t("recompute.confirmTitle", { group: groupName(pending) }) }}
                     </span>
                     <p class="text-xs text-muted">
                         {{ t("recompute.confirmHint") }}

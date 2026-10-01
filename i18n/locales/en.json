@@ -33,16 +33,17 @@
             "add": "Add",
             "addType": "Add type",
             "threshold": "Confidence threshold",
-            "thresholdStrict": "Strict — only very confident detections are redacted.",
-            "thresholdBalanced": "Balanced — recommended for most cases.",
-            "thresholdLoose": "Loose — more detections, but more false positives.",
+            "thresholdStrict": "Strict: only very confident detections are redacted.",
+            "thresholdBalanced": "Balanced: recommended for most cases.",
+            "thresholdLoose": "Loose: more detections, but more false positives.",
             "blacklist": "Never redact",
             "blacklistHint": "Terms that stay visible, even when detected.",
             "blacklistPlaceholder": "e.g. Müller, Berlin"
         },
         "preset": {
             "default": "Default",
-            "legal": "Legal"
+            "legal": "Legal",
+            "full": "Full"
         },
         "confirm": {
             "title": "Switch preset?",
@@ -90,7 +91,7 @@
         "title": "Workspace",
         "documents": "Documents",
         "new": "New anonymisation",
-        "entities": "Entities"
+        "entities": "Search schema"
     },
     "documents": {
         "title": "Documents",
@@ -104,7 +105,8 @@
             "review": "Review",
             "retry": "Try again",
             "remove": "Remove",
-            "group": "Detection group"
+            "group": "Detection group",
+            "download": "Download marked PDF"
         },
         "status": {
             "staged": "Queued",
@@ -113,7 +115,8 @@
             "ready": "Redacted",
             "failed": "Failed",
             "failedHint": "Processing failed. Please try again.",
-            "queued": "Queued (#{position})"
+            "queued": "Queued (#{position})",
+            "marked": "PDF marked"
         },
         "search": "Search documents…",
         "noMatches": "No matches."
@@ -128,7 +131,7 @@
         "dropHint": "PDF, DOCX, MD, TXT · scans are read via OCR",
         "chooseFiles": "Choose files",
         "staged": "Ready to process ({count})",
-        "pastePlaceholder": "Paste text here – for example a case note or an excerpt from minutes.",
+        "pastePlaceholder": "Paste text here, for example a case note or an excerpt from minutes.",
         "pasteHint": "{chars} characters · never leaves your own infrastructure",
         "pastedName": "Pasted text {date}",
         "start": "Start processing",
@@ -136,6 +139,13 @@
             "title": "Detection group",
             "entityCount": "{count} entities",
             "manage": "Manage groups"
+        },
+        "output": {
+            "title": "Output",
+            "markedPdf": "PDF with redaction marks",
+            "markedPdfHint": "PDF files only",
+            "markedPdfHelpLabel": "What does this mean?",
+            "markedPdfHelp": "You get the PDF itself back, with a redaction mark on everything that was detected, including text in pictures, plans and scans, and text the document contains but does not show. The marks are standard redaction annotations (ISO 32000) and each names the text it covers: in programs such as Kofax Power PDF or Adobe Acrobat you review them, edit, delete or add marks, and then redact the document."
         }
     },
     "review": {
@@ -196,7 +206,7 @@
         "redactedCount": "{count} redacted"
     },
     "entities": {
-        "title": "Entities",
+        "title": "Search schema",
         "typesTitle": "Entities",
         "groupsTitle": "Detection groups",
         "builtin": "Built-in",
@@ -281,5 +291,59 @@
         "blacked": "Black bars",
         "blackedExample": "████████",
         "blackedHint": "Each redaction becomes a black bar; what kind of detail it was is no longer visible."
+    },
+    "onboarding": {
+        "next": "Next",
+        "previous": "Back",
+        "done": "Done",
+        "progress": "{'{{current}}'} of {'{{total}}'}",
+        "welcome": {
+            "title": "Welcome to AnonyMate",
+            "description": "AnonyMate finds personal data in your documents, such as names, addresses and phone numbers, and helps you redact or replace it. All data is processed on IT BS servers. This short tour shows you the main features."
+        },
+        "documentList": {
+            "title": "Your documents",
+            "description": "All documents you have processed and their status. A document processed as text opens for review with one click; a PDF with redaction marks is downloaded."
+        },
+        "newDocument": {
+            "title": "New document",
+            "description": "Start a new anonymisation here."
+        },
+        "upload": {
+            "title": "Add documents",
+            "description": "Drop one or more files here, or paste text directly."
+        },
+        "group": {
+            "title": "What is searched for",
+            "description": "Choose which kinds of personal data are searched for: \"Default\" looks for people and places only, \"Full\" for every category. Create your own selections under \"Search schema\"."
+        },
+        "outputText": {
+            "title": "Way 1: review text and export (default)",
+            "description": "With the switch off, AnonyMate extracts the text from the document (PDF, Word, …) and marks the personal data in it. You review every finding here in AnonyMate, decide what is replaced, and export the anonymised text as Word, text or Markdown. The result is new text: the original's layout, images and formatting are not kept."
+        },
+        "outputMarkedPdf": {
+            "title": "Way 2: PDF with redaction marks",
+            "description": "With the switch on, PDF files come back as the original PDF, unchanged, with a redaction mark on every finding, including text in images, plans and scans. Review happens not here but in Kofax Power PDF or Adobe Acrobat: there you edit, delete or add marks and apply them. Only then is the content removed. Until then nothing is redacted."
+        },
+        "start": {
+            "title": "Start",
+            "description": "This starts the detection. You follow its progress in the document list."
+        },
+        "entityTypes": {
+            "title": "Entities",
+            "description": "Each category has a description the detection searches by, and a template for how a finding is replaced (e.g. \"Person-1\"). You can adjust both and add your own categories."
+        },
+        "entityGroups": {
+            "title": "Detection groups",
+            "description": "A group bundles categories that are searched for together. The built-in groups \"Default\", \"Legal\" and \"Full\" always stay; create your own here."
+        },
+        "blacklist": {
+            "title": "Never redact",
+            "description": "Terms in this list always stay visible, even when detected, for example the name of your office."
+        },
+        "complete": {
+            "title": "You're all set",
+            "description": "Restart the tour any time with \"Help\" at the top right."
+        }
     }
 }

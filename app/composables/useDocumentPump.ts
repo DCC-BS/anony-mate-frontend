@@ -69,6 +69,11 @@ export function useDocumentPump(
     /** Puts one document through the API and stores what comes back. */
     async function processDocument(document: StoredDocument): Promise<void> {
         try {
+            if (document.markedPdf && document.file) {
+                await markPdf(document);
+                return;
+            }
+
             const result = await runDetection(document);
 
             const detectionCount = await replaceDetections(
@@ -95,6 +100,29 @@ export function useDocumentPump(
         } finally {
             delete queuePositions.value[document.id];
         }
+    }
+
+    /**
+     * Has a PDF marked for redaction and keeps the marked copy. It is not
+     * reviewed here: it is downloaded and opened in an editor such as Kofax.
+     */
+    async function markPdf(document: StoredDocument): Promise<void> {
+        await updateDocument(document.id, { status: "converting" });
+        const marked = await markUploadedPdf(document, {
+            onQueuePosition: (position) => {
+                queuePositions.value[document.id] = position;
+            },
+            onScanning: () =>
+                void updateDocument(document.id, { status: "redacting" }),
+        });
+
+        await updateDocument(document.id, {
+            status: "ready",
+            markedFile: marked.file,
+            detectionCount: marked.markCount,
+            // The upload is only needed to retry a failed run.
+            file: undefined,
+        });
     }
 
     /**

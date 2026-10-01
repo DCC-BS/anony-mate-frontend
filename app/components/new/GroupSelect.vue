@@ -7,6 +7,7 @@ const selected = defineModel<string | undefined>();
 
 const { t } = useI18n();
 const localePath = useLocalePath();
+const { groupName } = useGroupName();
 </script>
 
 <template>
@@ -20,7 +21,7 @@ const localePath = useLocalePath();
         <URadioGroup
             v-model="selected"
             :items="props.groups.map((group) => ({
-                label: group.name,
+                label: groupName(group),
                 description: t('new.group.entityCount', { count: group.labels.length }),
                 value: group.id
             }))"

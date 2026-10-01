@@ -29,6 +29,20 @@ const {
     removeDetection,
 } = useDocumentReview(documentId);
 
+// A marked PDF has no text to review here: it is refined in an editor such as
+// Kofax. Reached by its address, it goes back to the list, where it is
+// downloaded.
+const localePath = useLocalePath();
+watch(
+    () => storedDocument.value?.markedPdf,
+    (markedPdf) => {
+        if (markedPdf) {
+            void navigateTo(localePath("/documents"), { replace: true });
+        }
+    },
+    { immediate: true }
+);
+
 const { slices, hasPages, pageOf, detectionCounts } = useDocumentPages(
     () => storedDocument.value?.text ?? "",
     () => storedDocument.value?.pageOffsets ?? [],
