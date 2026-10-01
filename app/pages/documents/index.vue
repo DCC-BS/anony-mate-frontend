@@ -35,7 +35,7 @@ const hasDocuments = computed(() => documents.value.length > 0);
                 </h1>
             </div>
 
-            <UButton icon="i-lucide-plus" :to="localePath('/new')">
+            <UButton id="new-document-button" icon="i-lucide-plus" :to="localePath('/new')">
                 {{ t("documents.new") }}
             </UButton>
         </div>
@@ -60,6 +60,7 @@ const hasDocuments = computed(() => documents.value.length > 0);
 
         <div v-if="hasDocuments" class="flex min-h-0 flex-1 flex-col">
             <DocumentsDocumentTable
+                id="document-list"
                 :documents="visibleDocuments"
                 :queue-positions="queuePositions"
                 @retry="retry"
@@ -74,7 +75,7 @@ const hasDocuments = computed(() => documents.value.length > 0);
             </p>
         </div>
 
-        <UCard v-else :ui="{ body: 'p-10 text-center flex flex-col items-center gap-3' }">
+        <UCard v-else id="document-list" :ui="{ body: 'p-10 text-center flex flex-col items-center gap-3' }">
             <UIcon name="i-lucide-inbox" class="size-8 text-dimmed" />
             <p class="text-sm text-muted">{{ t("documents.empty") }}</p>
             <UButton variant="soft" :to="localePath('/new')">

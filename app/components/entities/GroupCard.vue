@@ -21,13 +21,14 @@ const labels = computed({
 
 const options = computed(() => props.types.map((type) => type.name));
 const { entityName } = useEntityName();
+const { groupName } = useGroupName();
 </script>
 
 <template>
     <UCard :ui="{ body: 'p-3 flex flex-col gap-2' }">
         <div class="flex items-baseline justify-between gap-2">
             <span class="truncate text-label font-semibold text-highlighted">
-                {{ props.group.name }}
+                {{ groupName(props.group) }}
             </span>
 
             <div class="flex items-center gap-1">

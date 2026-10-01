@@ -9,6 +9,7 @@ const emit = defineEmits<{ retry: [id: string]; remove: [id: string] }>();
 
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
+const { documentGroupName } = useGroupName();
 const NuxtLink = resolveComponent("NuxtLink");
 
 // Status is shown at every width, so the narrow layout needs a column for it
@@ -100,8 +101,11 @@ function downloadMarked(document: StoredDocument): void {
                 />
             </div>
 
-            <div class="hidden min-w-0 truncate text-muted lg:block" :title="document.entityGroupName">
-                {{ document.entityGroupName || "—" }}
+            <div
+                class="hidden min-w-0 truncate text-muted lg:block"
+                :title="documentGroupName(document.entityGroupName)"
+            >
+                {{ documentGroupName(document.entityGroupName) || "—" }}
             </div>
 
             <div class="hidden tabular-nums text-muted lg:block">

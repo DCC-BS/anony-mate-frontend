@@ -12,6 +12,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { groupName } = useGroupName();
 
 const query = ref("");
 
@@ -19,7 +20,7 @@ const visible = computed(() => {
     const needle = query.value.trim().toLowerCase();
     return needle
         ? props.groups.filter((group) =>
-              group.name.toLowerCase().includes(needle)
+              groupName(group).toLowerCase().includes(needle)
           )
         : props.groups;
 });

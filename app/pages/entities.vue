@@ -42,6 +42,7 @@ function updateGroup(group: StoredEntityGroup) {
              rather than sharing one and pushing the other out of view. -->
         <div class="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_var(--width-entities-column)_var(--width-entities-column)]">
             <EntitiesEntityPanel
+                id="entity-panel"
                 :types="types"
                 @save="saveType"
                 @rename="renameType"
@@ -49,6 +50,7 @@ function updateGroup(group: StoredEntityGroup) {
             />
 
             <EntitiesGroupPanel
+                id="group-panel"
                 :groups="sortedGroups"
                 :types="types"
                 @create="createGroup"
@@ -57,6 +59,7 @@ function updateGroup(group: StoredEntityGroup) {
             />
 
             <EntitiesBlacklistEditor
+                id="blacklist-editor"
                 :terms="blacklist"
                 @add="addBlacklistTerm"
                 @remove="removeBlacklistTerm"

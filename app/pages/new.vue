@@ -109,7 +109,7 @@ async function start() {
         </div>
 
         <div class="grid gap-4 lg:grid-cols-3">
-            <UCard class="lg:col-span-2" :ui="{ body: 'flex flex-col gap-4' }">
+            <UCard id="upload-card" class="lg:col-span-2" :ui="{ body: 'flex flex-col gap-4' }">
                 <UTabs v-model="tab" :items="tabItems" :content="false" />
 
                 <template v-if="tab === 'files'">
@@ -148,15 +148,16 @@ async function start() {
             </UCard>
 
             <div class="flex flex-col gap-4">
-                <UCard :ui="{ body: 'sm:p-5 p-4 flex flex-col gap-4' }">
+                <UCard id="group-select" :ui="{ body: 'sm:p-5 p-4 flex flex-col gap-4' }">
                     <NewGroupSelect v-model="selectedGroup" :groups="groups" />
                 </UCard>
 
-                <UCard v-if="tab === 'files'" :ui="{ body: 'sm:p-5 p-4' }">
+                <UCard v-if="tab === 'files'" id="output-select" :ui="{ body: 'sm:p-5 p-4' }">
                     <NewOutputSelect v-model="markedPdf" />
                 </UCard>
 
                 <UButton
+                    id="start-button"
                     block
                     size="lg"
                     icon="i-lucide-wand-sparkles"
