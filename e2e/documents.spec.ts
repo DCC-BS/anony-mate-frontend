@@ -21,7 +21,7 @@ test.describe("document queue", () => {
         await page.getByRole("tab", { name: "Text einfügen" }).click();
         await page
             .getByPlaceholder(
-                "Text hier einfügen – z. B. eine Aktennotiz oder ein Protokollausschnitt.",
+                "Text hier einfügen, z. B. eine Aktennotiz oder einen Protokollausschnitt.",
             )
             .fill("Max Mustermann wohnt in Berlin.");
         await page
@@ -88,7 +88,7 @@ test.describe("document queue", () => {
         await page.getByRole("tab", { name: "Text einfügen" }).click();
         await page
             .getByPlaceholder(
-                "Text hier einfügen – z. B. eine Aktennotiz oder ein Protokollausschnitt.",
+                "Text hier einfügen, z. B. eine Aktennotiz oder einen Protokollausschnitt.",
             )
             .fill("Max Mustermann wohnt in Berlin.");
         await page
