@@ -53,7 +53,6 @@ export default defineNuxtConfig({
                     content: "AnonyMate",
                 },
                 { name: "application-name", content: "AnonyMate" },
-                { name: "msapplication-config", content: "/browserconfig.xml" },
             ],
             link: [
                 { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
