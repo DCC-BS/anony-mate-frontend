@@ -1,0 +1,25 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+<title>AnonyMate</title>
+<rect width="1024" height="1024" fill="#8C4A92" style="fill:#8C4A92;fill:color(display-p3 0.5490 0.2902 0.5725);fill-opacity:1;"/>
+<g transform="translate(0 30)" stroke-linejoin="miter" stroke-linecap="butt">
+<!-- document with folded corner -->
+<path d="M200 160H520L640 280V800H200Z" stroke="#FDC603" stroke-width="40"/>
+<path d="M520 160V280H640" stroke="#FDC603" stroke-width="40"/>
+<!-- text lines: plain and redacted -->
+<path d="M270 300H440M270 480H360" stroke="#FDC603" stroke-width="36"/>
+<g fill="#FDC603" style="fill:#FDC603;fill:color(display-p3 0.9922 0.7765 0.0118);fill-opacity:1;">
+<rect x="270" y="365" width="300" height="56"/>
+<rect x="400" y="455" width="170" height="50"/>
+</g>
+<path d="M270 560H400" stroke="#FDC603" stroke-width="36"/>
+<!-- mask: purple halo cuts the page, then the yellow outline -->
+<g transform="translate(-124 -138) scale(1.2)">
+<path d="M410 600C500 560 570 575 620 610C670 575 740 560 830 600C845 700 800 790 720 790C675 790 645 765 620 735C595 765 565 790 520 790C440 790 395 700 410 600Z" fill="#8C4A92" stroke="#8C4A92" stroke-width="92" style="fill:#8C4A92;fill:color(display-p3 0.5490 0.2902 0.5725);fill-opacity:1;"/>
+<path d="M410 600C500 560 570 575 620 610C670 575 740 560 830 600C845 700 800 790 720 790C675 790 645 765 620 735C595 765 565 790 520 790C440 790 395 700 410 600Z" stroke="#FDC603" stroke-width="34"/>
+<g fill="#FDC603" style="fill:#FDC603;fill:color(display-p3 0.9922 0.7765 0.0118);fill-opacity:1;">
+<path d="M465 665C500 640 545 640 575 670C545 705 500 705 465 665Z"/>
+<path d="M665 670C695 640 740 640 775 665C740 705 695 705 665 670Z"/>
+</g>
+</g>
+</g>
+</svg>
