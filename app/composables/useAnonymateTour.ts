@@ -20,8 +20,8 @@ type StepOptions = Pick<OnboardingStep, "element"> &
  *
  * It walks the document list, the upload page and the entity settings. On the
  * upload page it explains the two outputs side by side, since they work
- * differently: text to review here, or the PDF itself with redaction marks to
- * review in a PDF editor.
+ * differently: text reviewed here as new text, or the original PDF with the
+ * findings marked on it, reviewed here and applied in a PDF editor.
  *
  * @returns The tour to hand to the orchestrator's `onboarding-builder` prop.
  */
@@ -140,7 +140,7 @@ export function useAnonymateTour(): AnonymateTour {
                 side: "left",
                 align: "start",
             }),
-            step("outputMarkedPdf", {
+            step("outputPdfReview", {
                 element: "#output-select",
                 side: "left",
                 align: "start",

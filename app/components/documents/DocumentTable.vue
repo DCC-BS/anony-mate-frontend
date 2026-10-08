@@ -10,13 +10,23 @@ const emit = defineEmits<{ retry: [id: string]; remove: [id: string] }>();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const { documentGroupName } = useGroupName();
+const { entityName } = useEntityName();
 const NuxtLink = resolveComponent("NuxtLink");
 
 // Status is shown at every width, so the narrow layout needs a column for it
 // too: with only name and actions, the header's status label would sit over
-// the buttons. The detection group and the count stay hidden below `lg`.
+// the buttons. The output, the detection group and the count stay hidden
+// below `lg`.
 const rowGrid =
-    "grid grid-cols-[minmax(0,1fr)_auto_124px] items-center gap-3 lg:grid-cols-[minmax(0,1fr)_150px_minmax(0,150px)_90px_124px]";
+    "grid grid-cols-[minmax(0,1fr)_auto_124px] items-center gap-3 lg:grid-cols-[minmax(0,1fr)_150px_minmax(0,110px)_minmax(0,150px)_90px_124px]";
+
+/**
+ * What the document is worked for: the original as a PDF, its marks
+ * reviewed over it, or the text read out of it and reviewed as text.
+ */
+function outputOf(document: StoredDocument): "pdf" | "text" {
+    return document.pdfReview || document.markedPdf ? "pdf" : "text";
+}
 
 /** Documents still on their way through the API cannot be sent again. */
 function isBusy(document: StoredDocument): boolean {
@@ -32,8 +42,8 @@ function formatDate(date: Date): string {
 }
 
 /**
- * A marked PDF has no review here: it is downloaded and opened in an editor
- * such as Kofax, so its row leads nowhere and offers the file instead.
+ * A PDF from before the review came here, marked for an editor such as Kofax:
+ * its row leads nowhere and offers the file instead.
  */
 function isMarked(document: StoredDocument): boolean {
     return Boolean(document.markedPdf);
@@ -59,6 +69,7 @@ function downloadMarked(document: StoredDocument): void {
         >
             <div>{{ t("documents.table.document") }}</div>
             <div>{{ t("documents.table.status") }}</div>
+            <div class="hidden lg:block">{{ t("documents.table.output") }}</div>
             <div class="hidden lg:block">{{ t("documents.table.group") }}</div>
             <div class="hidden lg:block">{{ t("documents.table.detections") }}</div>
             <div />
@@ -102,6 +113,19 @@ function downloadMarked(document: StoredDocument): void {
             </div>
 
             <div
+                class="hidden items-center gap-1.5 text-muted lg:flex"
+                :title="t(`documents.table.output${outputOf(document) === 'pdf' ? 'Pdf' : 'Text'}`)"
+            >
+                <UIcon
+                    :name="outputOf(document) === 'pdf' ? 'i-lucide-file' : 'i-lucide-align-left'"
+                    class="size-4 flex-none"
+                />
+                <span class="truncate">
+                    {{ t(`documents.table.output${outputOf(document) === "pdf" ? "Pdf" : "Text"}`) }}
+                </span>
+            </div>
+
+            <div
                 class="hidden min-w-0 truncate text-muted lg:block"
                 :title="documentGroupName(document.entityGroupName)"
             >
@@ -124,7 +148,7 @@ function downloadMarked(document: StoredDocument): void {
                     @click.prevent.stop="downloadMarked(document)"
                 />
                 <RecomputeButton
-                    v-if="!isMarked(document)"
+                    v-if="!isMarked(document) && !document.pdfReview"
                     :document-id="document.id"
                     :group-id="document.entityGroupId"
                     :busy="isBusy(document)"

@@ -59,10 +59,40 @@ export const DocumentRedactResultSchema = z.object({
     entities: z.record(z.string(), z.array(EntitySchema)),
 });
 
+/** One marked area of a page, in points from the top left. */
+export const MarkBoxSchema = z.object({
+    page: z.int().gte(1),
+    left: z.number(),
+    top: z.number(),
+    right: z.number(),
+    bottom: z.number(),
+});
+
+/** One mark the API found on a PDF, as the interface draws it. */
+export const MarkAnnotationSchema = z.object({
+    /** The mark's id, kept as its annotation's /NM on the PDF. */
+    id: z.string(),
+    label: z.string(),
+    /** What the mark covers; empty for a mark on a picture. */
+    text: z.string(),
+    confidence: z.number().gte(0).lte(1),
+    boxes: z.array(MarkBoxSchema),
+});
+
+/** What a PDF scanned for redaction answers with, instead of the marked PDF. */
+export const PdfAnnotationsResultSchema = z.object({
+    annotations: z.array(MarkAnnotationSchema),
+    /** Width and height of each page in points, by 1-based page number. */
+    page_sizes: z.record(z.coerce.number(), z.tuple([z.number(), z.number()])),
+});
+
 export type Entity = z.infer<typeof EntitySchema>;
 export type RedactResult = z.infer<typeof RedactResultSchema>;
 export type RedactOptions = z.infer<typeof RedactOptionsSchema>;
 export type DocumentRedactResult = z.infer<typeof DocumentRedactResultSchema>;
+export type MarkBox = z.infer<typeof MarkBoxSchema>;
+export type MarkAnnotation = z.infer<typeof MarkAnnotationSchema>;
+export type PdfAnnotationsResult = z.infer<typeof PdfAnnotationsResultSchema>;
 
 export const TaskAcceptedSchema = z.object({
     task_id: z.string(),

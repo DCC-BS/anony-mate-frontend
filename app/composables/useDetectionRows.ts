@@ -50,6 +50,14 @@ export function useDetectionRows(
         expanded.value = next;
     }
 
+    /** Opens a group, if it is not already open: click-through from the
+     * document wants the row it names visible, not hidden in a closed group. */
+    function expandGroup(label: string): void {
+        if (!expanded.value.has(label)) {
+            expanded.value = new Set(expanded.value).add(label);
+        }
+    }
+
     /** Groups filtered by the search box, empty groups dropped. */
     const visibleGroups = computed(() => {
         const needle = query.value.trim().toLowerCase();
@@ -107,5 +115,5 @@ export function useDetectionRows(
             : ROW_HEIGHT.group;
     }
 
-    return { query, rows, estimateRow, toggleGroup };
+    return { query, rows, estimateRow, toggleGroup, expandGroup };
 }

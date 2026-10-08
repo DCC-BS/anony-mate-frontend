@@ -3,6 +3,7 @@ import type {
     DocumentView,
     ReviewTool,
 } from "~/composables/useDocumentReview";
+import { usePdfExport } from "~/composables/usePdfExport";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -43,6 +44,17 @@ watch(
     { immediate: true }
 );
 
+/** Whether the document is a PDF whose marks are reviewed over the original. */
+const isPdfReview = computed(
+    () =>
+        storedDocument.value?.pdfReview === true ||
+        // A document still in the superseded mode reads as the review it
+        // would be today, if its marks ever came back as annotations.
+        (storedDocument.value?.markedPdf === true &&
+            storedDocument.value?.markedFile === undefined &&
+            storedDocument.value?.detectionCount > 0)
+);
+
 const { slices, hasPages, pageOf, detectionCounts } = useDocumentPages(
     () => storedDocument.value?.text ?? "",
     () => storedDocument.value?.pageOffsets ?? [],
@@ -70,6 +82,15 @@ const { exportAs } = useReviewExport(
     blackout,
     () => storedDocument.value?.name ?? "document"
 );
+
+/** Writes the review's answer onto the PDF, as an annotated PDF to download. */
+const { exportAsPdf, isExportingPdf } = usePdfExport(
+    documentId,
+    replacements,
+    blackout
+);
+
+const sidebar = useTemplateRef<{ reveal: (id: string) => void }>("sidebar");
 
 const { selectedId, activePage, goToPage, selectDetection } =
     useReviewNavigation(
@@ -99,11 +120,34 @@ function annotate(start: number, end: number, text: string) {
     }
     return addDetection(markerLabel.value, start, end, text);
 }
+
+/**
+ * A click on a mark in the document rings its row and brings it into view:
+ * the reader works from the page, the list follows.
+ */
+function selectFromDocument(id: string | undefined): void {
+    void selectDetection(id);
+    if (id) {
+        sidebar.value?.reveal(id);
+    }
+}
 </script>
 
 <template>
     <div v-if="storedDocument" class="flex h-full min-h-0 flex-col gap-3 px-4 py-3">
+        <!-- A PDF whose marks are reviewed over the original: one view of the
+             file with the marks on it, no text to show or preview. -->
+        <ReviewPdfHeader
+            v-if="isPdfReview"
+            :name="storedDocument.name"
+            :labels="availableLabels"
+            :counts="counts"
+            :busy="isBusy || isExportingPdf"
+            @export-pdf="exportAsPdf(detections)"
+        />
+
         <ReviewHeader
+            v-else
             v-model:view="view"
             v-model:blackout="blackout"
             v-model:tool="tool"
@@ -117,14 +161,16 @@ function annotate(start: number, end: number, text: string) {
 
         <div
             class="grid min-h-0 flex-1 gap-4"
-            :class="hasPages
-                ? (pagesCollapsed
-                    ? 'lg:grid-cols-[var(--width-page-rail-collapsed)_minmax(0,1fr)_var(--width-detections)] lg:gap-2'
-                    : 'lg:grid-cols-[var(--width-page-rail)_minmax(0,1fr)_var(--width-detections)]')
-                : 'lg:grid-cols-[minmax(0,1fr)_var(--width-detections)]'"
+            :class="isPdfReview
+                ? 'lg:grid-cols-[minmax(0,1fr)_var(--width-detections)]'
+                : hasPages
+                    ? (pagesCollapsed
+                        ? 'lg:grid-cols-[var(--width-page-rail-collapsed)_minmax(0,1fr)_var(--width-detections)] lg:gap-2'
+                        : 'lg:grid-cols-[var(--width-page-rail)_minmax(0,1fr)_var(--width-detections)]')
+                    : 'lg:grid-cols-[minmax(0,1fr)_var(--width-detections)]'"
         >
             <ReviewPageList
-                v-if="hasPages"
+                v-if="hasPages && !isPdfReview"
                 class="hidden lg:flex"
                 v-model:collapsed="pagesCollapsed"
                 :counts="detectionCounts"
@@ -132,7 +178,21 @@ function annotate(start: number, end: number, text: string) {
                 @select="goToPage"
             />
 
+            <ReviewPdfDocumentView
+                v-if="isPdfReview"
+                :document="storedDocument"
+                :detections="detections"
+                :selected-id="selectedId"
+                :labels="availableLabels"
+                @select="selectFromDocument($event)"
+                @set-state="setState"
+                @set-all-occurrences="setAllOccurrences"
+                @relabel="relabel"
+                @remove-detection="removeDetection"
+            />
+
             <ReviewDocumentText
+                v-else
                 :slices="slices"
                 :view="view"
                 :blackout="blackout"
@@ -142,7 +202,7 @@ function annotate(start: number, end: number, text: string) {
                 :tool="tool"
                 :marker-label="markerLabel"
                 @visible-page="activePage = $event"
-                @select="selectDetection($event)"
+                @select="selectFromDocument($event)"
                 @set-state="setState"
                 @set-all-occurrences="setAllOccurrences"
                 @relabel="relabel"
@@ -151,6 +211,7 @@ function annotate(start: number, end: number, text: string) {
             />
 
             <ReviewDetectionSidebar
+                ref="sidebar"
                 :threshold="threshold"
                 :threshold-floor="thresholdFloor"
                 :document-id="documentId"
@@ -160,7 +221,8 @@ function annotate(start: number, end: number, text: string) {
                 :counts="counts"
                 :selected-id="selectedId"
                 :occurrences-of="occurrenceCount"
-                :readonly="view !== 'editor'"
+                :readonly="!isPdfReview && view !== 'editor'"
+                :allow-recompute="!isPdfReview"
                 @update:threshold="setThreshold"
                 @select="selectDetection($event, true)"
                 @set-state="setState"
@@ -171,6 +233,7 @@ function annotate(start: number, end: number, text: string) {
         </div>
 
         <ReviewWizard
+            v-if="!isPdfReview"
             v-model:open="wizardOpen"
             :items="detections"
             :text="storedDocument.text"

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { mockApi } from "./mocks";
+import { BLANK_PDF, mockApi, PDF_ANNOTATIONS } from "./mocks";
 
 test.describe("document queue", () => {
     test("queues pasted text, processes it, and opens the review", async ({
@@ -40,9 +40,7 @@ test.describe("document queue", () => {
         await expect(page.locator(".detection-mark")).toHaveCount(2);
     });
 
-    test("marks a PDF for redaction and offers it to download", async ({
-        page,
-    }) => {
+    test("scans a PDF for the review and shows its marks", async ({ page }) => {
         await mockApi(page);
         let options: Record<string, unknown> = {};
         await page.route("**/api/redact-document", (route) => {
@@ -51,30 +49,52 @@ test.describe("document queue", () => {
             options = json ? JSON.parse(json) : {};
             void route.fulfill({ json: { task_id: "task-1" } });
         });
+        await page.route("**/api/task/**", (route) => {
+            void route.fulfill({
+                json: {
+                    task_id: "task-1",
+                    status: "finished",
+                    resource_id: "resource-1",
+                },
+            });
+        });
+        await page.route("**/api/resource/**", (route) => {
+            void route.fulfill({ json: PDF_ANNOTATIONS });
+        });
 
+        // The file input's change listener arrives with the component's
+        // mount; a file set on the input before that is silently dropped.
         await page.goto("/new");
+        await expect(page.getByText("Dateien hierher ziehen")).toBeVisible();
         await page.locator('input[type="file"]').setInputFiles({
             name: "baugesuch.pdf",
             mimeType: "application/pdf",
-            buffer: Buffer.from("%PDF-1.7\n%%EOF\n"),
+            buffer: Buffer.from(BLANK_PDF),
         });
-        await page
-            .getByRole("switch", { name: "PDF mit Schwärzungsmarkierungen" })
-            .click();
+        await expect(
+            page.getByText("Bereit zur Verarbeitung (1)"),
+        ).toBeVisible();
+        // The output is a choice, and the PDF review is what was wanted.
+        await page.getByRole("button", { name: "PDF prüfen" }).first().click();
+        await expect(
+            page.getByRole("button", { name: "Verarbeitung starten" }),
+        ).toBeEnabled();
         await page
             .getByRole("button", { name: "Verarbeitung starten" })
             .click();
 
-        // The document is not reviewed here: it is offered to download.
-        await expect(page.getByText("PDF markiert")).toBeVisible();
-        await expect(page.getByText("3", { exact: true })).toBeVisible();
-        expect(options).toMatchObject({ marked_pdf: true });
+        // The PDF is reviewed here, so the row opens its review.
+        await expect(page.getByText("Geschwärzt")).toBeVisible();
+        await expect(page.getByText("2", { exact: true })).toBeVisible();
+        expect(options).toMatchObject({
+            pdf_annotations: true,
+            blacklist: [],
+        });
 
-        const download = page.waitForEvent("download");
-        await page.getByTitle("Markiertes PDF herunterladen").click();
-        expect((await download).suggestedFilename()).toBe(
-            "baugesuch.markiert.pdf",
-        );
+        await page.getByText("baugesuch.pdf").click();
+        await expect(
+            page.locator(".vue-pdf-embed__page").first(),
+        ).toBeVisible();
     });
 
     test("shows a failed document and lets it be retried", async ({ page }) => {

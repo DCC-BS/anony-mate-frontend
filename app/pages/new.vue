@@ -8,7 +8,7 @@ const { addDocument } = getDocumentService();
 const { pump } = useDocumentQueue();
 
 const selectedGroup = ref<string>();
-/** Return PDFs marked for redaction, for an editor such as Kofax, instead of as text. */
+/** Review PDFs here over the original, rather than only converting them to text. */
 const markedPdf = ref(false);
 /** True from the click until the queue has the documents and the route moves. */
 const isStarting = ref(false);
@@ -77,9 +77,9 @@ async function start() {
                     name: file.name,
                     text: "",
                     file,
-                    // Only a PDF can carry the marks; any other file is
-                    // converted and reviewed as usual.
-                    markedPdf: markedPdf.value && isPdf(file)
+                    // A PDF is reviewed here over the original; any other
+                    // file is converted and reviewed as text.
+                    pdfReview: markedPdf.value && isPdf(file)
                 });
             }
             stagedFiles.value = [];

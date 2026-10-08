@@ -1,5 +1,6 @@
 import { db } from "~/stores/db";
 import type { StoredDocument } from "~/types/storedDocument";
+import { scanUploadedPdf } from "~/utils/redactDocument";
 
 /**
  * Works staged documents off, one at a time.
@@ -14,7 +15,8 @@ import type { StoredDocument } from "~/types/storedDocument";
 export function useDocumentPump(
     queuePositions: Ref<Record<string, number | null>>,
 ) {
-    const { updateDocument, replaceDetections } = getDocumentService();
+    const { updateDocument, replaceDetections, replaceMarks } =
+        getDocumentService();
     const logger = useLogger();
     const { t } = useI18n();
 
@@ -69,8 +71,8 @@ export function useDocumentPump(
     /** Puts one document through the API and stores what comes back. */
     async function processDocument(document: StoredDocument): Promise<void> {
         try {
-            if (document.markedPdf && document.file) {
-                await markPdf(document);
+            if (document.pdfReview && document.file) {
+                await scanPdf(document);
                 return;
             }
 
@@ -103,12 +105,14 @@ export function useDocumentPump(
     }
 
     /**
-     * Has a PDF marked for redaction and keeps the marked copy. It is not
-     * reviewed here: it is downloaded and opened in an editor such as Kofax.
+     * Has a PDF scanned for the review here and stores the marks it found.
+     *
+     * The upload stays on the document: the review draws the marks over the
+     * original, and the annotated PDF is written from it later.
      */
-    async function markPdf(document: StoredDocument): Promise<void> {
+    async function scanPdf(document: StoredDocument): Promise<void> {
         await updateDocument(document.id, { status: "converting" });
-        const marked = await markUploadedPdf(document, {
+        const result = await scanUploadedPdf(document, {
             onQueuePosition: (position) => {
                 queuePositions.value[document.id] = position;
             },
@@ -116,12 +120,16 @@ export function useDocumentPump(
                 void updateDocument(document.id, { status: "redacting" }),
         });
 
+        const detectionCount = await replaceMarks(document.id, result);
+
         await updateDocument(document.id, {
             status: "ready",
-            markedFile: marked.file,
-            detectionCount: marked.markCount,
-            // The upload is only needed to retry a failed run.
-            file: undefined,
+            pageSizes: Object.fromEntries(
+                Object.entries(result.page_sizes).map(
+                    ([page, [width, height]]) => [page, { width, height }],
+                ),
+            ),
+            detectionCount,
         });
     }
 

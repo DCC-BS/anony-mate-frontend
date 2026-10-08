@@ -106,7 +106,10 @@
             "retry": "Try again",
             "remove": "Remove",
             "group": "Detection group",
-            "download": "Download marked PDF"
+            "download": "Download marked PDF",
+            "output": "Output",
+            "outputPdf": "PDF",
+            "outputText": "Text"
         },
         "status": {
             "staged": "Queued",
@@ -116,7 +119,7 @@
             "failed": "Failed",
             "failedHint": "Processing failed. Please try again.",
             "queued": "Queued (#{position})",
-            "marked": "PDF marked"
+            "marked": "PDF marked (Kofax)"
         },
         "search": "Search documents…",
         "noMatches": "No matches."
@@ -142,10 +145,13 @@
         },
         "output": {
             "title": "Output",
-            "markedPdf": "PDF with redaction marks",
-            "markedPdfHint": "PDF files only",
-            "markedPdfHelpLabel": "What does this mean?",
-            "markedPdfHelp": "You get the PDF itself back, with a redaction mark on everything that was detected, including text in pictures, plans and scans, and text the document contains but does not show. The marks are standard redaction annotations (ISO 32000) and each names the text it covers: in programs such as Kofax Power PDF or Adobe Acrobat you review them, edit, delete or add marks, and then redact the document."
+            "pdfReview": "Review PDF",
+            "pdfReviewHint": "The original stays a PDF: findings are marked on it",
+            "pdfReviewHelpLabel": "What does this mean?",
+            "pdfReviewHelp": "You review the PDF here in AnonyMate: every finding is shown as a mark over the original, including text in pictures, plans and scans. You take marks out or add new ones, and export the marked PDF from that, whose redactions you then apply in a program such as Kofax Power PDF or Adobe Acrobat.",
+            "textReview": "Review text",
+            "textReviewHint": "The text is extracted and reviewed as new text",
+            "textReviewHelp": "AnonyMate extracts the text from the document (PDF, Word, …) and marks the personal data in it. You review every finding here, decide what is replaced, and export the anonymised text as Word, text or Markdown. The result is new text: the original's layout, images and formatting are not kept."
         }
     },
     "review": {
@@ -269,7 +275,11 @@
             "docx": "Word (.docx)",
             "clipboard": "Copy to clipboard"
         },
-        "copied": "Copied"
+        "copied": "Copied",
+        "annotatedPdf": "Marked PDF",
+        "annotatedPdfDone": "Marked PDF created",
+        "pdfMissingFile": "The original PDF is no longer available. Please upload it again.",
+        "failed": "The export failed."
     },
     "threshold": {
         "title": "Minimum confidence",
@@ -318,12 +328,12 @@
             "description": "Choose which kinds of personal data are searched for: \"Default\" looks for people and places only, \"Full\" for every category. Create your own selections under \"Search schema\"."
         },
         "outputText": {
-            "title": "Way 1: review text and export (default)",
-            "description": "With the switch off, AnonyMate extracts the text from the document (PDF, Word, …) and marks the personal data in it. You review every finding here in AnonyMate, decide what is replaced, and export the anonymised text as Word, text or Markdown. The result is new text: the original's layout, images and formatting are not kept."
+            "title": "Output: review text",
+            "description": "AnonyMate extracts the text from the document (PDF, Word, …) and marks the personal data in it. You review every finding here in AnonyMate, decide what is replaced, and export the anonymised text as Word, text or Markdown. The result is new text: the original's layout, images and formatting are not kept."
         },
-        "outputMarkedPdf": {
-            "title": "Way 2: PDF with redaction marks",
-            "description": "With the switch on, PDF files come back as the original PDF, unchanged, with a redaction mark on every finding, including text in images, plans and scans. Review happens not here but in Kofax Power PDF or Adobe Acrobat: there you edit, delete or add marks and apply them. Only then is the content removed. Until then nothing is redacted."
+        "outputPdfReview": {
+            "title": "Output: review the PDF",
+            "description": "For PDF files the layout, images and scans are kept: you review the original here, with a mark on every finding, including text in images and plans. You take marks out or add new ones and export the marked PDF from that. The redaction itself is applied in a program such as Kofax Power PDF or Adobe Acrobat. Only then is the content removed."
         },
         "start": {
             "title": "Start",

@@ -1,4 +1,5 @@
-import type { Entity } from "#shared/types/redactTypes";
+import type { Entity, PdfAnnotationsResult } from "#shared/types/redactTypes";
+import { PdfAnnotationsResultSchema } from "#shared/types/redactTypes";
 import type { StoredDocument } from "~/types/storedDocument";
 
 /** What a run at the API gives back, whatever route it took to get there. */
@@ -86,21 +87,22 @@ export interface MarkedPdfResult {
 }
 
 /**
- * Sends an uploaded PDF to be marked for redaction instead of converted.
+ * Sends an uploaded PDF to be scanned for redaction, for the review here.
  *
- * Nothing is reviewed here afterwards: the marks are for an editor such as
- * Kofax Power PDF to list, change and apply. So the blacklist goes along and
- * the API leaves its words unmarked, where the text path applies it
- * client-side.
+ * The PDF itself never comes back: the caller keeps the file, and what the
+ * API answers with is what it found — every mention as a mark with its boxes
+ * on the page — for the interface to draw over the original. The blacklist
+ * goes along and the API leaves its words unmarked, where the text path
+ * applies it client-side.
  *
  * @param document - The document, with the upload still on it.
  * @param progress - Where to report the queue position and the handover.
- * @returns The marked PDF and how many marks it carries.
+ * @returns The marks and the size of each page they stand on.
  */
-export async function markUploadedPdf(
+export async function scanUploadedPdf(
     document: StoredDocument,
     progress: RedactionProgress,
-): Promise<MarkedPdfResult> {
+): Promise<PdfAnnotationsResult> {
     const formData = new FormData();
     formData.append("file", document.file as Blob, document.name);
     formData.append(
@@ -108,34 +110,31 @@ export async function markUploadedPdf(
         JSON.stringify({
             ...redactOptions(document),
             blacklist: document.blacklist,
-            marked_pdf: true,
+            pdf_annotations: true,
         }),
     );
 
     let isScanning = false;
-    const resourceId = await awaitApiTask(
+    const result = await runApiTask(
         () =>
             $fetch<unknown>("/api/redact-document", {
                 method: "POST",
                 body: formData,
                 headers: { "X-Client-Id": clientId() },
             }),
+        PdfAnnotationsResultSchema,
         ({ progress: fraction, queuePosition }) => {
             progress.onQueuePosition(queuePosition);
+
+            // One task covers both halves and only the scan reports a
+            // fraction, so its first one says conversion is done.
             if (fraction !== null && !isScanning) {
                 isScanning = true;
                 progress.onScanning();
             }
         },
     );
-
-    const response = await $fetch.raw<Blob>(`/api/marked-pdf/${resourceId}`, {
-        responseType: "blob",
-    });
-    return {
-        file: response._data as Blob,
-        markCount: Number(response.headers.get("x-mark-count") ?? 0),
-    };
+    return result;
 }
 
 /**
@@ -167,4 +166,60 @@ export async function redactStoredText(
         redactedText: result.text,
         entities: result.entities,
     };
+}
+
+/** What the export needs for one mark: its id and, when chosen, its overlay. */
+export interface AnnotationExport {
+    id: string;
+    label: string;
+    confidence: number;
+    text: string;
+    boxes: {
+        page: number;
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+    }[];
+    overlay?: string | null;
+}
+
+/**
+ * Has the reviewed marks of a PDF written onto the PDF itself.
+ *
+ * The marks leave as they were decided: only the ones the reader kept, each
+ * named by its id, with the overlay where the redaction style is a
+ * placeholder. What comes back is the PDF for an editor such as Kofax Power
+ * PDF to apply.
+ *
+ * @param file - The original PDF, as uploaded.
+ * @param name - The document's name, which the marked file is named after.
+ * @param annotations - The reviewed marks.
+ * @param onQueuePosition - Where to report the place in the API's queue.
+ * @returns The annotated PDF.
+ */
+export async function writeAnnotatedPdf(
+    file: Blob,
+    name: string,
+    annotations: AnnotationExport[],
+    onQueuePosition: (position: number | null) => void,
+): Promise<Blob> {
+    const resourceId = await awaitApiTask(
+        () => {
+            const formData = new FormData();
+            formData.append("file", file, name);
+            formData.append("options", JSON.stringify({ annotations }));
+            return $fetch<unknown>("/api/annotate-pdf", {
+                method: "POST",
+                body: formData,
+                headers: { "X-Client-Id": clientId() },
+            });
+        },
+        ({ queuePosition }) => onQueuePosition(queuePosition),
+    );
+
+    const response = await $fetch.raw<Blob>(`/api/annotate-pdf/${resourceId}`, {
+        responseType: "blob",
+    });
+    return response._data as Blob;
 }

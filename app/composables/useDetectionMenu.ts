@@ -72,8 +72,10 @@ export function useDetectionMenu(
                         })),
                 },
             ],
-            // Only the move this detection can make: the state it is already in
-            // would be an entry that does nothing.
+            // Only the moves this detection can make: the pair that fits its
+            // state, on the one mark and on every occurrence of its text.
+            // The state it is already in would be an entry that does nothing,
+            // and "all occurrences" follows its mark's own move.
             [
                 isRedacted
                     ? {
@@ -88,20 +90,25 @@ export function useDetectionMenu(
                           onSelect: () =>
                               actions.setState(detection.id, "redacted"),
                       },
-            ],
-            [
-                {
-                    label: t("review.redactAllOccurrencesShort"),
-                    icon: "i-lucide-eye-off",
-                    onSelect: () =>
-                        actions.setAllOccurrences(detection.text, "redacted"),
-                },
-                {
-                    label: t("review.unredactAllOccurrencesShort"),
-                    icon: "i-lucide-eye",
-                    onSelect: () =>
-                        actions.setAllOccurrences(detection.text, "unredacted"),
-                },
+                isRedacted
+                    ? {
+                          label: t("review.unredactAllOccurrencesShort"),
+                          icon: "i-lucide-eye",
+                          onSelect: () =>
+                              actions.setAllOccurrences(
+                                  detection.text,
+                                  "unredacted",
+                              ),
+                      }
+                    : {
+                          label: t("review.redactAllOccurrencesShort"),
+                          icon: "i-lucide-eye-off",
+                          onSelect: () =>
+                              actions.setAllOccurrences(
+                                  detection.text,
+                                  "redacted",
+                              ),
+                      },
             ],
             [
                 {

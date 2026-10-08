@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import type { PdfAnnotationsResult } from "#shared/types/redactTypes";
 import { db } from "~/stores/db";
 import {
     type NewDocument,
@@ -7,6 +8,7 @@ import {
     type StoredDocument,
     StoredDocumentSchema,
 } from "~/types/storedDocument";
+import { numberEntities } from "~/utils/detectionNumbering";
 
 /**
  * Persistence layer for documents and detections on top of IndexedDB.
@@ -130,6 +132,60 @@ export function getDocumentService() {
     }
 
     /**
+     * Replaces the detections of a PDF review document with the marks the
+     * API found on it.
+     *
+     * The id is the mark's own, so the row stays the same mark across
+     * un-redacting and export: the exported annotation carries it as its
+     * /NM. `start`/`end` are synthetic offsets — one mark per position in
+     * the API's first-seen order — and carry only the order, which
+     * `numberEntities` numbers the marks by.
+     */
+    async function replaceMarks(
+        documentId: string,
+        result: PdfAnnotationsResult,
+    ): Promise<number> {
+        // Numbered over the whole list in the API's first-seen order, so a
+        // mark's occurrence and subject numbers agree with what a reader
+        // counts on the pages, whatever label each mark carries.
+        const numbered = numberEntities(
+            result.annotations.map((annotation, index) => ({
+                id: annotation.id,
+                text: annotation.text,
+                label: annotation.label,
+                start: index,
+                end: index + 1,
+                confidence: annotation.confidence,
+            })),
+        );
+
+        const marks = numbered.map((entity) =>
+            StoredDetectionSchema.parse({
+                id: `${documentId}:${entity.label}:${entity.start}`,
+                documentId,
+                label: entity.label,
+                occurrenceIndex: entity.occurrenceIndex,
+                subjectIndex: entity.subjectIndex,
+                text: entity.text,
+                start: entity.start,
+                end: entity.end,
+                confidence: entity.confidence,
+                state: "redacted",
+                boxes: result.annotations.find(
+                    (annotation) => annotation.id === entity.id,
+                )?.boxes,
+            }),
+        );
+
+        await db.transaction("rw", db.detections, async () => {
+            await db.detections.where("documentId").equals(documentId).delete();
+            await db.detections.bulkAdd(marks);
+        });
+
+        return marks.length;
+    }
+
+    /**
      * Deletes documents untouched for longer than the retention period.
      *
      * @returns How many documents were removed.
@@ -159,6 +215,7 @@ export function getDocumentService() {
         deleteDocument,
         getDetections,
         replaceDetections,
+        replaceMarks,
         cleanupOldDocuments,
     };
 }
