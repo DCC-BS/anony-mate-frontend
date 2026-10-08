@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Page } from "@playwright/test";
 
 /** A small preset served for every entity type endpoint. */
@@ -33,8 +35,32 @@ export const REDACT_RESULT = {
     },
 };
 
-/** What the API sends back for a PDF marked for redaction: the PDF itself. */
-export const MARKED_PDF = "%PDF-1.7\n% marked\n%%EOF\n";
+/** What the API sends back for a PDF scanned for the review: its marks. */
+export const PDF_ANNOTATIONS = {
+    annotations: [
+        {
+            id: "d1",
+            label: "person",
+            text: "Max Mustermann",
+            confidence: 0.95,
+            boxes: [{ page: 1, left: 60, top: 100, right: 180, bottom: 112 }],
+        },
+        {
+            id: "d2",
+            label: "ort",
+            text: "Berlin",
+            confidence: 0.9,
+            boxes: [{ page: 1, left: 200, top: 100, right: 240, bottom: 112 }],
+        },
+    ],
+    page_sizes: { 1: [595, 842] },
+};
+
+/** A one-page PDF with nothing on it, for the viewer and for the export. */
+export const BLANK_PDF = readFileSync(join(__dirname, "./fixtures/blank.pdf"));
+
+/** What the API sends back for the reviewed marks: the PDF itself. */
+export const ANNOTATED_PDF = BLANK_PDF;
 
 /**
  * Intercepts every API call the app makes and answers it from fixtures, so
@@ -71,11 +97,14 @@ export async function mockApi(page: Page): Promise<void> {
         void route.fulfill({ json: REDACT_RESULT });
     });
 
-    await page.route("**/api/marked-pdf/**", (route) => {
+    // A PDF review's scan collects the marks instead of a redaction result.
+    // The task id tells them apart: the scan is submitted to the same task
+    // route, so the resource is chosen by which submission it followed.
+    await page.route("**/api/annotate-pdf/**", (route) => {
         void route.fulfill({
-            body: MARKED_PDF,
+            body: ANNOTATED_PDF,
             contentType: "application/pdf",
-            headers: { "X-Mark-Count": "3" },
+            headers: { "X-Mark-Count": "2" },
         });
     });
 }

@@ -96,12 +96,24 @@ _Avoid_: post-processing, curation
 The two ways the review shows a document, and the two tabs it is switched with. **Editor** is the original text with every detection marked on it, and the only place decisions are made. **Preview** is the result — each redaction written as its placeholder, or as black bars — and is read-only.
 _Avoid_: original, anonymised (the first names the text the editor shows, not the mode; the second was the preview's old name)
 
+**PDF Review**:
+The review of an uploaded PDF in place of its text: the original file is kept and shown in the browser's viewer, every detection arrives as a **Mark** with its boxes on the page, and the reader clicks a mark or its row. There are no editor/preview tabs, no wizard and no re-detect — the file is the one view, and laying the marks out again would mean reading it again. The export writes the kept marks onto the PDF for Kofax to apply.
+_Avoid_: pdf-to-pdf, native mode
+
+**Mark**:
+A detection of a PDF review, arrived as boxes on the page instead of a text span. Its text comes from the page's words, grouped by the layout the API read, so every mention is its own mark with its own id; the boxes of one mention stay one. Same states, same numbering, same sidebar as any detection.
+_Avoid_: annotation (reserved for the PDF feature the mark becomes), highlight
+
+**Annotated PDF**:
+The exported result of a PDF review: the original with one redaction annotation (ISO 32000) per kept mark, each named by its mark's id, carrying the placeholder as its overlay text where the redaction style asks for one. Nothing is removed; the editor — Kofax Power PDF or Acrobat — applies the marks, and only then is the content gone.
+_Avoid_: redacted PDF (the marks are not applied here), burned PDF
+
 **Marked PDF**:
-A PDF that comes back as itself instead of as text, with a redaction mark on every detection: a standard PDF redaction annotation (ISO 32000) that an editor such as Kofax Power PDF lists, lets a reader edit or delete, and applies. Chosen per upload under "Output", only for PDFs; it has no review here, only a download. The API gets its words and their places from docling-serve, OCR included, so text in pictures, plans and scans is marked too.
-_Avoid_: annotated PDF, redacted PDF (nothing is removed until the editor applies the marks)
+The superseded output of an earlier version: a PDF carried straight to Kofax without a review here, listed in the document table only to download. New documents are **PDF Review**s; the flag stays so an older document still downloads.
+_Avoid_: annotated PDF (the marks were not chosen here)
 
 **Document Status**:
-Where a document stands in the client-owned pipeline: `staged` (queued, nothing sent yet), `converting` (uploaded file is at docling), `redacting` (text is at the redact endpoint), `ready` (detections stored, waiting for review; for a **Marked PDF**, the marked copy stored, waiting to be downloaded), or `failed`. The API is stateless, so this status is the only record of progress and it lives in IndexedDB.
+Where a document stands in the client-owned pipeline: `staged` (queued, nothing sent yet), `converting` (uploaded file is at docling), `redacting` (text is at the redact endpoint), `ready` (detections stored, waiting for review), or `failed`. The API is stateless, so this status is the only record of progress and it lives in IndexedDB.
 _Avoid_: state, phase
 
 **Queue**:

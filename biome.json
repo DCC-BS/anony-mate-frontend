@@ -13,7 +13,15 @@
     },
     "files": {
         "ignoreUnknown": false,
-        "includes": ["**", "!.nuxt", "!.output", "!logs", "!tests", "!env.d.ts"]
+        "includes": [
+            "**",
+            "!.nuxt",
+            "!.output",
+            "!logs",
+            "!tests",
+            "!env.d.ts",
+            "!public/pdfjs"
+        ]
     },
     "formatter": {
         "enabled": true,

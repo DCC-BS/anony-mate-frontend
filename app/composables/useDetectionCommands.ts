@@ -45,11 +45,13 @@ export function useDetectionCommands(documentId: MaybeRefOrGetter<string>) {
  * A row as IndexedDB can store it.
  *
  * A command that has been through the history comes back wrapped in Vue's deep
- * reactivity, and a proxy cannot be structured-cloned. Copying the row drops
- * the wrapper, so undo and redo write the same plain rows the first edit did.
+ * reactivity, and a proxy cannot be structured-cloned. Copying the top row
+ * drops the wrapper around the row, but a detection that carries boxes nests
+ * objects of its own, and those stay proxies of theirs — so the copy goes all
+ * the way down, over plain values only, which is what a row is.
  */
 function plain(detection: StoredDetection): StoredDetection {
-    return { ...toRaw(detection) };
+    return JSON.parse(JSON.stringify(toRaw(detection))) as StoredDetection;
 }
 
 /**

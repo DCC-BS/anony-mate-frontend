@@ -106,7 +106,10 @@
             "retry": "Erneut versuchen",
             "remove": "Entfernen",
             "group": "Erkennungsgruppe",
-            "download": "Markiertes PDF herunterladen"
+            "download": "Markiertes PDF herunterladen",
+            "output": "Ausgabe",
+            "outputPdf": "PDF",
+            "outputText": "Text"
         },
         "status": {
             "staged": "Wartet",
@@ -116,7 +119,7 @@
             "failed": "Fehlgeschlagen",
             "failedHint": "Verarbeitung fehlgeschlagen. Bitte erneut versuchen.",
             "queued": "Wartet ({position}.)",
-            "marked": "PDF markiert"
+            "marked": "PDF markiert (Kofax)"
         },
         "search": "Dokument suchen…",
         "noMatches": "Keine Treffer."
@@ -142,10 +145,13 @@
         },
         "output": {
             "title": "Ausgabe",
-            "markedPdf": "PDF mit Schwärzungsmarkierungen",
-            "markedPdfHint": "Nur für PDF-Dateien",
-            "markedPdfHelpLabel": "Was bedeutet das?",
-            "markedPdfHelp": "Sie erhalten das PDF selbst zurück, mit einer Schwärzungsmarkierung auf allem, was erkannt wurde, auch auf Text in Bildern, Plänen und Scans und auf Text, den das Dokument enthält, aber nicht anzeigt. Die Markierungen sind standardisierte Schwärzungsanmerkungen (ISO 32000) und nennen jeweils den gefundenen Text: In Programmen wie Kofax Power PDF oder Adobe Acrobat prüfen Sie sie, bearbeiten, löschen oder ergänzen sie und schwärzen das Dokument anschliessend."
+            "pdfReview": "PDF prüfen",
+            "pdfReviewHint": "Das Original bleibt PDF: die Fundstellen werden darauf markiert",
+            "pdfReviewHelpLabel": "Was bedeutet das?",
+            "pdfReviewHelp": "Sie prüfen das PDF hier in AnonyMate: Jede Fundstelle wird als Markierung über dem Original angezeigt, auch auf Text in Bildern, Plänen und Scans. Sie nehmen Markierungen heraus oder ergänzen welche, und exportieren daraus das markierte PDF, dessen Schwärzung Sie in einem Programm wie Kofax Power PDF oder Adobe Acrobat anwenden.",
+            "textReview": "Text prüfen",
+            "textReviewHint": "Der Text wird ausgelesen und als neuer Text geprüft",
+            "textReviewHelp": "AnonyMate liest den Text aus dem Dokument (PDF, Word, …) und markiert die Personendaten darin. Sie prüfen jede Fundstelle hier, entscheiden, was ersetzt wird, und exportieren den anonymisierten Text als Word, Text oder Markdown. Das Ergebnis ist ein neuer Text: Layout, Bilder und Formatierung des Originals bleiben dabei nicht erhalten."
         }
     },
     "review": {
@@ -269,7 +275,11 @@
             "docx": "Word (.docx)",
             "clipboard": "In die Zwischenablage"
         },
-        "copied": "Kopiert"
+        "copied": "Kopiert",
+        "annotatedPdf": "Markiertes PDF",
+        "annotatedPdfDone": "Markiertes PDF erstellt",
+        "pdfMissingFile": "Das Original-PDF ist nicht mehr vorhanden. Laden Sie es erneut hoch.",
+        "failed": "Der Export ist fehlgeschlagen."
     },
     "threshold": {
         "title": "Mindestkonfidenz",
@@ -318,12 +328,12 @@
             "description": "Wählen Sie, welche Arten von Personendaten gesucht werden: «Standard» sucht nur Personen und Orte, «Vollständig» alle Kategorien. Eigene Zusammenstellungen legen Sie unter «Such-Schema» an."
         },
         "outputText": {
-            "title": "Weg 1: Text prüfen und exportieren (Standard)",
-            "description": "Ist der Schalter aus, liest AnonyMate den Text aus dem Dokument (PDF, Word, …) und markiert die Personendaten darin. Sie prüfen jede Fundstelle hier in AnonyMate, entscheiden, was ersetzt wird, und exportieren den anonymisierten Text als Word, Text oder Markdown. Das Ergebnis ist ein neuer Text: Layout, Bilder und Formatierung des Originals bleiben dabei nicht erhalten."
+            "title": "Ausgabe: Text prüfen",
+            "description": "AnonyMate liest den Text aus dem Dokument (PDF, Word, …) und markiert die Personendaten darin. Sie prüfen jede Fundstelle hier in AnonyMate, entscheiden, was ersetzt wird, und exportieren den anonymisierten Text als Word, Text oder Markdown. Das Ergebnis ist ein neuer Text: Layout, Bilder und Formatierung des Originals bleiben dabei nicht erhalten."
         },
-        "outputMarkedPdf": {
-            "title": "Weg 2: PDF mit Schwärzungsmarkierungen",
-            "description": "Ist der Schalter ein, erhalten Sie bei PDF-Dateien das Original-PDF unverändert zurück, mit einer Schwärzungsmarkierung auf jeder Fundstelle, auch auf Text in Bildern, Plänen und Scans. Geprüft wird nicht hier, sondern in Kofax Power PDF oder Adobe Acrobat: Dort bearbeiten, löschen oder ergänzen Sie die Markierungen und wenden sie an. Erst dann ist der Inhalt entfernt. Bis dahin ist nichts geschwärzt."
+        "outputPdfReview": {
+            "title": "Ausgabe: PDF prüfen",
+            "description": "Bei PDF-Dateien bleiben Layout, Bilder und Scans erhalten: Sie prüfen das Original hier, mit einer Markierung auf jeder Fundstelle, auch auf Text in Bildern und Plänen. Sie nehmen Markierungen heraus oder ergänzen welche und exportieren daraus das markierte PDF. Die Schwärzung selbst wenden Sie in einem Programm wie Kofax Power PDF oder Adobe Acrobat an. Erst dann ist der Inhalt entfernt."
         },
         "start": {
             "title": "Starten",

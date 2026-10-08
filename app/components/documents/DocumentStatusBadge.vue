@@ -31,7 +31,7 @@ const isBusy = computed(
     () => status.value === "converting" || status.value === "redacting"
 );
 
-/** A PDF that came back marked is done here: it is refined in an editor such as Kofax. */
+/** A PDF from before the review came here is done: it is refined in an editor such as Kofax. */
 const isMarked = computed(
     () => status.value === "ready" && props.document.markedPdf
 );

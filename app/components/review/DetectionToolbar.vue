@@ -9,6 +9,12 @@ const props = defineProps<{
     busy?: boolean;
     /** Confidence the document was detected with; the slider starts there. */
     thresholdFloor?: number;
+    /**
+     * Whether the detections are re-detected: a PDF's marks are laid over the
+     * original, and re-laying them needs the file read again, so the swap is
+     * a text review's control.
+     */
+    allowRecompute?: boolean;
 }>();
 
 /** Confidence a detection needs to stay in the review. */
@@ -30,6 +36,7 @@ const { t } = useI18n();
                  so it sits with the list rather than with the document's own
                  tools. -->
             <RecomputeButton
+                v-if="props.allowRecompute"
                 size="xs"
                 :document-id="props.documentId"
                 :group-id="props.groupId"

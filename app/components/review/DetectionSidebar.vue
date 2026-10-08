@@ -16,6 +16,8 @@ const props = defineProps<{
     groupId?: string;
     /** True while the document is queued or being detected again. */
     busy?: boolean;
+    /** Whether the list can be built again with another detection group. */
+    allowRecompute?: boolean;
 }>();
 const emit = defineEmits<{
     /** The detection now under the ring, or nothing once it is let go. */
@@ -33,14 +35,37 @@ const threshold = defineModel<number>("threshold", {
 
 const { t } = useI18n();
 
-const { query, rows, estimateRow, toggleGroup } = useDetectionRows(
+const { query, rows, estimateRow, toggleGroup, expandGroup } = useDetectionRows(
     () => props.groups,
     () => !props.readonly
 );
+
+/**
+ * Brings one detection's row into view: opens its group first, so the row
+ * exists at all, then scrolls it to the middle. A click from the document
+ * side lands the reader on the row while the document stays put.
+ */
+async function reveal(detectionId: string): Promise<void> {
+    const detection = props.groups
+        .flatMap((group) => group.items)
+        .find((item) => item.id === detectionId);
+    if (!detection) {
+        return;
+    }
+    expandGroup(detection.label);
+    await nextTick();
+    root.value
+        ?.querySelector(`[data-detection="${detectionId}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+defineExpose({ reveal });
+
+const root = useTemplateRef<HTMLElement>("root");
 </script>
 
 <template>
-    <div class="flex h-full min-h-0 flex-col gap-3">
+    <div ref="root" class="flex h-full min-h-0 flex-col gap-3">
         <ReviewDetectionToolbar
             v-model:threshold="threshold"
             :total="props.counts.total"
@@ -48,6 +73,7 @@ const { query, rows, estimateRow, toggleGroup } = useDetectionRows(
             :group-id="props.groupId"
             :busy="props.busy"
             :threshold-floor="props.thresholdFloor"
+            :allow-recompute="props.allowRecompute"
         />
 
         <ReviewDetectionStats :counts="props.counts" />
@@ -100,7 +126,7 @@ const { query, rows, estimateRow, toggleGroup } = useDetectionRows(
                     @set-group-state="(label, state) => emit('setGroupState', label, state)"
                 />
 
-                <div v-else class="px-2 py-1">
+                <div v-else class="px-2 py-1" :data-detection="item.detection.id">
                     <ReviewDetectionItem
                         :detection="item.detection"
                         :selected="item.detection.id === props.selectedId"
