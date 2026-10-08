@@ -129,12 +129,16 @@ test.describe("pdf review", () => {
         const menu = page.getByRole("menuitem");
         await expect(menu).toHaveCount(4);
         await expect(menu.getByText("Entität ändern")).toBeVisible();
-        await expect(menu.getByText("Schwärzen", { exact: true })).toBeVisible();
+        await expect(
+            menu.getByText("Schwärzen", { exact: true }),
+        ).toBeVisible();
         await expect(menu.getByText("Alle Vorkommen schwärzen")).toBeVisible();
         await expect(menu.getByText("Erkennung löschen")).toBeVisible();
 
         // Taking it back through the menu: the row reads redacted again.
-        await page.getByRole("menuitem", { name: "Schwärzen", exact: true }).click();
+        await page
+            .getByRole("menuitem", { name: "Schwärzen", exact: true })
+            .click();
         await expect(placeRowOf(page, "Schwärzung aufheben")).toBeVisible();
     });
 
@@ -151,7 +155,9 @@ test.describe("pdf review", () => {
         await mark.click({ button: "right", force: true });
         const menu = page.getByRole("menuitem");
         await expect(menu).toHaveCount(4);
-        await expect(menu.getByText("Schwärzung aufheben", { exact: true })).toBeVisible();
+        await expect(
+            menu.getByText("Schwärzung aufheben", { exact: true }),
+        ).toBeVisible();
         await expect(menu.getByText("Alle Vorkommen aufheben")).toBeVisible();
         await expect(menu.getByText("Entität ändern")).toBeVisible();
         await expect(menu.getByText("Erkennung löschen")).toBeVisible();
@@ -174,7 +180,7 @@ test.describe("pdf review", () => {
         ).toHaveAttribute("aria-expanded", "true");
         // The row is on screen: the reveal scrolled it to the middle.
         const placeRow = sidebarOf(page)
-            .locator('div[data-detection]')
+            .locator("div[data-detection]")
             .filter({ has: page.getByRole("button", { name: /Berlin/ }) })
             .first();
         await expect(placeRow).toBeInViewport({ ratio: 0.5 });
