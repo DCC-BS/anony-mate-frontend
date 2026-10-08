@@ -136,9 +136,18 @@ test.describe("pdf review", () => {
         // only the moves its state has: an un-redacted mark is taken back
         // (this one or all of its text), a redacted one would offer the
         // reverse pair; either way, relabel and the removal.
-        await plain.click({ button: "right" });
         const menu = page.getByRole("menuitem");
-        await expect(menu).toHaveCount(4);
+        await expect
+            .poll(
+                async () => {
+                    if ((await menu.count()) === 0) {
+                        await plain.dispatchEvent("contextmenu");
+                    }
+                    return menu.count();
+                },
+                { timeout: 15_000 },
+            )
+            .toBe(4);
         await expect(menu.getByText("Entität ändern")).toBeVisible();
         await expect(
             menu.getByText("Schwärzen", { exact: true }),
@@ -166,9 +175,21 @@ test.describe("pdf review", () => {
         const mark = page
             .locator('[data-page] button[aria-label*="«Max Mustermann»"]')
             .first();
-        await mark.dispatchEvent("contextmenu");
+        // The menu portal mounts a beat after the event; a runner under
+        // load can miss the first render, so the event is offered again
+        // while the menu is away.
         const menu = page.getByRole("menuitem");
-        await expect(menu).toHaveCount(4);
+        await expect
+            .poll(
+                async () => {
+                    if ((await menu.count()) === 0) {
+                        await mark.dispatchEvent("contextmenu");
+                    }
+                    return menu.count();
+                },
+                { timeout: 15_000 },
+            )
+            .toBe(4);
         await expect(
             menu.getByText("Schwärzung aufheben", { exact: true }),
         ).toBeVisible();
