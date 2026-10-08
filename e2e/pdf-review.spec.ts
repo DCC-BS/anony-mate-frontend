@@ -112,11 +112,22 @@ test.describe("pdf review", () => {
         await placeRowOf(page, "Schwärzung aufheben").click();
         await expect(placeRowOf(page, "Schwärzen")).toBeVisible();
         // The kept ones carry their hatch, the one the reader let go is
-        // now plain: the person mark hatched, the place mark open.
-        const hatched = page.locator(
-            '[data-page] button[style*="repeating-linear-gradient"]',
-        );
-        await expect(hatched).toHaveCount(1);
+        // now plain: the person mark hatched, the place mark open. (The
+        // hatch is read from the CSSOM: an attribute matcher against the
+        // style attribute misses how a headless browser serializes the
+        // gradient.)
+        const hatchedCount = () =>
+            page.evaluate(
+                () =>
+                    Array.from(
+                        document.querySelectorAll("[data-page] button"),
+                    ).filter((button) =>
+                        (button.style.backgroundImage ?? "").includes(
+                            "gradient",
+                        ),
+                    ).length,
+            );
+        await expect.poll(hatchedCount).toBe(1);
         const plain = page
             .locator('[data-page] button[aria-label*="«Berlin»"]')
             .first();
