@@ -160,10 +160,13 @@ test.describe("pdf review", () => {
 
         // Everything arrives redacted; a right click on a kept mark offers
         // the move that opens it up, on the mark and on its occurrences.
+        // (The event goes through the element: a forced mouse click lands
+        // wherever the viewport's geometry puts the point, which differs
+        // between a desktop and a CI runner.)
         const mark = page
             .locator('[data-page] button[aria-label*="«Max Mustermann»"]')
             .first();
-        await mark.click({ button: "right", force: true });
+        await mark.dispatchEvent("contextmenu");
         const menu = page.getByRole("menuitem");
         await expect(menu).toHaveCount(4);
         await expect(
