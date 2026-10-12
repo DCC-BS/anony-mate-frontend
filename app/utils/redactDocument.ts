@@ -18,6 +18,11 @@ export interface RedactionProgress {
     onQueuePosition: (position: number | null) => void;
     /** The conversion is done and the scan has started. */
     onScanning: () => void;
+    /**
+     * Share of the scan done, in [0, 1]; null while the task has none to
+     * give — while queued, converting, or not asked for a fraction.
+     */
+    onScanProgress: (fraction: number | null) => void;
 }
 
 /** What the API needs to know beyond the text itself. */
@@ -46,8 +51,14 @@ export async function redactUploadedFile(
     document: StoredDocument,
     progress: RedactionProgress,
 ): Promise<RedactionResult> {
+    const file = document.file;
+    if (!file) {
+        throw new Error(
+            "The document's upload is no longer stored; queue it again with its file.",
+        );
+    }
     const formData = new FormData();
-    formData.append("file", document.file as Blob, document.name);
+    formData.append("file", file, document.name);
     formData.append("options", JSON.stringify(redactOptions(document)));
 
     let isScanning = false;
@@ -61,6 +72,7 @@ export async function redactUploadedFile(
         DocumentRedactResultSchema,
         ({ progress: fraction, queuePosition }) => {
             progress.onQueuePosition(queuePosition);
+            progress.onScanProgress(fraction);
 
             // One task covers both halves and only the scan reports a
             // fraction, so its first one says conversion is done.
@@ -103,8 +115,14 @@ export async function scanUploadedPdf(
     document: StoredDocument,
     progress: RedactionProgress,
 ): Promise<PdfAnnotationsResult> {
+    const file = document.file;
+    if (!file) {
+        throw new Error(
+            "The document's upload is no longer stored; queue it again with its file.",
+        );
+    }
     const formData = new FormData();
-    formData.append("file", document.file as Blob, document.name);
+    formData.append("file", file, document.name);
     formData.append(
         "options",
         JSON.stringify({
@@ -125,6 +143,7 @@ export async function scanUploadedPdf(
         PdfAnnotationsResultSchema,
         ({ progress: fraction, queuePosition }) => {
             progress.onQueuePosition(queuePosition);
+            progress.onScanProgress(fraction);
 
             // One task covers both halves and only the scan reports a
             // fraction, so its first one says conversion is done.
@@ -142,12 +161,12 @@ export async function scanUploadedPdf(
  * document already converted and now being detected again.
  *
  * @param document - The document, with its text.
- * @param progress - Where to report the queue position.
+ * @param progress - Where to report the queue position and the scan.
  * @returns The text and what was found in it.
  */
 export async function redactStoredText(
     document: StoredDocument,
-    progress: Pick<RedactionProgress, "onQueuePosition">,
+    progress: Pick<RedactionProgress, "onQueuePosition" | "onScanProgress">,
 ): Promise<RedactionResult> {
     const result = await runApiTask(
         () =>
@@ -157,7 +176,10 @@ export async function redactStoredText(
                 body: { text: document.text, ...redactOptions(document) },
             }),
         RedactResultSchema,
-        ({ queuePosition }) => progress.onQueuePosition(queuePosition),
+        ({ progress: fraction, queuePosition }) => {
+            progress.onQueuePosition(queuePosition);
+            progress.onScanProgress(fraction);
+        },
     );
 
     return {

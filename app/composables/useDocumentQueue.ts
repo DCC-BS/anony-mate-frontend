@@ -33,9 +33,16 @@ export const useDocumentQueue = createSharedComposable(() => {
      * than in IndexedDB: a reload re-submits and gets a fresh position.
      */
     const queuePositions = ref<Record<string, number | null>>({});
+    /**
+     * Share of the scan done per document, while its API task reports one.
+     * Transient like `queuePositions`: in memory, fresh on the next run.
+     */
+    const scanProgress = ref<Record<string, number | null>>({});
 
-    const { isProcessing, pump, recoverInterrupted } =
-        useDocumentPump(queuePositions);
+    const { isProcessing, pump, recoverInterrupted } = useDocumentPump(
+        queuePositions,
+        scanProgress,
+    );
 
     const pending = computed(() =>
         documents.value.filter((document) =>
@@ -105,6 +112,7 @@ export const useDocumentQueue = createSharedComposable(() => {
     return {
         documents,
         queuePositions,
+        scanProgress,
         pending,
         activeDocument,
         isProcessing,

@@ -119,7 +119,8 @@
             "failed": "Failed",
             "failedHint": "Processing failed. Please try again.",
             "queued": "Queued (#{position})",
-            "marked": "PDF marked (Kofax)"
+            "marked": "PDF marked (Kofax)",
+            "redactingProgress": "Detecting ({percent}%)"
         },
         "search": "Search documents…",
         "noMatches": "No matches."
@@ -159,6 +160,7 @@
         "meta": "{detections} detections · {chars} characters",
         "notFound": "This document no longer exists.",
         "detections": "Detections",
+        "detectionsProgress": "Detecting ({percent}%)",
         "found": "{count} found",
         "searchPlaceholder": "Search the document…",
         "stats": {

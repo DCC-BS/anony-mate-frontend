@@ -10,10 +10,13 @@ import { scanUploadedPdf } from "~/utils/redactDocument";
  *
  * @param queuePositions - Where to record a document's place in the API's own
  *   queue while it waits; transient, so it is held by the caller in memory.
+ * @param scanProgress - Where to record a document's scan fraction while the
+ *   API's task reports one; transient, held in memory like the rest.
  * @returns Whether it is running, and how to start it.
  */
 export function useDocumentPump(
     queuePositions: Ref<Record<string, number | null>>,
+    scanProgress: Ref<Record<string, number | null>>,
 ) {
     const { updateDocument, replaceDetections, replaceMarks } =
         getDocumentService();
@@ -94,13 +97,17 @@ export function useDocumentPump(
                 file: undefined,
             });
         } catch (error) {
-            logger.error({ error }, "Document processing failed");
+            logger.error(
+                { error: describeError(error) },
+                "Document processing failed",
+            );
             await updateDocument(document.id, {
                 status: "failed",
                 errorMessage: t("documents.status.failedHint"),
             });
         } finally {
             delete queuePositions.value[document.id];
+            delete scanProgress.value[document.id];
         }
     }
 
@@ -115,6 +122,9 @@ export function useDocumentPump(
         const result = await scanUploadedPdf(document, {
             onQueuePosition: (position) => {
                 queuePositions.value[document.id] = position;
+            },
+            onScanProgress: (fraction) => {
+                scanProgress.value[document.id] = fraction;
             },
             onScanning: () =>
                 void updateDocument(document.id, { status: "redacting" }),
@@ -143,16 +153,24 @@ export function useDocumentPump(
         const onQueuePosition = (position: number | null) => {
             queuePositions.value[document.id] = position;
         };
+        const onScanProgress = (fraction: number | null) => {
+            scanProgress.value[document.id] = fraction;
+        };
 
         if (document.text) {
             return updateDocument(document.id, { status: "redacting" }).then(
-                () => redactStoredText(document, { onQueuePosition }),
+                () =>
+                    redactStoredText(document, {
+                        onQueuePosition,
+                        onScanProgress,
+                    }),
             );
         }
 
         return updateDocument(document.id, { status: "converting" }).then(() =>
             redactUploadedFile(document, {
                 onQueuePosition,
+                onScanProgress,
                 onScanning: () =>
                     void updateDocument(document.id, { status: "redacting" }),
             }),

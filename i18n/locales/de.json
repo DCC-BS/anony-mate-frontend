@@ -119,7 +119,8 @@
             "failed": "Fehlgeschlagen",
             "failedHint": "Verarbeitung fehlgeschlagen. Bitte erneut versuchen.",
             "queued": "Wartet ({position}.)",
-            "marked": "PDF markiert (Kofax)"
+            "marked": "PDF markiert (Kofax)",
+            "redactingProgress": "Wird geprüft ({percent} %)"
         },
         "search": "Dokument suchen…",
         "noMatches": "Keine Treffer."
@@ -159,6 +160,7 @@
         "meta": "{detections} Erkennungen · {chars} Zeichen",
         "notFound": "Dieses Dokument ist nicht mehr vorhanden.",
         "detections": "Erkennungen",
+        "detectionsProgress": "Wird geprüft ({percent} %)",
         "found": "{count} gefunden",
         "searchPlaceholder": "Begriff im Dokument suchen…",
         "stats": {

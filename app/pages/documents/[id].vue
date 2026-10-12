@@ -83,6 +83,10 @@ const { exportAs } = useReviewExport(
     () => storedDocument.value?.name ?? "document"
 );
 
+/** The queue holds the scan fraction while the document is out at the API. */
+const { scanProgress } = useDocumentQueue();
+const scanPercent = computed(() => scanProgress.value[documentId.value] ?? null);
+
 /** Writes the review's answer onto the PDF, as an annotated PDF to download. */
 const { exportAsPdf, isExportingPdf } = usePdfExport(
     documentId,
@@ -217,6 +221,7 @@ function selectFromDocument(id: string | undefined): void {
                 :document-id="documentId"
                 :group-id="storedDocument.entityGroupId"
                 :busy="isBusy"
+                :scan-progress="isBusy ? scanPercent : null"
                 :groups="groups"
                 :counts="counts"
                 :selected-id="selectedId"

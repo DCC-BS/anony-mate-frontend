@@ -4,6 +4,7 @@ const localePath = useLocalePath();
 const {
     documents,
     queuePositions,
+    scanProgress,
     pending,
     progress,
     isProcessing,
@@ -63,6 +64,7 @@ const hasDocuments = computed(() => documents.value.length > 0);
                 id="document-list"
                 :documents="visibleDocuments"
                 :queue-positions="queuePositions"
+                :scan-progress="scanProgress"
                 @retry="retry"
                 @remove="deleteDocument"
             />
