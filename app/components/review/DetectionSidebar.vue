@@ -16,6 +16,8 @@ const props = defineProps<{
     groupId?: string;
     /** True while the document is queued or being detected again. */
     busy?: boolean;
+    /** Share of the scan done, while the document is being detected. */
+    scanProgress?: number | null;
     /** Whether the list can be built again with another detection group. */
     allowRecompute?: boolean;
 }>();
@@ -72,6 +74,7 @@ const root = useTemplateRef<HTMLElement>("root");
             :document-id="props.documentId"
             :group-id="props.groupId"
             :busy="props.busy"
+            :scan-progress="props.scanProgress"
             :threshold-floor="props.thresholdFloor"
             :allow-recompute="props.allowRecompute"
         />

@@ -4,6 +4,7 @@ import type { StoredDocument } from "~/types/storedDocument";
 const props = defineProps<{
     documents: StoredDocument[];
     queuePositions: Record<string, number | null>;
+    scanProgress: Record<string, number | null>;
 }>();
 const emit = defineEmits<{ retry: [id: string]; remove: [id: string] }>();
 
@@ -109,6 +110,7 @@ function downloadMarked(document: StoredDocument): void {
                 <DocumentsDocumentStatusBadge
                     :document="document"
                     :queue-position="props.queuePositions[document.id] ?? null"
+                    :scan-progress="props.scanProgress[document.id] ?? null"
                 />
             </div>
 

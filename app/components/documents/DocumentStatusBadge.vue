@@ -5,6 +5,8 @@ const props = defineProps<{
     document: StoredDocument;
     /** Place in the API queue, when the work is waiting on a busy service. */
     queuePosition?: number | null;
+    /** Share of the scan done, while the API's task reports one. */
+    scanProgress?: number | null;
 }>();
 
 const { t } = useI18n();
@@ -38,11 +40,17 @@ const isMarked = computed(
 
 /**
  * A queued document says how many are ahead of it, so a long wait reads as a
- * queue rather than as a stall.
+ * queue rather than as a stall. A scan carries a fraction instead: it says how
+ * far along the work is, in the badge the status otherwise would be.
  */
 const label = computed(() => {
     if (isBusy.value && props.queuePosition) {
         return t("documents.status.queued", { position: props.queuePosition });
+    }
+    if (status.value === "redacting" && props.scanProgress != null) {
+        return t("documents.status.redactingProgress", {
+            percent: Math.round(props.scanProgress * 100)
+        });
     }
     return isMarked.value
         ? t("documents.status.marked")

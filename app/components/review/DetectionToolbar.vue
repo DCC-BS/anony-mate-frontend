@@ -7,6 +7,8 @@ const props = defineProps<{
     groupId?: string;
     /** True while the document is queued or being detected again. */
     busy?: boolean;
+    /** Share of the scan done, while the document is being detected. */
+    scanProgress?: number | null;
     /** Confidence the document was detected with; the slider starts there. */
     thresholdFloor?: number;
     /**
@@ -27,9 +29,17 @@ const { t } = useI18n();
 
 <template>
     <div class="flex items-center justify-between gap-2">
-        <h2 class="font-semibold text-highlighted">
-            {{ t("review.detections") }}
-        </h2>
+        <div class="flex items-baseline gap-2">
+            <h2 class="font-semibold text-highlighted">
+                {{ t("review.detections") }}
+            </h2>
+            <span
+                v-if="props.busy && props.scanProgress != null"
+                class="text-xs tabular-nums text-muted"
+            >
+                {{ t("review.detectionsProgress", { percent: Math.round(props.scanProgress * 100) }) }}
+            </span>
+        </div>
 
         <div class="flex items-center gap-1.5">
             <!-- Re-detecting throws this whole list away and builds a new one,
