@@ -14,8 +14,6 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ exportPdf: [] }>();
 
-const blackout = defineModel<boolean>("blackout", { default: false });
-
 const { t } = useI18n();
 const localePath = useLocalePath();
 const { canUndo, canRedo, undo, redo } = useCommandHistory();
@@ -57,8 +55,6 @@ const isExporting = computed(() => props.busy ?? false);
         </div>
 
         <div class="flex items-center justify-end gap-2">
-            <ReviewRedactionStyle v-model="blackout" class="whitespace-nowrap" />
-
             <UButton
                 icon="i-lucide-download"
                 :loading="isExporting"
