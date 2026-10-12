@@ -32,6 +32,14 @@ export default defineNuxtConfig({
                 "Access-Control-Allow-Credentials": "true",
             },
         },
+        "/pdfjs/**": {
+            headers: {
+                // The pdf.js worker is a data: URL (opaque origin), so its
+                // own fetches of the wasm decoders, cmaps and standard fonts
+                // count as cross-origin and need CORS to pass.
+                "Access-Control-Allow-Origin": "*",
+            },
+        },
     },
     alias: {
         "#shared": fileURLToPath(new URL("./shared", import.meta.url)),
