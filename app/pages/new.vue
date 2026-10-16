@@ -46,6 +46,17 @@ const canStart = computed(
 );
 
 /**
+ * A staged non-PDF cannot be reviewed over the original — the marked-PDF
+ * flow needs a PDF to mark. True while such a file sits in PDF mode.
+ */
+const pdfBlocked = computed(
+    () =>
+        markedPdf.value &&
+        tab.value === "files" &&
+        stagedFiles.value.some((file) => !isPdf(file))
+);
+
+/**
  * Queues the staged files or the pasted text and returns to the overview,
  * where the queue reports progress.
  */
@@ -156,13 +167,22 @@ async function start() {
                     <NewOutputSelect v-model="markedPdf" />
                 </UCard>
 
+                <p
+                    v-if="pdfBlocked"
+                    class="flex items-start gap-1.5 text-xs text-error"
+                    role="alert"
+                >
+                    <span class="i-lucide-circle-alert size-3.5 shrink-0 mt-0.5" aria-hidden="true" />
+                    {{ t("new.pdfOnlyHint") }}
+                </p>
+
                 <UButton
                     id="start-button"
                     block
                     size="lg"
                     icon="i-lucide-wand-sparkles"
                     :loading="isStarting"
-                    :disabled="!canStart || isStarting"
+                    :disabled="!canStart || isStarting || pdfBlocked"
                     @click="start"
                 >
                     {{ t("new.start") }}

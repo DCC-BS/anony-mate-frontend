@@ -45,6 +45,8 @@ const active = computed(() => options.find((option) => option.value === selected
                 block
                 :variant="selected === option.value ? 'soft' : 'ghost'"
                 :color="selected === option.value ? 'primary' : 'neutral'"
+                :icon="selected === option.value ? 'i-lucide-check' : undefined"
+                :class="selected === option.value ? 'font-semibold' : 'text-muted'"
                 :aria-pressed="selected === option.value"
                 @click="selected = option.value"
             >
@@ -52,23 +54,25 @@ const active = computed(() => options.find((option) => option.value === selected
             </UButton>
         </UFieldGroup>
 
-        <p class="text-xs text-muted">
-            {{ t(active?.hint ?? "") }}
-        </p>
+        <div class="flex items-start justify-between gap-2">
+            <p class="text-xs text-muted">
+                {{ t(active?.hint ?? "") }}
+            </p>
 
-        <UPopover mode="hover" :content="{ side: 'left', align: 'start' }">
-            <UButton
-                icon="i-lucide-circle-help"
-                variant="ghost"
-                color="neutral"
-                size="xs"
-                :aria-label="t(active?.help ?? '')"
-            />
-            <template #content>
-                <p class="max-w-80 p-3 text-xs leading-relaxed text-default">
-                    {{ t(active?.help ?? "") }}
-                </p>
-            </template>
-        </UPopover>
+            <UPopover mode="hover" :content="{ side: 'left', align: 'start' }">
+                <UButton
+                    icon="i-lucide-circle-help"
+                    variant="ghost"
+                    color="neutral"
+                    size="xs"
+                    :aria-label="t(active?.help ?? '')"
+                />
+                <template #content>
+                    <p class="max-w-80 p-3 text-xs leading-relaxed text-default">
+                        {{ t(active?.help ?? "") }}
+                    </p>
+                </template>
+            </UPopover>
+        </div>
     </div>
 </template>

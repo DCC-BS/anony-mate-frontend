@@ -1,14 +1,13 @@
 <script lang="ts" setup>
-import type { StoredEntityGroup, StoredEntityType } from "~/types/storedEntity";
+import type { StoredEntityGroup } from "~/types/storedEntity";
 
 const props = defineProps<{
     groups: StoredEntityGroup[];
-    types: StoredEntityType[];
+    selected: string | null;
 }>();
 const emit = defineEmits<{
-    create: [name: string];
-    update: [group: StoredEntityGroup];
-    remove: [groupId: string];
+    select: [id: string];
+    create: [];
 }>();
 
 const { t } = useI18n();
@@ -24,31 +23,13 @@ const visible = computed(() => {
           )
         : props.groups;
 });
-
-const addFields = computed(() => [
-    {
-        key: "name",
-        label: t("entities.newGroup.name"),
-        placeholder: t("entities.newGroup.placeholder")
-    }
-]);
-
-function create(values: Record<string, string>) {
-    emit("create", values.name as string);
-}
 </script>
 
 <template>
-    <section class="flex min-h-0 flex-col gap-2">
-        <div class="flex items-baseline justify-between">
-            <h2 class="text-eyebrow font-semibold uppercase tracking-eyebrow text-dimmed">
-                {{ t("entities.groupsTitle") }}
-            </h2>
-            <span class="text-meta tabular-nums text-dimmed">
-                {{ t("entities.count", { count: props.groups.length }) }}
-            </span>
-        </div>
-
+    <section
+        id="group-panel"
+        class="flex min-h-0 flex-col gap-2 rounded-lg p-2 ring ring-default"
+    >
         <div class="flex gap-2">
             <UInput
                 v-model="query"
@@ -56,29 +37,38 @@ function create(values: Record<string, string>) {
                 size="sm"
                 class="flex-1"
                 :placeholder="t('entities.searchGroups')"
+                :ui="{ leadingIcon: 'translate-y-[1.5px]' }"
             />
-
-            <EntitiesAddPopover
-                :title="t('entities.newGroup.title')"
-                :fields="addFields"
-                @submit="create"
+            <UButton
+                icon="i-lucide-plus"
+                size="sm"
+                variant="soft"
+                :aria-label="t('entities.list.newGroup')"
+                :title="t('entities.list.newGroup')"
+                @click="emit('create')"
             />
         </div>
 
-        <div class="min-h-0 flex-1 space-y-2 overflow-y-auto">
-            <EntitiesGroupCard
+        <div class="min-h-0 flex-1 overflow-y-auto">
+            <button
                 v-for="group in visible"
                 :key="group.id"
-                :group="group"
-                :types="props.types"
-                @update="emit('update', $event)"
-                @remove="emit('remove', $event)"
-            />
+                type="button"
+                class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left"
+                :class="props.selected === group.id ? 'bg-elevated' : 'hover:bg-elevated'"
+                @click="emit('select', group.id)"
+            >
+                <span class="truncate text-label font-medium text-highlighted">
+                    {{ groupName(group) }}
+                </span>
+                <span class="ml-auto text-meta tabular-nums text-dimmed">
+                    {{ group.labels.length }}
+                </span>
+            </button>
 
-            <p v-if="!visible.length" class="p-6 text-center text-xs text-dimmed">
+            <p v-if="!visible.length" class="p-4 text-center text-xs text-dimmed">
                 {{ t("entities.noMatches") }}
             </p>
         </div>
-
     </section>
 </template>
