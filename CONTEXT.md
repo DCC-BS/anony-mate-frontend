@@ -65,7 +65,7 @@ To restore a redacted occurrence back to its original text so it stays visible i
 _Avoid_: reveal, undo (undo also exists as a general editor history action)
 
 **Marking**:
-The review mode where a reader selects words in the editor and files them as a detection of a chosen entity type. A mark arrives redacted at once; clicking an existing detection in marking mode erases it.
+The review mode where a reader files detections by hand: words are selected in the editor, a rectangle is drawn over the page in the PDF review — each arrives as a detection of the chosen entity type, redacted at once. Clicking an existing detection in marking mode erases it.
 _Avoid_: annotating, highlighting
 
 **Relabel**:
@@ -101,7 +101,7 @@ The review of an uploaded PDF in place of its text: the original file is kept an
 _Avoid_: pdf-to-pdf, native mode
 
 **Mark**:
-A detection of a PDF review, arrived as boxes on the page instead of a text span. Its text comes from the page's words, grouped by the layout the API read, so every mention is its own mark with its own id; the boxes of one mention stay one. Same states, same numbering, same sidebar as any detection.
+A detection of a PDF review, arrived as boxes on the page instead of a text span. Its text comes from the page's words, grouped by the layout the API read, so every mention is its own mark with its own id; the boxes of one mention stay one. A mark drawn by hand covers an area rather than a mention: its text is guessed from the words under the rectangle in the page's text layer — empty over a picture or a scan — and it is certain, so no threshold filters it away. The guess is the reader's to correct in the mark's row, since only they know what the rectangle meant to cover. Same states, same numbering, same sidebar as any detection.
 _Avoid_: annotation (reserved for the PDF feature the mark becomes), highlight
 
 **Annotated PDF**:

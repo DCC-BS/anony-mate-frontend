@@ -4,6 +4,8 @@
  * annotated PDF; no editor or preview tabs, because the file is the only
  * view there is.
  */
+import type { ReviewTool } from "~/composables/useDocumentReview";
+
 const props = defineProps<{
     name: string;
     /** Entity types this document was detected with. */
@@ -14,6 +16,10 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ exportPdf: [] }>();
 
+/** The tool in the reader's hand, and the type a mark is filed under. */
+const tool = defineModel<ReviewTool>("tool", { default: "select" });
+const markerLabel = defineModel<string>("markerLabel", { default: "" });
+
 const { t } = useI18n();
 const localePath = useLocalePath();
 const { canUndo, canRedo, undo, redo } = useCommandHistory();
@@ -21,7 +27,8 @@ const isExporting = computed(() => props.busy ?? false);
 </script>
 
 <template>
-    <!-- As ReviewHeader: three tracks, controls in the outer two. -->
+    <!-- As ReviewHeader: three tracks, controls in the outer two. The
+         tools stand with the export they feed, as in the text review. -->
     <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
         <div
             class="flex min-w-0 items-center gap-2 lg:pe-[calc(var(--width-workspace-nav)/2)]"
@@ -45,16 +52,20 @@ const isExporting = computed(() => props.busy ?? false);
             </div>
         </div>
 
-        <div class="flex items-center lg:translate-x-[calc(var(--width-workspace-nav)/-2)]">
+        <div class="flex items-center justify-end gap-2">
             <UndoRedoButtons
                 :can-undo="canUndo"
                 :can-redo="canRedo"
                 @undo="undo"
                 @redo="redo"
             />
-        </div>
 
-        <div class="flex items-center justify-end gap-2">
+            <ReviewMarkerControls
+                v-model:tool="tool"
+                v-model:marker-label="markerLabel"
+                :labels="props.labels"
+            />
+
             <UButton
                 icon="i-lucide-download"
                 :loading="isExporting"

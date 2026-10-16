@@ -96,6 +96,8 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         setAllOccurrences,
         setAllStates,
         addDetection: recordDetection,
+        addMark: recordMark,
+        renameDetection,
         removeDetection,
         relabel,
     } = useDetectionEditing(documentId, detections);
@@ -111,6 +113,15 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         // review is showing: marking words that carry a filtered-out detection
         // must revive that row rather than collide with it.
         return recordDetection(allDetections.value, label, start, end, text);
+    }
+
+    /** Records a mark the reader drew by hand on a PDF page. */
+    function addMark(
+        label: string,
+        boxes: NonNullable<StoredDetection["boxes"]>,
+        text = "",
+    ): Promise<void> {
+        return recordMark(allDetections.value, label, boxes, text);
     }
 
     /**
@@ -141,6 +152,8 @@ export function useDocumentReview(documentId: MaybeRefOrGetter<string>) {
         occurrenceCount,
         relabel,
         addDetection,
+        addMark,
+        renameDetection,
         removeDetection,
     };
 }

@@ -73,9 +73,11 @@ export function useDetectionMenu(
                 },
             ],
             // Only the moves this detection can make: the pair that fits its
-            // state, on the one mark and on every occurrence of its text.
-            // The state it is already in would be an entry that does nothing,
-            // and "all occurrences" follows its mark's own move.
+            // state, on the one mark — and, where the mark carries words, on
+            // every occurrence of its text. A mark without words (a picture,
+            // a hand-drawn rectangle) has no text to match others by, and
+            // "every occurrence of nothing" would take every textless mark
+            // in the document with one click.
             [
                 isRedacted
                     ? {
@@ -90,25 +92,33 @@ export function useDetectionMenu(
                           onSelect: () =>
                               actions.setState(detection.id, "redacted"),
                       },
-                isRedacted
-                    ? {
-                          label: t("review.unredactAllOccurrencesShort"),
-                          icon: "i-lucide-eye",
-                          onSelect: () =>
-                              actions.setAllOccurrences(
-                                  detection.text,
-                                  "unredacted",
-                              ),
-                      }
-                    : {
-                          label: t("review.redactAllOccurrencesShort"),
-                          icon: "i-lucide-eye-off",
-                          onSelect: () =>
-                              actions.setAllOccurrences(
-                                  detection.text,
-                                  "redacted",
-                              ),
-                      },
+                ...(detection.text
+                    ? [
+                          isRedacted
+                              ? {
+                                    label: t(
+                                        "review.unredactAllOccurrencesShort",
+                                    ),
+                                    icon: "i-lucide-eye",
+                                    onSelect: () =>
+                                        actions.setAllOccurrences(
+                                            detection.text,
+                                            "unredacted",
+                                        ),
+                                }
+                              : {
+                                    label: t(
+                                        "review.redactAllOccurrencesShort",
+                                    ),
+                                    icon: "i-lucide-eye-off",
+                                    onSelect: () =>
+                                        actions.setAllOccurrences(
+                                            detection.text,
+                                            "redacted",
+                                        ),
+                                },
+                      ]
+                    : []),
             ],
             [
                 {
