@@ -5,7 +5,7 @@ const props = defineProps<{ types: StoredEntityType[]; labels: string[] }>();
 const emit = defineEmits<{
     add: [label: string];
     remove: [label: string];
-    /** The labels array in its new order after a member was dropped onto another. */
+    /** The labels array after a drop onto a member row: members reordered, available labels inserted before the target. */
     reorder: [labels: string[]];
 }>();
 
@@ -76,10 +76,10 @@ function onDropMembers() {
     onDragEnd();
 }
 
-/** Drops a dragged member onto another member row: moves it before the target. */
+/** Drops a label onto a member row: inserts it before the target, moving it there if already a member. */
 function onDropMemberRow(target: string) {
     const label = dragging.value;
-    if (label && label !== target && props.labels.includes(label)) {
+    if (label && label !== target) {
         const next = props.labels.filter((entry) => entry !== label);
         next.splice(next.indexOf(target), 0, label);
         emit("reorder", next);
