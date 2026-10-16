@@ -60,6 +60,13 @@ const draftType = ref<StoredEntityType | null>(null);
 const draftPersistedName = ref<string | null>(null);
 const selectedTypeName = ref<string | null>(null);
 
+/**
+ * The type editor's key. It moves only when the selection switches: keying by
+ * name would remount the editor — dropping the user's focus — when a draft's
+ * first save or a rename changes the selected type's name.
+ */
+const typeEditorKey = ref(0);
+
 const selectedType = computed<StoredEntityType | null>(() => {
     if (draftType.value) {
         return draftType.value;
@@ -82,12 +89,14 @@ function createType() {
     };
     draftPersistedName.value = null;
     selectedTypeName.value = null;
+    typeEditorKey.value += 1;
 }
 
 function selectType(name: string) {
     draftType.value = null;
     draftPersistedName.value = null;
     selectedTypeName.value = name;
+    typeEditorKey.value += 1;
 }
 
 async function saveTypeFromEditor(type: StoredEntityType, patch: Partial<StoredEntityType>) {
@@ -209,7 +218,7 @@ async function deleteGroupFromEditor(group: StoredEntityGroup) {
             <div class="min-h-0 rounded-lg ring ring-default">
                 <EntitiesTypeEditor
                     v-if="selectedType"
-                    :key="selectedType.name"
+                    :key="typeEditorKey"
                     :type="selectedType"
                     @save="saveTypeFromEditor"
                     @remove="deleteTypeFromEditor"
