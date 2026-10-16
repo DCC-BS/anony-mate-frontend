@@ -9,7 +9,7 @@ A named category of sensitive information (e.g. `person`, `location`, `insurance
 _Avoid_: PII category, detector
 
 **Label**:
-The technical name of an entity type, as sent to the API and read by the detection model (e.g. `ahv-nummer`). Distinct from the display name a reader sees.
+The technical name of an entity type, as sent to the API and read by the detection model (e.g. `ahv-nummer`). Distinct from the display name a reader sees. The search schema generates it from the display name; editing it by hand keeps the generator from overwriting it again.
 _Avoid_: name (the display name), key
 
 **Display Name**:

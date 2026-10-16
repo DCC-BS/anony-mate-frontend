@@ -6,7 +6,12 @@ import type {
 } from "@dcc-bs/common-ui.bs.js/runtime/types/onboarding.js";
 
 /** The pages the tour walks through. */
-export type TourPhase = "documents" | "new" | "entities";
+export type TourPhase =
+    | "documents"
+    | "new"
+    | "entitiesTypes"
+    | "entitiesGroups"
+    | "entitiesBlacklist";
 
 /** A tour, phased along the pages it walks through. */
 export type AnonymateTour = OnboadingStepBuilder<TourPhase>;
@@ -65,10 +70,15 @@ export function useAnonymateTour(): AnonymateTour {
      *
      * @param path - The route to show, without locale prefix.
      * @param selector - Anchor element that marks the page as ready.
+     * @param query - Optional query parameters, e.g. the tab to open.
      */
-    async function goTo(path: string, selector: string) {
-        const target = localePath(path);
-        if (router.currentRoute.value.path !== target) {
+    async function goTo(
+        path: string,
+        selector: string,
+        query?: Record<string, string>,
+    ) {
+        const target = localePath(query ? { path, query } : path);
+        if (router.currentRoute.value.fullPath !== target) {
             await router.push(target);
         }
         await waitForElement(selector);
@@ -105,8 +115,17 @@ export function useAnonymateTour(): AnonymateTour {
             onEnter: () => goTo("/new", "#upload-card"),
         },
         {
-            name: "entities",
-            onEnter: () => goTo("/entities", "#entity-panel"),
+            name: "entitiesTypes",
+            onEnter: () => goTo("/entities", "#entity-panel", { tab: "types" }),
+        },
+        {
+            name: "entitiesGroups",
+            onEnter: () => goTo("/entities", "#group-panel", { tab: "groups" }),
+        },
+        {
+            name: "entitiesBlacklist",
+            onEnter: () =>
+                goTo("/entities", "#blacklist-editor", { tab: "blacklist" }),
         },
     ])
         .switchPhase("documents")
@@ -151,18 +170,24 @@ export function useAnonymateTour(): AnonymateTour {
                 align: "center",
             }),
         ])
-        .switchPhase("entities")
+        .switchPhase("entitiesTypes")
         .addSteps([
             step("entityTypes", {
                 element: "#entity-panel",
                 side: "right",
                 align: "start",
             }),
+        ])
+        .switchPhase("entitiesGroups")
+        .addSteps([
             step("entityGroups", {
                 element: "#group-panel",
                 side: "left",
                 align: "start",
             }),
+        ])
+        .switchPhase("entitiesBlacklist")
+        .addSteps([
             step("blacklist", {
                 element: "#blacklist-editor",
                 side: "left",

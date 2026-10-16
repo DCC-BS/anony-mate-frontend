@@ -138,6 +138,7 @@
         "pastePlaceholder": "Paste text here, for example a case note or an excerpt from minutes.",
         "pasteHint": "{chars} characters · never leaves your own infrastructure",
         "pastedName": "Pasted text {date}",
+        "pdfOnlyHint": "“Review PDF” only works for PDF files — remove other files or switch to “Review text”.",
         "start": "Start processing",
         "group": {
             "title": "Detection group",
@@ -215,31 +216,50 @@
     },
     "entities": {
         "title": "Search schema",
-        "typesTitle": "Entities",
+        "typesTitle": "Entity types",
         "groupsTitle": "Detection groups",
         "builtin": "Built-in",
         "groupEntities": "{count} entities",
         "deleteGroup": "Delete group",
         "deleteType": "Delete entity",
-        "table": {
-            "name": "Entity",
+        "list": {
+            "newType": "New entity type",
+            "newGroup": "New detection group",
+            "emptyTypeSelection": "Select an entity type on the left, or create one with +",
+            "emptyGroupSelection": "Select a detection group on the left, or create one with +"
+        },
+        "editor": {
+            "displayName": "Display name",
+            "displayNameHint": "Shown in the interface and in replacements",
+            "displayNamePlaceholder": "e.g. Postal code",
+            "label": "Label (API name)",
+            "labelHint": "Generated from the display name — edit to override",
+            "labelPlaceholder": "auto from display name",
             "description": "Description",
-            "descriptionPlaceholder": "Description of the content to find"
+            "descriptionHint": "Read by the detection model — describe clearly what to find.",
+            "descriptionPlaceholder": "Description of the content to find",
+            "replacement": "Replacement pattern",
+            "example": "Example: {example}",
+            "autoSave": "Saves automatically when a field loses focus"
+        },
+        "membership": {
+            "available": "Available",
+            "inGroup": "In group",
+            "filter": "Filter types…",
+            "add": "Add {name} to the group",
+            "remove": "Remove {name} from the group",
+            "emptyAvailable": "All types are in this group",
+            "emptyMembers": "No types yet — add some from the left"
+        },
+        "group": {
+            "name": "Group name",
+            "membersHint": "The entity types this group detects"
         },
         "newType": {
-            "name": "Name",
-            "displayName": "Display name, e.g. Person",
-            "description": "Description",
-            "add": "Create",
-            "title": "New entity",
-            "namePlaceholder": "e.g. project_name",
-            "descriptionPlaceholder": "Description of the content to find"
+            "title": "New entity"
         },
         "newGroup": {
-            "name": "New group",
-            "add": "Create",
-            "title": "New group",
-            "placeholder": "e.g. Legal & appeals"
+            "name": "New group"
         },
         "blacklist": {
             "title": "Never redact",
@@ -248,17 +268,16 @@
             "remove": "Remove",
             "empty": "No terms yet."
         },
-        "count": "{count}",
+        "terms": {
+            "search": "Search {count} terms…",
+            "noMatch": "No term matches “{query}”"
+        },
         "searchTypes": "Search entities…",
         "searchGroups": "Search groups…",
-        "selectTypes": "Select entities",
         "noMatches": "No matches.",
         "noDescription": "No description",
-        "edit": "Edit",
-        "save": "Save",
-        "cancel": "Cancel",
         "replacement": {
-            "label": "Replacement in the document",
+            "hint": "Tokens:",
             "tokens": {
                 "name": "entity display name",
                 "label": "technical label",

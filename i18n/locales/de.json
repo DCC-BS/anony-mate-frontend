@@ -138,6 +138,7 @@
         "pastePlaceholder": "Text hier einfügen, z. B. eine Aktennotiz oder einen Protokollausschnitt.",
         "pasteHint": "{chars} Zeichen · verlässt die eigene Infrastruktur nicht",
         "pastedName": "Eingefügter Text {date}",
+        "pdfOnlyHint": "„PDF prüfen“ funktioniert nur mit PDF-Dateien — entferne andere Dateien oder wechsle zu „Text prüfen“.",
         "start": "Verarbeitung starten",
         "group": {
             "title": "Erkennungsgruppe",
@@ -215,31 +216,50 @@
     },
     "entities": {
         "title": "Such-Schema",
-        "typesTitle": "Entitäten",
+        "typesTitle": "Entitätstypen",
         "groupsTitle": "Erkennungsgruppen",
         "builtin": "Vorgabe",
         "groupEntities": "{count} Entitäten",
         "deleteGroup": "Gruppe löschen",
         "deleteType": "Entität löschen",
-        "table": {
-            "name": "Entität",
+        "list": {
+            "newType": "Neuer Entitätstyp",
+            "newGroup": "Neue Erkennungsgruppe",
+            "emptyTypeSelection": "Wähle links eine Entität oder erstelle eine mit +",
+            "emptyGroupSelection": "Wähle links eine Gruppe oder erstelle eine mit +"
+        },
+        "editor": {
+            "displayName": "Anzeigename",
+            "displayNameHint": "Wird in der Oberfläche und in Ersetzungen angezeigt",
+            "displayNamePlaceholder": "z. B. Postleitzahl",
+            "label": "Label (API-Name)",
+            "labelHint": "Wird aus dem Anzeigenamen erzeugt — zum Überschreiben bearbeiten",
+            "labelPlaceholder": "automatisch aus dem Anzeigenamen",
             "description": "Beschreibung",
-            "descriptionPlaceholder": "Beschreibung des gesuchten Inhalts"
+            "descriptionHint": "Vom Erkennungsmodell gelesen — beschreibe klar, was zu finden ist.",
+            "descriptionPlaceholder": "Beschreibung des gesuchten Inhalts",
+            "replacement": "Ersetzungsmuster",
+            "example": "Beispiel: {example}",
+            "autoSave": "Speichert automatisch, wenn ein Feld den Fokus verliert"
+        },
+        "membership": {
+            "available": "Verfügbar",
+            "inGroup": "In der Gruppe",
+            "filter": "Entitäten filtern…",
+            "add": "{name} zur Gruppe hinzufügen",
+            "remove": "{name} aus der Gruppe entfernen",
+            "emptyAvailable": "Alle Entitäten sind in dieser Gruppe",
+            "emptyMembers": "Noch keine Entitäten — links hinzufügen"
+        },
+        "group": {
+            "name": "Gruppenname",
+            "membersHint": "Die Entitäten, die diese Gruppe erkennt"
         },
         "newType": {
-            "name": "Bezeichnung",
-            "displayName": "Anzeigename, z. B. Person",
-            "description": "Beschreibung",
-            "add": "Anlegen",
-            "title": "Neue Entität",
-            "namePlaceholder": "z. B. projektname",
-            "descriptionPlaceholder": "Beschreibung des gesuchten Inhalts"
+            "title": "Neue Entität"
         },
         "newGroup": {
-            "name": "Neue Gruppe",
-            "add": "Anlegen",
-            "title": "Neue Gruppe",
-            "placeholder": "z. B. Recht & Einsprachen"
+            "name": "Neue Gruppe"
         },
         "blacklist": {
             "title": "Nie schwärzen",
@@ -248,17 +268,16 @@
             "remove": "Entfernen",
             "empty": "Noch keine Begriffe erfasst."
         },
-        "count": "{count}",
+        "terms": {
+            "search": "{count} Begriffe durchsuchen…",
+            "noMatch": "Kein Begriff passt zu „{query}“"
+        },
         "searchTypes": "Entität suchen…",
         "searchGroups": "Gruppe suchen…",
-        "selectTypes": "Entitäten auswählen",
         "noMatches": "Keine Treffer.",
         "noDescription": "Keine Beschreibung",
-        "edit": "Bearbeiten",
-        "save": "Speichern",
-        "cancel": "Abbrechen",
         "replacement": {
-            "label": "Ersetzung im Dokument",
+            "hint": "Platzhalter:",
             "tokens": {
                 "name": "Anzeigename der Entität",
                 "label": "technische Bezeichnung",
