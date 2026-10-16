@@ -129,6 +129,13 @@ export const StoredDetectionSchema = z.object({
      * marks; a text detection is placed by its span alone.
      */
     boxes: z.array(DetectionBoxSchema).optional(),
+    /**
+     * Whether the reader drew this mark by hand, as a rectangle over the
+     * page. A hand-drawn mark carries no text, but unlike the API's picture
+     * marks it covers words the reader saw — so it reads as a kept redaction
+     * (solid) rather than as a mark on a picture (dashed).
+     */
+    manual: z.boolean().default(false),
 });
 
 export type StoredDetection = z.infer<typeof StoredDetectionSchema>;

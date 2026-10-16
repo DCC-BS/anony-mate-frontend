@@ -28,6 +28,8 @@ const emit = defineEmits<{
     setGroupState: [label: string, state: DetectionState];
     setAllOccurrences: [text: string, state: DetectionState];
     setAllStates: [state: DetectionState];
+    /** A hand-drawn mark's guessed content, corrected by the reader. */
+    rename: [id: string, text: string];
 }>();
 
 /** Confidence a detection needs to stay in the review. */
@@ -138,6 +140,7 @@ const root = useTemplateRef<HTMLElement>("root");
                         @select="emit('select', $event === props.selectedId ? undefined : $event)"
                         @set-state="(id, state) => emit('setState', id, state)"
                         @set-all-occurrences="(text, state) => emit('setAllOccurrences', text, state)"
+                        @rename="(id, text) => emit('rename', id, text)"
                     />
                 </div>
             </template>

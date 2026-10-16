@@ -13,6 +13,8 @@ const emit = defineEmits<{
     select: [id: string];
     setState: [id: string, state: DetectionState];
     setAllOccurrences: [text: string, state: DetectionState];
+    /** A hand-drawn mark's guessed content, corrected by the reader. */
+    rename: [id: string, text: string];
 }>();
 
 const { t } = useI18n();
@@ -28,6 +30,31 @@ const isRedacted = computed(() => props.detection.state === "redacted");
 const nextState = computed<DetectionState>(() =>
     isRedacted.value ? "unredacted" : "redacted"
 );
+
+// Only a hand-drawn mark's content is the reader's own: the guess can be
+// wrong, so the row lets it be corrected. A found mark's text is what the
+// layout read and stays as it is.
+const editable = computed(() => props.detection.manual && !props.readonly);
+
+const editing = ref(false);
+const draft = ref("");
+const input = useTemplateRef<{ inputRef?: HTMLInputElement }>("input");
+
+function startEditing(): void {
+    draft.value = props.detection.text;
+    editing.value = true;
+    nextTick(() => input.value?.inputRef?.select());
+}
+
+function commit(): void {
+    if (!editing.value) {
+        return;
+    }
+    editing.value = false;
+    if (draft.value !== props.detection.text) {
+        emit("rename", props.detection.id, draft.value);
+    }
+}
 </script>
 
 <template>
@@ -40,12 +67,37 @@ const nextState = computed<DetectionState>(() =>
             !isRedacted && 'opacity-55'
         ]"
     >
+        <!-- The text button and the actions stay direct children of the row:
+             the reviews' helpers walk from one to the others. -->
+        <UInput
+            v-if="editing"
+            ref="input"
+            v-model="draft"
+            size="sm"
+            icon="i-lucide-pen-line"
+            :placeholder="t('review.renameDetection')"
+            :aria-label="t('review.renameDetection')"
+            class="min-w-0 flex-1"
+            @keydown.esc="editing = false"
+            @blur="commit"
+            @keydown.enter="commit"
+        />
         <button
+            v-else
             type="button"
             class="min-w-0 flex-1 text-left"
             @click="emit('select', props.detection.id)"
         >
-            <div class="truncate font-mono text-xs">{{ props.detection.text }}</div>
+            <div class="flex items-center gap-1 truncate font-mono text-xs">
+                <span class="min-w-0 flex-1 truncate">
+                    {{ props.detection.text || t("review.contentMissing") }}
+                </span>
+                <UIcon
+                    v-if="editable"
+                    name="i-lucide-pencil-line"
+                    class="size-3.5 shrink-0 text-muted"
+                />
+            </div>
             <div class="flex items-center gap-2 text-xs text-muted">
                 <span class="tabular-nums">{{ confidencePercent }}%</span>
                 <span>·</span>
@@ -54,6 +106,17 @@ const nextState = computed<DetectionState>(() =>
         </button>
 
         <template v-if="!props.readonly">
+            <UButton
+                v-if="editable && !editing"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil-line"
+                :aria-label="t('review.renameDetection')"
+                :title="t('review.renameDetection')"
+                @click.stop="startEditing"
+            />
+
             <UButton
                 v-if="hasOccurrences"
                 size="xs"

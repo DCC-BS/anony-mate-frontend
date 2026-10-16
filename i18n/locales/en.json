@@ -210,6 +210,8 @@
         "redactAllOccurrencesShort": "Redact all occurrences",
         "unredactAllOccurrencesShort": "Un-redact all occurrences",
         "removeDetection": "Delete detection",
+        "renameDetection": "Edit content",
+        "contentMissing": "no content",
         "settings": "Settings",
         "unredactedCount": "{count} not redacted",
         "redactedCount": "{count} redacted"

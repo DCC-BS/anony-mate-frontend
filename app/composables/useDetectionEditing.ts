@@ -114,6 +114,48 @@ export function useDetectionEditing(
     }
 
     /**
+     * Records a mark the reader drew by hand on a PDF page.
+     *
+     * The words the rectangle covers are guessed from the page's text layer;
+     * where it covers none (a picture, a scan), the mark arrives without
+     * text, like the API's picture marks. Either way it is certain:
+     * confidence 1 keeps it above every threshold, as with a hand-marked
+     * word. Its span is synthetic — appended after everything the document
+     * holds, in the same family as the API marks' offsets — so the id is
+     * fresh (no revival collision, as a rectangle covers new ground) and the
+     * sidebar sorts it last.
+     *
+     * @param all - Every detection the document holds, filtered or not.
+     * @param label - Entity type to file it under.
+     * @param boxes - The drawn area, one box in page points.
+     * @param text - The words the rectangle covers, if the page has any.
+     */
+    function addMark(
+        all: StoredDetection[],
+        label: string,
+        boxes: NonNullable<StoredDetection["boxes"]>,
+        text = "",
+    ): Promise<void> {
+        const start = all.reduce(
+            (latest, detection) => Math.max(latest, detection.end),
+            0,
+        );
+        const marked = StoredDetectionSchema.parse({
+            id: `${toValue(documentId)}:${label}:${start}`,
+            documentId: toValue(documentId),
+            label,
+            text,
+            start,
+            end: start + 1,
+            confidence: 1,
+            state: "redacted",
+            boxes,
+            manual: true,
+        });
+        return edit([], [marked]);
+    }
+
+    /**
      * Takes a detection out of the document for good.
      *
      * A decision changes how a mention is written; removing it says the
@@ -124,6 +166,19 @@ export function useDetectionEditing(
     function removeDetection(id: string): Promise<void> {
         const detection = toValue(detections).find((item) => item.id === id);
         return detection ? edit([detection], []) : Promise.resolve();
+    }
+
+    /**
+     * Rewrites a mark's content: the guess was wrong, or the reader wants
+     * the placeholder to say something else. The id and the boxes stay; the
+     * renumbering regroups same-text marks, so a mention renamed onto an
+     * existing value joins its numbering.
+     */
+    function renameDetection(id: string, text: string): Promise<void> {
+        const detection = toValue(detections).find((item) => item.id === id);
+        return detection && detection.text !== text
+            ? edit([detection], [{ ...detection, text }])
+            : Promise.resolve();
     }
 
     /** Moves a detection to a different entity type, keeping its decision. */
@@ -153,6 +208,8 @@ export function useDetectionEditing(
         setAllOccurrences,
         setAllStates,
         addDetection,
+        addMark,
+        renameDetection,
         removeDetection,
         relabel,
     };

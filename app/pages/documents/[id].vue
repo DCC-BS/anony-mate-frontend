@@ -4,6 +4,7 @@ import type {
     ReviewTool,
 } from "~/composables/useDocumentReview";
 import { usePdfExport } from "~/composables/usePdfExport";
+import type { DetectionBox } from "~/types/storedDocument";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -27,6 +28,8 @@ const {
     occurrenceCount,
     relabel,
     addDetection,
+    addMark,
+    renameDetection,
     removeDetection,
 } = useDocumentReview(documentId);
 
@@ -125,6 +128,14 @@ function annotate(start: number, end: number, text: string) {
     return addDetection(markerLabel.value, start, end, text);
 }
 
+/** Files a rectangle the reader drew under the type the marker is set to. */
+function markRectangle(box: DetectionBox, text: string) {
+    if (!markerLabel.value) {
+        return;
+    }
+    return addMark(markerLabel.value, [box], text);
+}
+
 /**
  * A click on a mark in the document rings its row and brings it into view:
  * the reader works from the page, the list follows.
@@ -143,6 +154,8 @@ function selectFromDocument(id: string | undefined): void {
              file with the marks on it, no text to show or preview. -->
         <ReviewPdfHeader
             v-if="isPdfReview"
+            v-model:tool="tool"
+            v-model:marker-label="markerLabel"
             :name="storedDocument.name"
             :labels="availableLabels"
             :counts="counts"
@@ -188,7 +201,10 @@ function selectFromDocument(id: string | undefined): void {
                 :detections="detections"
                 :selected-id="selectedId"
                 :labels="availableLabels"
+                :tool="tool"
+                :marker-label="markerLabel"
                 @select="selectFromDocument($event)"
+                @mark="markRectangle"
                 @set-state="setState"
                 @set-all-occurrences="setAllOccurrences"
                 @relabel="relabel"
@@ -234,6 +250,7 @@ function selectFromDocument(id: string | undefined): void {
                 @set-group-state="setGroupState"
                 @set-all-occurrences="setAllOccurrences"
                 @set-all-states="setAllStates"
+                @rename="renameDetection"
             />
         </div>
 

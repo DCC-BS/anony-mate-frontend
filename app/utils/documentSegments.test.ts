@@ -19,6 +19,7 @@ function detection(
         end: start + text.length,
         confidence: 0.9,
         state,
+        manual: false,
     };
 }
 
