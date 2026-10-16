@@ -90,7 +90,8 @@ function onDropMemberRow(target: string) {
 
 <template>
     <div class="grid h-72 grid-cols-2 gap-3">
-        <div
+        <fieldset
+            :aria-label="t('entities.membership.available')"
             class="flex min-h-0 flex-col rounded-lg ring transition-colors"
             :class="dragOver === 'available' ? 'bg-elevated ring-accented' : 'ring-default'"
             @dragover.prevent="dragOver = 'available'"
@@ -112,8 +113,8 @@ function onDropMemberRow(target: string) {
                     :ui="{ leadingIcon: 'translate-y-[1.5px]' }"
                 />
             </div>
-            <div class="min-h-0 flex-1 overflow-y-auto p-2">
-                <div
+            <ul class="min-h-0 flex-1 overflow-y-auto p-2">
+                <li
                     v-for="type in available"
                     :key="type.name"
                     class="group flex cursor-grab items-center gap-2 rounded-md px-2 py-1 hover:bg-elevated"
@@ -132,14 +133,15 @@ function onDropMemberRow(target: string) {
                         :aria-label="t('entities.membership.add', { name: entityName(type.name) })"
                         @click="emit('add', type.name)"
                     />
-                </div>
-                <p v-if="!available.length" class="p-3 text-center text-xs text-dimmed">
+                </li>
+                <li v-if="!available.length" class="p-3 text-center text-xs text-dimmed">
                     {{ t("entities.membership.emptyAvailable") }}
-                </p>
-            </div>
-        </div>
+                </li>
+            </ul>
+        </fieldset>
 
-        <div
+        <fieldset
+            :aria-label="t('entities.membership.inGroup')"
             class="flex min-h-0 flex-col rounded-lg ring transition-colors"
             :class="dragOver === 'members' ? 'bg-elevated ring-accented' : 'ring-default'"
             @dragover.prevent="dragOver = 'members'"
@@ -151,8 +153,8 @@ function onDropMemberRow(target: string) {
                 <span>{{ t("entities.membership.inGroup") }}</span>
                 <span class="tabular-nums">{{ props.labels.length }}</span>
             </div>
-            <div class="min-h-0 flex-1 overflow-y-auto p-2">
-                <div
+            <ul class="min-h-0 flex-1 overflow-y-auto p-2">
+                <li
                     v-for="type in members"
                     :key="type.name"
                     class="group flex cursor-grab items-center gap-2 rounded-md px-2 py-1 hover:bg-elevated"
@@ -173,11 +175,11 @@ function onDropMemberRow(target: string) {
                         :aria-label="t('entities.membership.remove', { name: entityName(type.name) })"
                         @click="emit('remove', type.name)"
                     />
-                </div>
-                <p v-if="!members.length" class="p-3 text-center text-xs text-dimmed">
+                </li>
+                <li v-if="!members.length" class="p-3 text-center text-xs text-dimmed">
                     {{ t("entities.membership.emptyMembers") }}
-                </p>
-            </div>
-        </div>
+                </li>
+            </ul>
+        </fieldset>
     </div>
 </template>
