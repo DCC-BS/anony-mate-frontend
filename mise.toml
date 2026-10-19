@@ -176,18 +176,6 @@ env = { APP_MODE= "ci" }
 description = "generate Playwright tests via codegen (requires a running e2e:serve)"
 run = "bunx playwright codegen http://localhost:4300"
 
-# ── Docker ────────────────────────────────────────────────────────────────────
-
-[tasks."docker:up"]
-description = "build and start the dev Docker containers"
-dir = "{{config_root}}/docker"
-run = "bunx varlock run -- docker compose -f docker-compose.dev.yml up --build -d"
-
-[tasks."docker:down"]
-description = "stop the dev Docker containers"
-dir = "{{config_root}}/docker"
-run = "bunx varlock run -- docker compose -f docker-compose.dev.yml down"
-
 # ── Cleanup ───────────────────────────────────────────────────────────────────
 
 [tasks."cleanup:layers"]

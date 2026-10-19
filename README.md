@@ -127,33 +127,6 @@ mise run dummy
 
 ---
 
-## Backend & Docker Services
-
-For full functionality with detection models, the backend services can be run via Docker:
-
-### Start Backend Services Only
-
-```bash
-mise run docker:up
-```
-
-### Stop Backend Services
-
-```bash
-mise run docker:down
-```
-
-### Full Stack Compose
-
-To run all services (frontend, backend, and Nginx reverse proxy):
-
-```bash
-cd docker
-varlock run -- docker compose up
-```
-
----
-
 ## Project Architecture
 
 ```text
