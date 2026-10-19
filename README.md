@@ -1,4 +1,4 @@
-# anony-mate-frontend
+# AnonyMate-frontend
 
 ![anony-mate-frontend Screenshot](_imgs/screenshot.png)
 
