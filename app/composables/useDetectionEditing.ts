@@ -175,9 +175,10 @@ export function useDetectionEditing(
      * existing value joins its numbering.
      */
     function renameDetection(id: string, text: string): Promise<void> {
+        const next = text.trim();
         const detection = toValue(detections).find((item) => item.id === id);
-        return detection && detection.text !== text
-            ? edit([detection], [{ ...detection, text }])
+        return detection && detection.text !== next
+            ? edit([detection], [{ ...detection, text: next }])
             : Promise.resolve();
     }
 

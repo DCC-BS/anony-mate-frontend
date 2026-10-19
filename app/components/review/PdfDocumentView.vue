@@ -241,9 +241,18 @@ let draw: {
     rectHeight: number;
     /** The page's element, for reading the text layer under the rectangle. */
     pageEl: HTMLElement;
+    /** The page's real size in points, which the box is scaled into. */
+    pageSize: { width: number; height: number };
 } | null = null;
 
 function onDrawStart(event: PointerEvent, page: number): void {
+    // Without the page's real size there is nothing to scale the rectangle
+    // into; the drag does not start rather than drawing against a
+    // fabricated page.
+    const pageSize = props.document.pageSizes?.[page];
+    if (!pageSize) {
+        return;
+    }
     const target = event.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
     // The overlay's parent is the page div the viewer laid out.
@@ -255,6 +264,7 @@ function onDrawStart(event: PointerEvent, page: number): void {
         rectWidth: rect.width,
         rectHeight: rect.height,
         pageEl,
+        pageSize,
     };
     // The drag belongs to the rectangle even when the pointer leaves the
     // page; where it ends up is clamped to the page at the end.
@@ -445,24 +455,32 @@ function onDrawCancel(): void {
 /**
  * A rectangle from px within the rendered page into page points, clamped to
  * the page. The rendered page keeps the page's aspect ratio, so one scale
- * per axis takes the whole box across.
+ * per axis takes the whole box across. The size is the one the drag started
+ * with: a drag never begins against a page without one.
  */
 function boxInPoints(
-    state: { page: number; rectWidth: number; rectHeight: number },
+    state: {
+        page: number;
+        rectWidth: number;
+        rectHeight: number;
+        pageSize: { width: number; height: number };
+    },
     left: number,
     top: number,
     right: number,
     bottom: number,
 ): DetectionBox {
-    const size = props.document.pageSizes?.[state.page] ?? { width: 1, height: 1 };
-    const scaleX = size.width / state.rectWidth;
-    const scaleY = size.height / state.rectHeight;
+    const scaleX = state.pageSize.width / state.rectWidth;
+    const scaleY = state.pageSize.height / state.rectHeight;
     return {
         page: state.page,
         left: Math.max(0, Math.min(left, right) * scaleX),
         top: Math.max(0, Math.min(top, bottom) * scaleY),
-        right: Math.min(size.width, Math.max(left, right) * scaleX),
-        bottom: Math.min(size.height, Math.max(top, bottom) * scaleY),
+        right: Math.min(state.pageSize.width, Math.max(left, right) * scaleX),
+        bottom: Math.min(
+            state.pageSize.height,
+            Math.max(top, bottom) * scaleY,
+        ),
     };
 }
 
