@@ -133,6 +133,9 @@ export default defineNuxtConfig({
             cssMinify: "lightningcss",
             chunkSizeWarningLimit: 800,
         },
+        server: {
+            allowedHosts: true,
+        },
     },
     runtimeConfig: {
         apiUrl: process.env.API_URL,

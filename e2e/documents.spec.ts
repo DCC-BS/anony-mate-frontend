@@ -87,9 +87,10 @@ test.describe("document queue", () => {
         await expect(page.getByText("Geschwärzt")).toBeVisible();
         await expect(page.getByText("2", { exact: true })).toBeVisible();
         expect(options).toMatchObject({
-            pdf_annotations: true,
             blacklist: [],
         });
+        expect(options).not.toHaveProperty("pdf_annotations");
+        expect(options).not.toHaveProperty("marked_pdf");
 
         await page.getByText("baugesuch.pdf").click();
         await expect(

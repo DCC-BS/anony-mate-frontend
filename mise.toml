@@ -104,7 +104,7 @@ run = "bunx nuxt build"
 
 [tasks.preview]
 description = "preview the production build locally"
-run = "bunx nuxt preview"
+run = "npx varlock run -- nuxt preview"
 
 # ── Type Checking & Linting ───────────────────────────────────────────────────
 

@@ -30,4 +30,4 @@ export default apiHandler
         formData.append("options", options);
         return formData;
     })
-    .build("/redact/file/async");
+    .build("/anonymize/file/async");

@@ -1,1 +1,1 @@
-export default apiHandler.build("/redact/async");
+export default apiHandler.build("/anonymize/async");

@@ -128,14 +128,13 @@ export async function scanUploadedPdf(
         JSON.stringify({
             ...redactOptions(document),
             blacklist: document.blacklist,
-            pdf_annotations: true,
         }),
     );
 
     let isScanning = false;
     const result = await runApiTask(
         () =>
-            $fetch<unknown>("/api/redact-document", {
+            $fetch<unknown>("/api/redact-pdf", {
                 method: "POST",
                 body: formData,
                 headers: { "X-Client-Id": clientId() },
