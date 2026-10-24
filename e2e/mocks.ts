@@ -83,6 +83,11 @@ export async function mockApi(page: Page): Promise<void> {
         void route.fulfill({ json: { task_id: "task-1" } });
     });
 
+    // A PDF reviewed over its original is scanned through its own route.
+    await page.route("**/api/redact-pdf", (route) => {
+        void route.fulfill({ json: { task_id: "task-1" } });
+    });
+
     await page.route("**/api/task/**", (route) => {
         void route.fulfill({
             json: {
@@ -106,5 +111,31 @@ export async function mockApi(page: Page): Promise<void> {
             contentType: "application/pdf",
             headers: { "X-Mark-Count": "2" },
         });
+    });
+}
+
+/**
+ * Waits until Nuxt has hydrated the page. The server-rendered text is visible
+ * before that, but the components' listeners are not attached yet: a file set
+ * on the upload input or a key pressed in a field in between is silently
+ * dropped.
+ */
+export async function waitForHydration(page: Page): Promise<void> {
+    await page.waitForFunction(() => {
+        const root = document.querySelector("#__nuxt") as
+            | (Element & {
+                  __vue_app__?: {
+                      config: {
+                          globalProperties: {
+                              $nuxt?: { isHydrating?: boolean };
+                          };
+                      };
+                  };
+              })
+            | null;
+        return (
+            root?.__vue_app__?.config.globalProperties.$nuxt?.isHydrating ===
+            false
+        );
     });
 }

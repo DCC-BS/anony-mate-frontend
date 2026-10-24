@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-import { mockApi, PDF_ANNOTATIONS } from "./mocks";
+import { mockApi, PDF_ANNOTATIONS, waitForHydration } from "./mocks";
 
 // A scanned page whose image stream is CCITT-fax encoded: pdf.js 6.x decodes
 // it through jbig2.wasm, which the worker loads from /pdfjs — the exact path
@@ -55,6 +55,7 @@ test.describe("pdf review with a CCITT-fax scan", () => {
 
         await page.goto("/new");
         await expect(page.getByText("Dateien hierher ziehen")).toBeVisible();
+        await waitForHydration(page);
         await page.locator('input[type="file"]').setInputFiles({
             name: "scan.pdf",
             mimeType: "application/pdf",
