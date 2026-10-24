@@ -29,7 +29,9 @@ test.describe("review", () => {
         await expect(page.getByText("2 geschwärzt")).toBeVisible();
 
         // Expand the person group to reveal its detection row.
-        await page.getByRole("button", { name: /^Person/ }).click();
+        // The group toggle reads "<type> <count>"; the detection's type select
+        // (disabled here) is also named after its value since @nuxt/ui 4.12.
+        await page.getByRole("button", { name: /^Person \d+$/ }).click();
 
         // The sidebar holds the detection rows; the person row is the one that
         // names the detection, and its toggle sits beside it.
