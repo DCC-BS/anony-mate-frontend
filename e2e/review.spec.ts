@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { mockApi } from "./mocks";
+import { mockApi, waitForHydration } from "./mocks";
 
 /**
  * Queues a pasted document and waits until it is ready, then opens its review.
@@ -7,6 +7,7 @@ import { mockApi } from "./mocks";
 async function openReview(page: import("@playwright/test").Page) {
     await mockApi(page);
     await page.goto("/new");
+    await waitForHydration(page);
     await page.getByRole("tab", { name: "Text einfügen" }).click();
     await page
         .getByPlaceholder(

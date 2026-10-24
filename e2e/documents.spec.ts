@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { BLANK_PDF, mockApi, PDF_ANNOTATIONS } from "./mocks";
+import { BLANK_PDF, mockApi, PDF_ANNOTATIONS, waitForHydration } from "./mocks";
 
 test.describe("document queue", () => {
     test("queues pasted text, processes it, and opens the review", async ({
@@ -7,6 +7,7 @@ test.describe("document queue", () => {
     }) => {
         await mockApi(page);
         await page.goto("/documents");
+        await waitForHydration(page);
 
         // Empty state before anything is queued.
         await expect(
@@ -43,7 +44,7 @@ test.describe("document queue", () => {
     test("scans a PDF for the review and shows its marks", async ({ page }) => {
         await mockApi(page);
         let options: Record<string, unknown> = {};
-        await page.route("**/api/redact-document", (route) => {
+        await page.route("**/api/redact-pdf", (route) => {
             const body = route.request().postData() ?? "";
             const json = body.match(/name="options"\r\n\r\n(.*)\r\n/)?.[1];
             options = json ? JSON.parse(json) : {};
@@ -66,6 +67,7 @@ test.describe("document queue", () => {
         // mount; a file set on the input before that is silently dropped.
         await page.goto("/new");
         await expect(page.getByText("Dateien hierher ziehen")).toBeVisible();
+        await waitForHydration(page);
         await page.locator('input[type="file"]').setInputFiles({
             name: "baugesuch.pdf",
             mimeType: "application/pdf",
@@ -106,6 +108,7 @@ test.describe("document queue", () => {
         );
 
         await page.goto("/new");
+        await waitForHydration(page);
         await page.getByRole("tab", { name: "Text einfügen" }).click();
         await page
             .getByPlaceholder(

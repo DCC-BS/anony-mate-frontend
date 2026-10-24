@@ -1,5 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
-import { ANNOTATED_PDF, BLANK_PDF, mockApi, PDF_ANNOTATIONS } from "./mocks";
+import {
+    ANNOTATED_PDF,
+    BLANK_PDF,
+    mockApi,
+    PDF_ANNOTATIONS,
+    waitForHydration,
+} from "./mocks";
 
 /**
  * Queues a PDF for the review here and waits until its marks are ready, then
@@ -16,6 +22,7 @@ async function openPdfReview(page: Page) {
     // allowed to settle first.
     await page.goto("/new");
     await expect(page.getByText("Dateien hierher ziehen")).toBeVisible();
+    await waitForHydration(page);
     await page.locator('input[type="file"]').setInputFiles({
         name: "baugesuch.pdf",
         mimeType: "application/pdf",

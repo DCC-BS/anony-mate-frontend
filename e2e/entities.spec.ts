@@ -1,10 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { mockApi } from "./mocks";
+import { mockApi, waitForHydration } from "./mocks";
 
 test.describe("entities", () => {
     test("seeds the built-in presets and shows them", async ({ page }) => {
         await mockApi(page);
         await page.goto("/entities");
+        await waitForHydration(page);
 
         // The types tab lists the seeded presets; each row shows the display
         // name and, in mono, the API label.
@@ -18,6 +19,7 @@ test.describe("entities", () => {
     }) => {
         await mockApi(page);
         await page.goto("/entities");
+        await waitForHydration(page);
 
         // The editor opens on a fresh draft; the display name comes first and
         // the API label generates itself from it.
@@ -46,15 +48,15 @@ test.describe("entities", () => {
     }) => {
         await mockApi(page);
         await page.goto("/entities?tab=groups");
+        await waitForHydration(page);
 
         // Every preset group detects person and ort; open the default group.
         await page
             .locator("#group-panel button")
             .filter({ hasText: "Standard" })
             .click();
-        const picker = page.locator(".grid.h-72");
-        const available = picker.locator("> div").first();
-        const members = picker.locator("> div").last();
+        const available = page.getByRole("group", { name: "Verfügbar" });
+        const members = page.getByRole("group", { name: "In der Gruppe" });
         await expect(
             members.getByText("Person", { exact: true }),
         ).toBeVisible();
@@ -78,6 +80,7 @@ test.describe("entities", () => {
     test("adds a never-redact term", async ({ page }) => {
         await mockApi(page);
         await page.goto("/entities?tab=blacklist");
+        await waitForHydration(page);
 
         const blacklist = page.locator("#blacklist-editor");
         const input = blacklist.getByPlaceholder("z. B. Basel-Stadt");
@@ -90,6 +93,7 @@ test.describe("entities", () => {
     test("searches the never-redact terms", async ({ page }) => {
         await mockApi(page);
         await page.goto("/entities?tab=blacklist");
+        await waitForHydration(page);
 
         const blacklist = page.locator("#blacklist-editor");
         const input = blacklist.getByPlaceholder("z. B. Basel-Stadt");

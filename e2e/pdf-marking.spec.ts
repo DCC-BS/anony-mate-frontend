@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { BLANK_PDF, mockApi, PDF_ANNOTATIONS } from "./mocks";
+import { BLANK_PDF, mockApi, PDF_ANNOTATIONS, waitForHydration } from "./mocks";
 
 /** A minimal two-page PDF, page 2 carrying one line of text, with xref. */
 function twoPagePdf(): Buffer {
@@ -51,6 +51,7 @@ async function openPdfReview(page: Page) {
     // allowed to settle first.
     await page.goto("/new");
     await expect(page.getByText("Dateien hierher ziehen")).toBeVisible();
+    await waitForHydration(page);
     await page.locator('input[type="file"]').setInputFiles({
         name: "baugesuch.pdf",
         mimeType: "application/pdf",
@@ -218,6 +219,7 @@ test.describe("pdf marking", () => {
         });
         await page.goto("/new");
         await expect(page.getByText("Dateien hierher ziehen")).toBeVisible();
+        await waitForHydration(page);
         await page.locator('input[type="file"]').setInputFiles({
             name: "zweiseiten.pdf",
             mimeType: "application/pdf",
