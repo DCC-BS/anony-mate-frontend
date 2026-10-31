@@ -23,10 +23,10 @@
         "env:check": "pass-cli login && bunx varlock load"
     },
     "dependencies": {
-        "@dcc-bs/common-ui.bs.js": "^2.2.2",
+        "@dcc-bs/common-ui.bs.js": "^2.2.3",
         "@dcc-bs/communication.bs.js": "^0.1.4",
-        "@dcc-bs/dependency-injection.bs.js": "^0.0.16",
-        "@dcc-bs/event-system.bs.js": "^1.4.3",
+        "@dcc-bs/dependency-injection.bs.js": "^0.0.18",
+        "@dcc-bs/event-system.bs.js": "^1.4.5",
         "@iconify-json/lucide": "^1.2.85",
         "@mohtasham/md-to-docx": "^4.0.0",
         "@nuxt/ui": "^4.12.0",
