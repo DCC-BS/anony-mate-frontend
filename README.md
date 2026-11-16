@@ -69,24 +69,24 @@ APP_MODE=dev      # dev, ci, build, prod
 
 Environment variables are validated using Varlock schemas (`.env.schema`, `.env.runtime.schema`, `.env.buildtime.schema`, `.env.dev.schema`):
 
-| Variable | Description | Default | Type |
-|----------|-------------|---------|------|
-| **Core Configuration** | | | |
-| `APP_MODE` | Application runtime mode (`dev`, `ci`, `build`, `prod`) | `dev` | enum |
-| `USE_FEEDBACK` | Enable feedback widget | `true` (non-CI) | boolean |
-| `DUMMY` | Enable mock data mode (no backend required) | `false` | boolean |
-| **Backend & Services** | | | |
-| `API_PORT` | Backend API port | `8000` | port |
-| `NUXT_API_URL` | Backend API URL | `http://localhost:8000` (dev) | URL |
-| `NUXT_FEEDBACK_GITHUB_TOKEN` | GitHub token for feedback reporting | Proton Pass (dev) | string (sensitive) |
-| `NUXT_PUBLIC_POLL_INTERVAL_MS` | Interval between task status polls | `3000` | number |
-| `NUXT_PUBLIC_DOCUMENT_RETENTION_DAYS` | Days a document is kept locally before cleanup | `7` | number |
-| `NUXT_PUBLIC_LOGGER_LOG_LEVEL` | Client log level | `debug` (dev), `info` (prod) | enum |
-| **UI & Onboarding Flags** | | | |
-| `NUXT_PUBLIC_COMMON_UI_DISABLE_CHANGELOG` | Disable changelog modal | `true` | boolean |
-| `NUXT_PUBLIC_COMMON_UI_DISABLE_DISCLAIMER` | Disable disclaimer banner | `true` | boolean |
-| `NUXT_PUBLIC_COMMON_UI_DISABLE_ONBOARDING` | Disable onboarding tour (off in CI) | `false` | boolean |
-| `NUXT_PUBLIC_COMMON_UI_DISABLE_SYSTEM_STATUS` | Disable backend health indicator | `true` | boolean |
+| Variable                                      | Description                                             | Default                       | Type               |
+| --------------------------------------------- | ------------------------------------------------------- | ----------------------------- | ------------------ |
+| **Core Configuration**                        |                                                         |                               |                    |
+| `APP_MODE`                                    | Application runtime mode (`dev`, `ci`, `build`, `prod`) | `dev`                         | enum               |
+| `USE_FEEDBACK`                                | Enable feedback widget                                  | `true` (non-CI)               | boolean            |
+| `DUMMY`                                       | Enable mock data mode (no backend required)             | `false`                       | boolean            |
+| **Backend & Services**                        |                                                         |                               |                    |
+| `API_PORT`                                    | Backend API port                                        | `8000`                        | port               |
+| `NUXT_API_URL`                                | Backend API URL                                         | `http://localhost:8000` (dev) | URL                |
+| `NUXT_FEEDBACK_GITHUB_TOKEN`                  | GitHub token for feedback reporting                     | Proton Pass (dev)             | string (sensitive) |
+| `NUXT_PUBLIC_POLL_INTERVAL_MS`                | Interval between task status polls                      | `3000`                        | number             |
+| `NUXT_PUBLIC_DOCUMENT_RETENTION_DAYS`         | Days a document is kept locally before cleanup          | `7`                           | number             |
+| `NUXT_PUBLIC_LOGGER_LOG_LEVEL`                | Client log level                                        | `debug` (dev), `info` (prod)  | enum               |
+| **UI & Onboarding Flags**                     |                                                         |                               |                    |
+| `NUXT_PUBLIC_COMMON_UI_DISABLE_CHANGELOG`     | Disable changelog modal                                 | `true`                        | boolean            |
+| `NUXT_PUBLIC_COMMON_UI_DISABLE_DISCLAIMER`    | Disable disclaimer banner                               | `true`                        | boolean            |
+| `NUXT_PUBLIC_COMMON_UI_DISABLE_ONBOARDING`    | Disable onboarding tour (off in CI)                     | `false`                       | boolean            |
+| `NUXT_PUBLIC_COMMON_UI_DISABLE_SYSTEM_STATUS` | Disable backend health indicator                        | `true`                        | boolean            |
 
 ### Varlock & Secrets Management
 
