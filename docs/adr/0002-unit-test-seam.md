@@ -20,7 +20,7 @@ Initially the suite covers two layers:
   `replacementText`, `pageMarkdown`, `documentSegments`, `redactionStyles`.
   These import nothing Nuxt-global, so they run in plain `happy-dom` and are the
   cheapest place to pin down behaviour.
-- **`entityService`** — the IndexedDB persistence layer — run against the *real*
+- **`entityService`** — the IndexedDB persistence layer — run against the _real_
   `db` singleton (cleared between tests), so the code under test is the code
   that ships.
 
