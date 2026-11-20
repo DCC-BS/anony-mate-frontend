@@ -49,10 +49,7 @@ export const useEntityGroups = createSharedComposable(() => {
                 return ApiEntityPresetSchema.parse(response);
             });
         } catch (error) {
-            logger.error(
-                { error: describeError(error) },
-                "Could not sync entity presets",
-            );
+            logger.error(describeError(error), "Could not sync entity presets");
         }
     });
 

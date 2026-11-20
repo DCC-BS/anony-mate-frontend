@@ -81,7 +81,8 @@ Environment variables are validated using Varlock schemas (`.env.schema`, `.env.
 | `NUXT_FEEDBACK_GITHUB_TOKEN`                  | GitHub token for feedback reporting                     | Proton Pass (dev)             | string (sensitive) |
 | `NUXT_PUBLIC_POLL_INTERVAL_MS`                | Interval between task status polls                      | `3000`                        | number             |
 | `NUXT_PUBLIC_DOCUMENT_RETENTION_DAYS`         | Days a document is kept locally before cleanup          | `7`                           | number             |
-| `NUXT_PUBLIC_LOGGER_LOG_LEVEL`                | Client log level                                        | `debug` (dev), `info` (prod)  | enum               |
+| `NUXT_PUBLIC_LOGGER_LOGLEVEL`                 | Log level                                               | `debug` (dev), `info` (prod)  | enum               |
+| `NUXT_PUBLIC_LOGGER_APP`                      | Service name in log lines (`app` field)                 | `anony-mate-frontend`         | string             |
 | **UI & Onboarding Flags**                     |                                                         |                               |                    |
 | `NUXT_PUBLIC_COMMON_UI_DISABLE_CHANGELOG`     | Disable changelog modal                                 | `true`                        | boolean            |
 | `NUXT_PUBLIC_COMMON_UI_DISABLE_DISCLAIMER`    | Disable disclaimer banner                               | `true`                        | boolean            |
