@@ -78,10 +78,7 @@ export function usePdfExport(
                 icon: "i-lucide-check",
             });
         } catch (error) {
-            logger.error(
-                { error: describeError(error) },
-                "Annotated PDF export failed",
-            );
+            logger.error(describeError(error), "Annotated PDF export failed");
             toast.add({
                 title: t("export.failed"),
                 color: "error",

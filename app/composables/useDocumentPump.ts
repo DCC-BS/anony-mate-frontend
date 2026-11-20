@@ -97,10 +97,7 @@ export function useDocumentPump(
                 file: undefined,
             });
         } catch (error) {
-            logger.error(
-                { error: describeError(error) },
-                "Document processing failed",
-            );
+            logger.error(describeError(error), "Document processing failed");
             await updateDocument(document.id, {
                 status: "failed",
                 errorMessage: t("documents.status.failedHint"),
