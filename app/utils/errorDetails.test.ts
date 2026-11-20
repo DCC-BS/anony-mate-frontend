@@ -9,12 +9,16 @@ describe("describeError", () => {
         });
     });
 
-    it("reads the status and the detail a call was answered with", () => {
+    it("reads the status, error id and debug message of an API error", () => {
         const fetchError = Object.assign(
             new Error("[POST] /api/redact-document: 500"),
             {
                 statusCode: 500,
-                data: { detail: "boom" },
+                data: {
+                    errorId: "redaction_failed",
+                    status: 500,
+                    debugMessage: "boom",
+                },
             },
         );
 
@@ -22,8 +26,17 @@ describe("describeError", () => {
             error: "[POST] /api/redact-document: 500",
             error_type: "Error",
             status_code: 500,
-            error_detail: "boom",
+            error_id: "redaction_failed",
+            debug_message: "boom",
         });
+    });
+
+    it("truncates a long debug message", () => {
+        const fetchError = Object.assign(new Error("Failed"), {
+            data: { errorId: "x", debugMessage: "a".repeat(800) },
+        });
+
+        expect(describeError(fetchError).debug_message).toHaveLength(500);
     });
 
     it("leaves a structured answer body out of the log", () => {
