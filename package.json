@@ -1,6 +1,6 @@
 {
     "name": "anony-mate-frontend",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "private": true,
     "type": "module",
     "scripts": {
@@ -26,7 +26,7 @@
     "dependencies": {
         "@dcc-bs/common-ui.bs.js": "^2.2.5",
         "@dcc-bs/communication.bs.js": "^0.1.5",
-        "@dcc-bs/dependency-injection.bs.js": "^0.0.19",
+        "@dcc-bs/dependency-injection.bs.js": "^0.0.20",
         "@dcc-bs/event-system.bs.js": "^1.4.6",
         "@iconify-json/lucide": "^1.2.85",
         "@mohtasham/md-to-docx": "^4.0.0",
